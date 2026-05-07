@@ -2925,10 +2925,10 @@ export default function BPSPro() {
                   {showModule1 && (
                     <div className="ml-4 mt-1 space-y-1">
                       {[
-                        'How to use Blocks Online 1',
-                        'How to use Blocks Online 2',
-                        'How to use Blocks Online 3',
-                        'How to use Blocks Online 4'
+                        'How To Apportion Service Charge Allocations',
+                        'How to add a new supplier',
+                        'Debt Collection - Referral Process',
+                        'How To Create A Works Order'
                       ].map((video, idx) => (
                         <button
                           key={idx}
@@ -4891,9 +4891,9 @@ export default function BPSPro() {
             <div className="bg-slate-900 rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%', position: 'relative' }}>
               <iframe
                 src={`https://www.loom.com/embed/${
-                  selectedVideo === 'How to use Blocks Online 1' ? '50f5a5255c154afb9dcff36215554ef4' :
-                  selectedVideo === 'How to use Blocks Online 2' ? 'e9d5897256fb4cae8f2ca6a4e79763b6' :
-                  selectedVideo === 'How to use Blocks Online 3' ? '18b6abf98a3b4bd1a4faa2c9b333e693' :
+                  selectedVideo === 'How To Apportion Service Charge Allocations' ? '50f5a5255c154afb9dcff36215554ef4' :
+                  selectedVideo === 'How to add a new supplier' ? 'e9d5897256fb4cae8f2ca6a4e79763b6' :
+                  selectedVideo === 'Debt Collection - Referral Process' ? '18b6abf98a3b4bd1a4faa2c9b333e693' :
                   '85d0c596ca154e33b10ffde3acb20324'
                 }?sid=training`}
                 frameBorder="0"
