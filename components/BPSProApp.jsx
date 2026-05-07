@@ -2958,13 +2958,22 @@ export default function BPSPro() {
             </h1>
           </div>
           <div className="hidden md:flex items-center gap-4 text-sm text-slate-600">
-            <button className="hover-bps-text flex items-center gap-1">
+            <button 
+              onClick={() => alert('Presentation Mode - Coming Soon')}
+              className="hover-bps-text flex items-center gap-1"
+            >
               📺 Pres. mode
             </button>
-            <button className="hover-bps-text flex items-center gap-1">
+            <button 
+              onClick={() => alert('Request a Feature\n\nEmail: keanu@blockpropertysolutions.co.uk\n\nShare your ideas and suggestions with us.')}
+              className="hover-bps-text flex items-center gap-1"
+            >
               👤 Feature
             </button>
-            <button className="hover-bps-text flex items-center gap-1">
+            <button 
+              onClick={() => alert('Need Help?\n\nEmail: keanu@blockpropertysolutions.co.uk\n\nWe typically respond within 24 hours.')}
+              className="hover-bps-text flex items-center gap-1"
+            >
               ❓ Help
             </button>
           </div>
