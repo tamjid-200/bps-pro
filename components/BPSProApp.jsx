@@ -586,22 +586,20 @@ export default function BPSPro() {
                         <h3 className="font-bold text-base md:text-lg mb-1 truncate">{block.shortName || block.name}</h3>
                         <p className="text-xs text-slate-500 line-clamp-2">{block.address}</p>
                       </div>
-                      {/* Task count badge or checkmark */}
-                      {areAllTasksCompleted(block.id) ? (
-                        <div className="flex-shrink-0 bg-green-500 text-white w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center">
-                          <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />
-                        </div>
-                      ) : taskCount > 0 ? (
-                        <div className="flex-shrink-0 bg-red-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold">
-                          {taskCount}
-                        </div>
-                      ) : null}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      {taskCount > 0 ? (
-                        <span className="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded-full">{taskCount} tasks</span>
-                      ) : (
-                        <span className="bg-slate-300 text-slate-600 text-xs px-2 py-1 rounded-full">0 tasks</span>
+                      <span className="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded-full">{taskCount} task{taskCount !== 1 ? 's' : ''}</span>
+                      {/* Small badge: green checkmark if all done, red count if incomplete */}
+                      {taskCount > 0 && (
+                        areAllTasksCompleted(block.id) ? (
+                          <div className="flex-shrink-0 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center">
+                            <CheckCircle className="w-3 h-3" />
+                          </div>
+                        ) : (
+                          <div className="flex-shrink-0 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">
+                            {taskCount}
+                          </div>
+                        )
                       )}
                     </div>
                     </button>
@@ -2789,8 +2787,8 @@ export default function BPSPro() {
               <X className="w-5 h-5" />
             </button>
           </div>
-          <div className="text-xs text-slate-400">Block Property Solutions</div>
-          <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+          <div className="text-xs font-medium" style={{ color: '#1a1a1a' }}>Block Property Solutions</div>
+          <div className="text-xs font-medium mt-1 flex items-center gap-1" style={{ color: '#1a1a1a' }}>
             <span>👑</span> Admin
           </div>
           <button
