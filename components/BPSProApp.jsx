@@ -2415,10 +2415,21 @@ export default function BPSPro() {
     if (activeSection === 'portal') {
       return (
         <div className="p-4 md:p-8">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">Resident Portal</h2>
-          <div className="text-center py-12 text-slate-500">
-            <DoorOpen className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-            <p>Portal configuration coming soon</p>
+          <h2 className="text-xl md:text-2xl font-bold mb-6">Portal</h2>
+          <div className="bg-white border rounded-lg p-8 md:p-12 max-w-2xl mx-auto">
+            <div className="text-center">
+              <DoorOpen className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 text-blue-500" />
+              <h3 className="text-xl md:text-2xl font-bold mb-4">Resident Portal</h3>
+              <p className="text-slate-600 mb-4">Access the resident-facing portal at:</p>
+              <a 
+                href="https://myblockonline.co.uk" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:text-blue-600 text-lg md:text-xl font-medium hover:underline"
+              >
+                myblockonline.co.uk
+              </a>
+            </div>
           </div>
         </div>
       );
