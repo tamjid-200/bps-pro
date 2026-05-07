@@ -2787,8 +2787,8 @@ export default function BPSPro() {
               <X className="w-5 h-5" />
             </button>
           </div>
-          <div className="text-xs font-medium" style={{ color: '#1a1a1a' }}>Block Property Solutions</div>
-          <div className="text-xs font-medium mt-1 flex items-center gap-1" style={{ color: '#1a1a1a' }}>
+          <div className="text-xs font-medium text-white">Block Property Solutions</div>
+          <div className="text-xs font-medium text-white mt-1 flex items-center gap-1">
             <span>👑</span> Admin
           </div>
           <button
