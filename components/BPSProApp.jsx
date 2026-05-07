@@ -20,6 +20,7 @@ export default function BPSPro() {
   const [showSubNav, setShowSubNav] = useState(false);
   const [showHelpSection, setShowHelpSection] = useState(false); // For collapsible Help & Support
   const [showTrainingSection, setShowTrainingSection] = useState(false); // For collapsible Training
+  const [showModule1, setShowModule1] = useState(false); // For collapsible Module 1
   const [showTrainingModal, setShowTrainingModal] = useState(false); // For training module modal
   const [selectedModule, setSelectedModule] = useState(null); // Selected training module
   const [selectedVideo, setSelectedVideo] = useState(null); // Selected video within module
@@ -2894,19 +2895,58 @@ export default function BPSPro() {
           {/* Training Section - Collapsible (HOME ONLY) */}
           {showAllBlocks && (
             <div className="mb-1">
+              {/* Training Main Button */}
               <button 
-                onClick={() => {
-                  setSelectedModule('Module 1');
-                  setShowTrainingModal(true);
-                  setShowMainNav(false);
-                }}
+                onClick={() => setShowTrainingSection(!showTrainingSection)}
                 className="flex items-center justify-between w-full px-3 py-2.5 rounded text-sm hover:bg-white/10"
               >
                 <div className="flex items-center gap-2">
                   <GraduationCap className="w-4 h-4" />
-                  <span>Training Videos</span>
+                  <span>Training</span>
                 </div>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showTrainingSection ? 'rotate-180' : ''}`} />
               </button>
+              
+              {/* Module 1 (Nested) */}
+              {showTrainingSection && (
+                <div className="ml-4 mt-1">
+                  <button 
+                    onClick={() => setShowModule1(!showModule1)}
+                    className="flex items-center justify-between w-full px-3 py-2.5 rounded text-sm hover:bg-white/10"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs">📚</span>
+                      <span>Module 1</span>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showModule1 ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {/* Videos under Module 1 */}
+                  {showModule1 && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {[
+                        'How to use Blocks Online 1',
+                        'How to use Blocks Online 2',
+                        'How to use Blocks Online 3',
+                        'How to use Blocks Online 4'
+                      ].map((video, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setSelectedVideo(video);
+                            setShowTrainingModal(true);
+                            setShowMainNav(false);
+                          }}
+                          className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm hover:bg-white/10 text-left"
+                        >
+                          <span className="text-xs">🎥</span>
+                          <span className="text-xs">{video}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -4832,9 +4872,9 @@ export default function BPSPro() {
               <div>
                 <h3 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
                   <GraduationCap className="w-6 h-6" style={{ color: '#1d89c6' }} />
-                  {selectedVideo ? selectedVideo : 'Training Videos'}
+                  {selectedVideo}
                 </h3>
-                <p className="text-sm text-slate-500 mt-1">BPS Pro Training</p>
+                <p className="text-sm text-slate-500 mt-1">BPS Pro Training - Module 1</p>
               </div>
               <button
                 onClick={() => {
@@ -4847,74 +4887,28 @@ export default function BPSPro() {
               </button>
             </div>
             
-            {/* Video Selection or Video Player */}
-            {!selectedVideo ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { title: 'How to use Blocks Online 1', videoId: '50f5a5255c154afb9dcff36215554ef4' },
-                  { title: 'How to use Blocks Online 2', videoId: 'e9d5897256fb4cae8f2ca6a4e79763b6' },
-                  { title: 'How to use Blocks Online 3', videoId: '18b6abf98a3b4bd1a4faa2c9b333e693' },
-                  { title: 'How to use Blocks Online 4', videoId: '85d0c596ca154e33b10ffde3acb20324' }
-                ].map((video, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedVideo(video.title)}
-                    className="bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 hover:border-slate-300 rounded-lg p-6 text-left transition-all group"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1d89c6' }}>
-                        <GraduationCap className="w-6 h-6 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-slate-900 mb-1">{video.title}</h4>
-                        <p className="text-sm text-slate-500">Click to watch video</p>
-                      </div>
-                      <div className="text-slate-400 group-hover:text-slate-600">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div>
-                {/* Back Button */}
-                <button
-                  onClick={() => setSelectedVideo(null)}
-                  className="mb-4 flex items-center gap-2 text-slate-600 hover:text-slate-900 text-sm"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Back to video selection
-                </button>
-                
-                {/* Video Player */}
-                <div className="bg-slate-900 rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%', position: 'relative' }}>
-                  <iframe
-                    src={`https://www.loom.com/embed/${
-                      selectedVideo === 'How to use Blocks Online 1' ? '50f5a5255c154afb9dcff36215554ef4' :
-                      selectedVideo === 'How to use Blocks Online 2' ? 'e9d5897256fb4cae8f2ca6a4e79763b6' :
-                      selectedVideo === 'How to use Blocks Online 3' ? '18b6abf98a3b4bd1a4faa2c9b333e693' :
-                      '85d0c596ca154e33b10ffde3acb20324'
-                    }?sid=training`}
-                    frameBorder="0"
-                    webkitallowfullscreen="true"
-                    mozallowfullscreen="true"
-                    allowFullScreen
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%'
-                    }}
-                  />
-                </div>
-              </div>
-            )}
+            {/* Video Player */}
+            <div className="bg-slate-900 rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%', position: 'relative' }}>
+              <iframe
+                src={`https://www.loom.com/embed/${
+                  selectedVideo === 'How to use Blocks Online 1' ? '50f5a5255c154afb9dcff36215554ef4' :
+                  selectedVideo === 'How to use Blocks Online 2' ? 'e9d5897256fb4cae8f2ca6a4e79763b6' :
+                  selectedVideo === 'How to use Blocks Online 3' ? '18b6abf98a3b4bd1a4faa2c9b333e693' :
+                  '85d0c596ca154e33b10ffde3acb20324'
+                }?sid=training`}
+                frameBorder="0"
+                webkitallowfullscreen="true"
+                mozallowfullscreen="true"
+                allowFullScreen
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%'
+                }}
+              />
+            </div>
             
             <div className="mt-6 flex justify-end">
               <button
