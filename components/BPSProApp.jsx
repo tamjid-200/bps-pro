@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function BPSPro() {
   const [blocks, setBlocks] = useState([]);
@@ -14,6 +15,11 @@ export default function BPSPro() {
   const [loading, setLoading] = useState(true);
   const [showAllBlocks, setShowAllBlocks] = useState(false);
   const [blockData, setBlockData] = useState({});
+  
+  // Mobile menu states
+  const [showMainNav, setShowMainNav] = useState(false);
+  const [showSubNav, setShowSubNav] = useState(false);
+  
   const [newBlockForm, setNewBlockForm] = useState({
     name: '',
     shortName: '',
@@ -279,16 +285,13 @@ export default function BPSPro() {
         if (blocksResult) {
           const loadedBlocks = JSON.parse(blocksResult.value);
           setBlocks(loadedBlocks);
-          // Start at home view showing all blocks
           setShowAllBlocks(true);
           setActiveSection('home');
           
-          // Load or initialize block-specific data
           const dataResult = await window.storage.get('bps_pro_block_data');
           if (dataResult) {
             setBlockData(JSON.parse(dataResult.value));
           } else {
-            // Initialize empty data structure for each block
             const initialData = {};
             loadedBlocks.forEach(block => {
               initialData[block.id] = {
@@ -349,11 +352,9 @@ export default function BPSPro() {
             }
           ];
           setBlocks(sampleBlocks);
-          // Start at home view showing all blocks
           setShowAllBlocks(true);
           setActiveSection('home');
           
-          // Initialize empty data for each sample block
           const initialData = {};
           sampleBlocks.forEach(block => {
             initialData[block.id] = {
@@ -401,11 +402,11 @@ export default function BPSPro() {
     // HOME - ALL BLOCKS VIEW
     if (activeSection === 'home' || showAllBlocks) {
       return (
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           <div className="max-w-6xl">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">All blocks</h2>
-              <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+              <h2 className="text-xl md:text-2xl font-bold">All blocks</h2>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 <button 
                   onClick={async () => {
                     if (confirm('Clear all blocks and start fresh? This cannot be undone.')) {
@@ -415,7 +416,7 @@ export default function BPSPro() {
                       await window.storage.set('bps_pro_block_data', JSON.stringify({}));
                     }
                   }}
-                  className="border border-red-500 text-red-500 px-4 py-2 rounded-lg hover:bg-red-50 text-sm font-medium"
+                  className="border border-red-500 text-red-500 px-4 py-2.5 rounded-lg hover:bg-red-50 text-sm font-medium w-full sm:w-auto"
                 >
                   Clear all blocks
                 </button>
@@ -424,7 +425,7 @@ export default function BPSPro() {
                     setModalType('add-block');
                     setShowModal(true);
                   }}
-                  className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2  text-sm font-medium"
+                  className="bps-blue px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium w-full sm:w-auto"
                 >
                   <Plus className="w-4 h-4" />
                   Add new block
@@ -432,9 +433,9 @@ export default function BPSPro() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {blocks.length === 0 ? (
-                <div className="col-span-3 text-center py-12 text-slate-500">
+                <div className="col-span-full text-center py-12 text-slate-500">
                   <Building className="w-16 h-16 mx-auto mb-4 text-slate-300" />
                   <p className="text-lg mb-2">No blocks yet</p>
                   <p className="text-sm">Click "Add new block" to get started</p>
@@ -447,7 +448,7 @@ export default function BPSPro() {
                 return (
                   <div
                     key={block.id}
-                    className="bg-white border-2 border-slate-200 rounded-lg p-6 hover:bps-blue-border hover:shadow-lg transition-all relative"
+                    className="bg-white border-2 border-slate-200 rounded-lg p-4 md:p-6 hover:bps-blue-border hover:shadow-lg transition-all relative"
                   >
                     <button
                       onClick={async (e) => {
@@ -464,7 +465,7 @@ export default function BPSPro() {
                           await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                         }
                       }}
-                      className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-2 rounded"
+                      className="absolute top-3 right-3 text-red-500 hover:bg-red-50 p-2 rounded"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -481,16 +482,16 @@ export default function BPSPro() {
                       }}
                       className="w-full text-left"
                     >
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className="w-16 h-16 bps-blue-bg-circle rounded-full flex items-center justify-center flex-shrink-0">
-                        <Building className="w-8 h-8 text-white" />
+                    <div className="flex items-start gap-3 md:gap-4 mb-4">
+                      <div className="w-12 h-12 md:w-16 md:h-16 bps-blue-bg-circle rounded-full flex items-center justify-center flex-shrink-0">
+                        <Building className="w-6 h-6 md:w-8 md:h-8 text-white" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg mb-1">{block.shortName || block.name}</h3>
-                        <p className="text-xs text-slate-500">{block.address}</p>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-base md:text-lg mb-1 truncate">{block.shortName || block.name}</h3>
+                        <p className="text-xs text-slate-500 line-clamp-2">{block.address}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {taskCount > 0 ? (
                         <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">{taskCount} tasks</span>
                       ) : (
@@ -519,7 +520,6 @@ export default function BPSPro() {
       const allTasks = currentBlockData.tasks || [];
       const today = new Date().toISOString().split('T')[0];
       
-      // Calculate task counts
       const upcomingTasks = allTasks.filter(t => 
         !t.completed && 
         t.dueDate && 
@@ -532,11 +532,9 @@ export default function BPSPro() {
         ((t.dueDate && t.dueDate < today) || t.priority === 'High')
       );
       
-      // Calculate set-up required count from H&S, Utilities, Insurance, Documents
       const setups = currentBlockData.setups || {};
       const allSetupKeys = [];
       
-      // H&S setup keys
       hsItems.forEach(item => {
         if (item.subItems) {
           item.subItems.forEach(sub => {
@@ -544,22 +542,18 @@ export default function BPSPro() {
           });
         }
       });
-      // Utilities
       utilityItems.forEach(item => {
         allSetupKeys.push(`utilities-${item.id}`);
       });
-      // Insurance
       [...insuranceCategories.policy, ...insuranceCategories.other].forEach(item => {
         allSetupKeys.push(`insurance-${item.id}`);
       });
-      // Documents
       documentCategories[0].items.forEach(item => {
         allSetupKeys.push(`documents-${item.id}`);
       });
       
       const setupRequiredCount = allSetupKeys.filter(key => !setups[key]?.completed).length;
       
-      // Helper to get item name from setup key
       const getSetupItemName = (key) => {
         const parts = key.split('-');
         const section = parts[0];
@@ -592,7 +586,6 @@ export default function BPSPro() {
         return { itemName, sectionName, section, itemId };
       };
       
-      // Find overdue setup items (setup completed but next due date passed)
       const overdueSetups = Object.entries(setups)
         .filter(([key, setup]) => setup.completed && setup.nextDue && setup.nextDue < today)
         .map(([key, setup]) => {
@@ -609,20 +602,18 @@ export default function BPSPro() {
           };
         });
       
-      // Combine overdue tasks with overdue setups
       const allOverdueItems = [
         ...overdueOrHighPriorityTasks,
         ...overdueSetups
       ];
       
-      // Filter tasks based on selected tab and search
       let filteredTasks = allTasks;
       if (taskFilter === 'upcoming') {
         filteredTasks = upcomingTasks;
       } else if (taskFilter === 'overdue') {
         filteredTasks = allOverdueItems;
       } else if (taskFilter === 'setup') {
-        filteredTasks = []; // Setup items shown separately
+        filteredTasks = [];
       }
       
       if (taskSearch) {
@@ -634,25 +625,25 @@ export default function BPSPro() {
       }
 
       return (
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">All tasks</h2>
+        <div className="p-4 md:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 md:mb-6 gap-3">
+            <h2 className="text-xl md:text-2xl font-bold">All tasks</h2>
             <button 
               onClick={() => {
                 setModalType('add-task');
                 setShowModal(true);
               }}
-              className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2  text-sm font-medium"
+              className="bps-blue px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium w-full sm:w-auto"
             >
               <Plus className="w-4 h-4" />
               New task
             </button>
           </div>
           
-          <div className="flex gap-6 mb-6 border-b overflow-x-auto">
+          <div className="flex gap-3 md:gap-6 mb-4 md:mb-6 border-b overflow-x-auto pb-0">
             <button 
               onClick={() => setTaskFilter('all')}
-              className={`pb-3 px-1 text-sm whitespace-nowrap ${
+              className={`pb-3 px-1 text-xs md:text-sm whitespace-nowrap flex-shrink-0 ${
                 taskFilter === 'all' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
               }`}
             >
@@ -660,46 +651,46 @@ export default function BPSPro() {
             </button>
             <button 
               onClick={() => setTaskFilter('upcoming')}
-              className={`pb-3 px-1 text-sm flex items-center gap-2 whitespace-nowrap ${
+              className={`pb-3 px-1 text-xs md:text-sm flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
                 taskFilter === 'upcoming' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
               }`}
             >
-              Upcoming/ Outstanding
+              Upcoming
               {upcomingTasks.length > 0 && (
-                <span className="bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full min-w-[24px] text-center">
+                <span className="bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                   {upcomingTasks.length}
                 </span>
               )}
             </button>
             <button 
               onClick={() => setTaskFilter('overdue')}
-              className={`pb-3 px-1 text-sm flex items-center gap-2 whitespace-nowrap ${
+              className={`pb-3 px-1 text-xs md:text-sm flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
                 taskFilter === 'overdue' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
               }`}
             >
-              Overdue/ High Priority
+              Overdue
               {allOverdueItems.length > 0 && (
-                <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full min-w-[24px] text-center">
+                <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                   {allOverdueItems.length}
                 </span>
               )}
             </button>
             <button 
               onClick={() => setTaskFilter('setup')}
-              className={`pb-3 px-1 text-sm flex items-center gap-2 whitespace-nowrap ${
+              className={`pb-3 px-1 text-xs md:text-sm flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
                 taskFilter === 'setup' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
               }`}
             >
-              Set-up required
+              Set-up
               {setupRequiredCount > 0 && (
-                <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full min-w-[24px] text-center">
+                <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                   {setupRequiredCount}
                 </span>
               )}
             </button>
           </div>
           
-          <div className="mb-6">
+          <div className="mb-4 md:mb-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
@@ -707,12 +698,11 @@ export default function BPSPro() {
                 onChange={(e) => setTaskSearch(e.target.value)}
                 type="text" 
                 placeholder="Search" 
-                className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm" 
+                className="w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm" 
               />
             </div>
           </div>
           
-          {/* Set-up required view */}
           {taskFilter === 'setup' ? (
             setupRequiredCount === 0 ? (
               <div className="text-center py-12 text-slate-500">
@@ -762,7 +752,6 @@ export default function BPSPro() {
                     <button
                       key={key}
                       onClick={() => {
-                        // Navigate to the relevant section
                         if (section === 'hs') {
                           const parentItem = hsItems.find(h => itemId.startsWith(h.id + '-'));
                           if (parentItem) {
@@ -799,15 +788,15 @@ export default function BPSPro() {
                       }}
                       className="bg-white border rounded-lg p-4 flex items-center justify-between w-full text-left hover:bps-blue-border hover:shadow-md transition-all cursor-pointer group"
                     >
-                      <div className="flex-1">
-                        <div className="font-medium group-hover:bps-blue-text">{itemName}</div>
-                        <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium group-hover:bps-blue-text truncate">{itemName}</div>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
                           <span className="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-full">{sectionName}</span>
-                          <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">Set-up required</span>
+                          <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full whitespace-nowrap">Set-up required</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 bps-blue-text text-sm font-medium ml-4 flex-shrink-0">
-                        <span>Set up</span>
+                        <span className="hidden sm:inline">Set up</span>
                         <span className="text-lg">→</span>
                       </div>
                     </button>
@@ -823,7 +812,6 @@ export default function BPSPro() {
           ) : (
             <div className="space-y-2">
               {filteredTasks.map(task => {
-                // If this is an overdue setup item, render it as a clickable card
                 if (task.isOverdueSetup) {
                   return (
                     <button
@@ -863,14 +851,14 @@ export default function BPSPro() {
                         }
                         setActiveTab('home');
                       }}
-                      className="bg-white border-2 border-red-200 rounded-lg p-4 flex items-center justify-between w-full text-left hover-bps-border hover:shadow-md transition-all cursor-pointer group"
+                      className="bg-white border-2 border-red-200 rounded-lg p-4 flex items-center justify-between w-full text-left hover:bps-blue-border hover:shadow-md transition-all cursor-pointer group"
                     >
-                      <div className="flex-1">
-                        <div className="font-medium text-red-700 group-hover:text-blue-600">⚠️ {task.title}</div>
-                        <div className="flex items-center gap-3 mt-2 text-xs">
-                          <span className="flex items-center gap-1 text-red-500">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-red-700 group-hover:text-blue-600 truncate">⚠️ {task.title}</div>
+                        <div className="flex items-center gap-2 md:gap-3 mt-2 text-xs flex-wrap">
+                          <span className="flex items-center gap-1 text-red-500 whitespace-nowrap">
                             <Calendar className="w-3 h-3" />
-                            Was due: {new Date(task.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            {new Date(task.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                           </span>
                           <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
                             {task.sectionName}
@@ -881,19 +869,18 @@ export default function BPSPro() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 bps-blue-text text-sm font-medium ml-4 flex-shrink-0">
-                        <span>Review</span>
+                        <span className="hidden sm:inline">Review</span>
                         <span className="text-lg">→</span>
                       </div>
                     </button>
                   );
                 }
                 
-                // Regular task rendering
                 const isOverdue = task.dueDate && task.dueDate < today && !task.completed;
                 return (
                   <div 
                     key={task.id} 
-                    className={`bg-white border rounded-lg p-4 flex items-center gap-4 ${
+                    className={`bg-white border rounded-lg p-4 flex items-start gap-3 md:gap-4 ${
                       task.completed ? 'opacity-50' : ''
                     }`}
                   >
@@ -914,29 +901,28 @@ export default function BPSPro() {
                         setBlockData(updatedBlockData);
                         await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                       }}
-                      className="w-5 h-5"
+                      className="w-5 h-5 mt-0.5 flex-shrink-0"
                     />
-                    <div className="flex-1">
-                      <div className={`font-medium ${task.completed ? 'line-through' : ''}`}>{task.title}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className={`font-medium ${task.completed ? 'line-through' : ''} break-words`}>{task.title}</div>
                       {task.description && (
-                        <div className="text-sm text-slate-600 mt-1">{task.description}</div>
+                        <div className="text-sm text-slate-600 mt-1 break-words">{task.description}</div>
                       )}
-                      <div className="flex items-center gap-3 mt-2 text-xs">
+                      <div className="flex items-center gap-2 md:gap-3 mt-2 text-xs flex-wrap">
                         {task.dueDate && (
-                          <span className={`flex items-center gap-1 ${isOverdue ? 'text-red-500' : 'text-slate-500'}`}>
+                          <span className={`flex items-center gap-1 whitespace-nowrap ${isOverdue ? 'text-red-500' : 'text-slate-500'}`}>
                             <Calendar className="w-3 h-3" />
-                            {new Date(task.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                            {isOverdue && ' (Overdue)'}
+                            {new Date(task.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                           </span>
                         )}
-                        <span className={`px-2 py-0.5 rounded-full ${
+                        <span className={`px-2 py-0.5 rounded-full whitespace-nowrap ${
                           task.priority === 'High' ? 'bg-red-100 text-red-700' :
                           task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
                           'bg-green-100 text-green-700'
                         }`}>
                           {task.priority}
                         </span>
-                        <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
+                        <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full whitespace-nowrap">
                           {task.category}
                         </span>
                       </div>
@@ -956,7 +942,7 @@ export default function BPSPro() {
                           await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                         }
                       }}
-                      className="text-red-500 hover:bg-red-50 p-2 rounded"
+                      className="text-red-500 hover:bg-red-50 p-2 rounded flex-shrink-0"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -969,20 +955,20 @@ export default function BPSPro() {
       );
     }
 
-    // BLOCK INFO
+    // BLOCK INFO - COMPLETE
     if (activeSection === 'block-info') {
       return (
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           <div className="max-w-4xl">
-            <div className="flex items-start gap-6 mb-8">
-              <div className="w-32 h-32 bps-blue-bg-circle rounded-full flex items-center justify-center flex-shrink-0">
-                <Building className="w-16 h-16 text-white" />
+            <div className="flex flex-col md:flex-row items-start gap-4 md:gap-6 mb-6 md:mb-8">
+              <div className="w-20 h-20 md:w-32 md:h-32 bps-blue-bg-circle rounded-full flex items-center justify-center flex-shrink-0">
+                <Building className="w-10 h-10 md:w-16 md:h-16 text-white" />
               </div>
-              <div className="flex-1">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h2 className="text-2xl font-bold mb-1">{currentBlock?.shortName || currentBlock?.name}</h2>
-                    <p className="text-slate-600 mb-3">Also known as {currentBlock?.name}</p>
+              <div className="flex-1 w-full">
+                <div className="flex flex-col sm:flex-row items-start justify-between mb-2 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl md:text-2xl font-bold mb-1 break-words">{currentBlock?.shortName || currentBlock?.name}</h2>
+                    <p className="text-sm md:text-base text-slate-600 mb-3">Also known as {currentBlock?.name}</p>
                   </div>
                   <button
                     onClick={() => {
@@ -996,7 +982,7 @@ export default function BPSPro() {
                       setModalType('edit-block');
                       setShowModal(true);
                     }}
-                    className="bps-blue-text text-sm hover:underline flex items-center gap-1"
+                    className="bps-blue-text text-sm hover:underline flex items-center gap-1 whitespace-nowrap"
                   >
                     <Edit2 className="w-3 h-3" />
                     Edit
@@ -1007,8 +993,8 @@ export default function BPSPro() {
               </div>
             </div>
 
-            <div className="border-2 border-red-300 rounded-lg p-6 mb-8">
-              <h3 className="font-bold mb-4">Evacuation strategy:</h3>
+            <div className="border-2 border-red-300 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+              <h3 className="font-bold mb-4 text-base md:text-lg">Evacuation strategy:</h3>
               <div className="space-y-3 mb-4">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input 
@@ -1027,9 +1013,9 @@ export default function BPSPro() {
                       setBlockData(updatedBlockData);
                       await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                     }}
-                    className="mt-1" 
+                    className="mt-1 flex-shrink-0" 
                   />
-                  <span>Simultaneous</span>
+                  <span className="text-sm md:text-base">Simultaneous</span>
                 </label>
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input 
@@ -1048,11 +1034,11 @@ export default function BPSPro() {
                       setBlockData(updatedBlockData);
                       await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                     }}
-                    className="mt-1" 
+                    className="mt-1 flex-shrink-0" 
                   />
                   <div>
-                    <div className="font-medium">Stay put</div>
-                    <div className="text-sm text-slate-600 mt-1">
+                    <div className="font-medium text-sm md:text-base">Stay put</div>
+                    <div className="text-xs md:text-sm text-slate-600 mt-1">
                       (Also called defend in place) Residents in flats not directly affected by the fire remain in their own homes
                       unless instructed otherwise by the fire and rescue service (FRS) or they feel unsafe.
                       <br /><br />
@@ -1080,29 +1066,29 @@ export default function BPSPro() {
                       setBlockData(updatedBlockData);
                       await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                     }}
-                    className="mt-1" 
+                    className="mt-1 flex-shrink-0" 
                   />
-                  <span>Phased</span>
+                  <span className="text-sm md:text-base">Phased</span>
                 </label>
               </div>
               <button 
                 onClick={() => alert('Evacuation strategy saved successfully!')}
-                className="bps-blue px-6 py-2 rounded-lg  text-sm font-medium"
+                className="bps-blue px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto"
               >
                 Set evacuation strategy
               </button>
             </div>
 
-            <div className="border-2 border-red-300 rounded-lg p-6 mb-8">
-              <h3 className="font-bold mb-4">Responsible Person (RP)</h3>
+            <div className="border-2 border-red-300 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+              <h3 className="font-bold mb-4 text-base md:text-lg">Responsible Person (RP)</h3>
               {(blockData[selectedBlock]?.responsiblePersons || []).length > 0 && (
                 <div className="space-y-2 mb-4">
                   {(blockData[selectedBlock]?.responsiblePersons || []).map((rp, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-slate-50 p-3 rounded">
-                      <div>
-                        <div className="font-medium">{rp.name}</div>
+                    <div key={idx} className="flex items-center justify-between bg-slate-50 p-3 rounded gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm md:text-base truncate">{rp.name}</div>
                         <div className="text-xs text-slate-600">{rp.role}</div>
-                        <div className="text-xs text-slate-500">{rp.email} • {rp.phone}</div>
+                        <div className="text-xs text-slate-500 break-words">{rp.email} • {rp.phone}</div>
                       </div>
                       <button 
                         onClick={async () => {
@@ -1119,7 +1105,7 @@ export default function BPSPro() {
                             await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                           }
                         }}
-                        className="text-red-500 hover:bg-red-50 p-2 rounded"
+                        className="text-red-500 hover:bg-red-50 p-2 rounded flex-shrink-0"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -1132,15 +1118,15 @@ export default function BPSPro() {
                   setModalType('add-rp');
                   setShowModal(true);
                 }}
-                className="bps-blue px-6 py-2 rounded-lg  text-sm font-medium"
+                className="bps-blue px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto"
               >
                 Add
               </button>
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold">Managing agent</h3>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+                <h3 className="font-bold text-base md:text-lg">Managing agent</h3>
                 <button
                   onClick={() => {
                     setEditAgentForm({
@@ -1158,27 +1144,27 @@ export default function BPSPro() {
                   Edit
                 </button>
               </div>
-              <p className="text-sm mb-1"><span className="font-medium">Managing agent:</span> {currentBlock?.managingAgent?.name}</p>
-              <p className="text-sm mb-1"><span className="font-medium">Address:</span> {currentBlock?.managingAgent?.address}</p>
-              <p className="text-sm mb-1"><span className="font-medium">Property manager:</span> {currentBlock?.managingAgent?.manager}</p>
-              <p className="text-sm"><span className="font-medium">Email:</span> {currentBlock?.managingAgent?.email}</p>
+              <p className="text-sm mb-1 break-words"><span className="font-medium">Managing agent:</span> {currentBlock?.managingAgent?.name}</p>
+              <p className="text-sm mb-1 break-words"><span className="font-medium">Address:</span> {currentBlock?.managingAgent?.address}</p>
+              <p className="text-sm mb-1 break-words"><span className="font-medium">Property manager:</span> {currentBlock?.managingAgent?.manager}</p>
+              <p className="text-sm break-words"><span className="font-medium">Email:</span> {currentBlock?.managingAgent?.email}</p>
             </div>
           </div>
         </div>
       );
     }
 
-    // BLOCK SETTINGS
+    // BLOCK SETTINGS - COMPLETE
     if (activeSection === 'block-settings') {
       return (
-        <div className="p-8">
-          <h2 className="text-2xl font-bold mb-6">Settings</h2>
-          <div className="flex gap-8">
-            <div className="w-64">
+        <div className="p-4 md:p-8">
+          <h2 className="text-xl md:text-2xl font-bold mb-6">Settings</h2>
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            <div className="w-full lg:w-64">
               <p className="text-xs text-slate-500 uppercase mb-3">Select</p>
               <button 
                 onClick={() => setSettingsTab('assets')}
-                className={`flex items-center gap-2 w-full px-4 py-2 rounded mb-2 text-sm ${
+                className={`flex items-center gap-2 w-full px-4 py-2.5 rounded mb-2 text-sm ${
                   settingsTab === 'assets' ? 'bg-slate-900 text-white' : 'hover:bg-slate-100'
                 }`}
               >
@@ -1187,7 +1173,7 @@ export default function BPSPro() {
               </button>
               <button 
                 onClick={() => setSettingsTab('auto-chase')}
-                className={`flex items-center gap-2 w-full px-4 py-2 rounded mb-2 text-sm ${
+                className={`flex items-center gap-2 w-full px-4 py-2.5 rounded mb-2 text-sm ${
                   settingsTab === 'auto-chase' ? 'bg-slate-900 text-white' : 'hover:bg-slate-100'
                 }`}
               >
@@ -1196,7 +1182,7 @@ export default function BPSPro() {
               </button>
               <button 
                 onClick={() => setSettingsTab('resident')}
-                className={`flex items-center gap-2 w-full px-4 py-2 rounded mb-2 text-sm ${
+                className={`flex items-center gap-2 w-full px-4 py-2.5 rounded mb-2 text-sm ${
                   settingsTab === 'resident' ? 'bg-slate-900 text-white' : 'hover:bg-slate-100'
                 }`}
               >
@@ -1205,7 +1191,7 @@ export default function BPSPro() {
               </button>
               <button 
                 onClick={() => setSettingsTab('site-staff')}
-                className={`flex items-center gap-2 w-full px-4 py-2 rounded mb-2 text-sm ${
+                className={`flex items-center gap-2 w-full px-4 py-2.5 rounded mb-2 text-sm ${
                   settingsTab === 'site-staff' ? 'bg-slate-900 text-white' : 'hover:bg-slate-100'
                 }`}
               >
@@ -1216,7 +1202,7 @@ export default function BPSPro() {
             <div className="flex-1">
               {settingsTab === 'assets' && (
                 <>
-                  <h3 className="text-xl font-bold mb-4">Add/ remove assets</h3>
+                  <h3 className="text-lg md:text-xl font-bold mb-4">Add/ remove assets</h3>
                   <div className="mb-4">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -1225,11 +1211,11 @@ export default function BPSPro() {
                         onChange={(e) => setAssetSearch(e.target.value)}
                         type="text" 
                         placeholder="Search" 
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm" 
+                        className="w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm" 
                       />
                     </div>
                   </div>
-                  <h4 className="font-medium mb-3">Service and maintenance (H&S items)</h4>
+                  <h4 className="font-medium mb-3 text-sm md:text-base">Service and maintenance (H&S items)</h4>
                   <div className="space-y-2">
                     {blockAssets
                       .filter(asset => asset.name.toLowerCase().includes(assetSearch.toLowerCase()))
@@ -1237,9 +1223,9 @@ export default function BPSPro() {
                         const blockAssetState = blockData[selectedBlock]?.assets?.[asset.id];
                         const isActive = blockAssetState !== undefined ? blockAssetState : asset.active;
                         return (
-                          <div key={asset.id} className="flex items-center justify-between py-2 border-b">
-                            <span className="text-sm">{asset.name}</span>
-                            <div className="flex items-center gap-2">
+                          <div key={asset.id} className="flex items-center justify-between py-2 border-b gap-3">
+                            <span className="text-sm flex-1 min-w-0 break-words">{asset.name}</span>
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               {isActive ? (
                                 <>
                                   <CheckCircle className="w-5 h-5 text-green-500" />
@@ -1258,7 +1244,7 @@ export default function BPSPro() {
                                       setBlockData(updatedBlockData);
                                       await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                                     }}
-                                    className="text-red-500 text-xs hover:underline"
+                                    className="text-red-500 text-xs hover:underline whitespace-nowrap"
                                   >
                                     Deactivate
                                   </button>
@@ -1280,7 +1266,7 @@ export default function BPSPro() {
                                       setBlockData(updatedBlockData);
                                       await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                                     }}
-                                    className="bps-blue-text text-sm hover:underline"
+                                    className="bps-blue-text text-sm hover:underline whitespace-nowrap"
                                   >
                                     + Activate
                                   </button>
@@ -1298,7 +1284,7 @@ export default function BPSPro() {
               
               {settingsTab === 'auto-chase' && (
                 <>
-                  <h3 className="text-xl font-bold mb-4">Contractor auto-chase</h3>
+                  <h3 className="text-lg md:text-xl font-bold mb-4">Contractor auto-chase</h3>
                   <p className="text-sm text-slate-600 mb-4">
                     Automated email chasers sent to the contractor/ supplier for upcoming or overdue actions.
                   </p>
@@ -1308,7 +1294,7 @@ export default function BPSPro() {
               
               {settingsTab === 'resident' && (
                 <>
-                  <h3 className="text-xl font-bold mb-4">Resident settings</h3>
+                  <h3 className="text-lg md:text-xl font-bold mb-4">Resident settings</h3>
                   <p className="text-sm text-slate-600 mb-4">Configure resident communication preferences.</p>
                   <div className="text-slate-500">Coming soon</div>
                 </>
@@ -1316,11 +1302,11 @@ export default function BPSPro() {
               
               {settingsTab === 'site-staff' && (
                 <>
-                  <h3 className="text-xl font-bold mb-4">Site staff</h3>
+                  <h3 className="text-lg md:text-xl font-bold mb-4">Site staff</h3>
                   <p className="text-sm text-slate-600 mb-4">Manage site staff members.</p>
                   <button 
                     onClick={() => alert('Add site staff coming soon!')}
-                    className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2  text-sm font-medium"
+                    className="bps-blue px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium"
                   >
                     <Plus className="w-4 h-4" />
                     Add staff member
@@ -1333,14 +1319,14 @@ export default function BPSPro() {
       );
     }
 
-    // ISSUES/COMPLAINTS
+    // ISSUES/COMPLAINTS - COMPLETE
     if (activeSection === 'issues') {
       const issues = blockData[selectedBlock]?.issues || [];
       return (
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Reported issues/complaints</h2>
-            <div className="flex gap-3">
+        <div className="p-4 md:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+            <h2 className="text-xl md:text-2xl font-bold">Reported issues/complaints</h2>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <button 
                 onClick={() => alert('Recipient settings: Configure who receives issue notifications')}
                 className="bps-blue-text text-sm hover:underline"
@@ -1353,7 +1339,7 @@ export default function BPSPro() {
                   setModalType('add-issue');
                   setShowModal(true);
                 }}
-                className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2  text-sm font-medium"
+                className="bps-blue px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4" />
                 New issue or complaint
@@ -1369,11 +1355,11 @@ export default function BPSPro() {
             <div className="space-y-3">
               {issues.map(issue => (
                 <div key={issue.id} className={`bg-white border rounded-lg p-4 ${issue.resolved ? 'opacity-60' : ''}`}>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className={`font-medium ${issue.resolved ? 'line-through' : ''}`}>{issue.title}</h3>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 className={`font-medium ${issue.resolved ? 'line-through' : ''} break-words`}>{issue.title}</h3>
+                        <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
                           issue.priority === 'High' ? 'bg-red-100 text-red-700' :
                           issue.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
                           'bg-green-100 text-green-700'
@@ -1382,10 +1368,10 @@ export default function BPSPro() {
                         </span>
                       </div>
                       {issue.location && <div className="text-xs text-slate-600 mb-2">📍 {issue.location}</div>}
-                      <p className="text-sm text-slate-600">{issue.description}</p>
+                      <p className="text-sm text-slate-600 break-words">{issue.description}</p>
                       <div className="text-xs text-slate-400 mt-2">Reported: {new Date(issue.createdAt).toLocaleDateString('en-GB')}</div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={async () => {
                           const updatedIssues = issues.map(i => 
@@ -1435,20 +1421,20 @@ export default function BPSPro() {
       );
     }
 
-    // H&S, UTILITIES, INSURANCE, DOCUMENTS WITH ITEMS
+    // H&S, UTILITIES, INSURANCE, DOCUMENTS WITH ITEMS - COMPLETE WITH ALL TABS
     if ((activeSection === 'hs' || activeSection === 'utilities' || activeSection === 'insurance' || activeSection === 'documents') && activeSubItem) {
       const hasTabs = activeSection !== 'insurance';
       const tabs = hasTabs ? ['Home', 'O&Ms', 'Asset register', 'Notes', 'Settings'] : ['Home', 'Settings'];
 
       return (
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* Tabs */}
-          <div className="mb-6 flex gap-6 border-b">
+          <div className="mb-6 flex gap-3 md:gap-6 border-b overflow-x-auto pb-0">
             {tabs.map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab.toLowerCase().replace(/ /g, '-').replace(/&/g, 'and'))}
-                className={`pb-3 text-sm ${
+                className={`pb-3 text-xs md:text-sm whitespace-nowrap flex-shrink-0 ${
                   activeTab === tab.toLowerCase().replace(/ /g, '-').replace(/&/g, 'and')
                     ? 'border-b-2 border-slate-900 font-medium'
                     : 'text-slate-600'
@@ -1465,7 +1451,7 @@ export default function BPSPro() {
               {/* H&S Section */}
               {activeSection === 'hs' && activeSubItem.subItems && !activeSubSubItem && (
                 <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-6">{activeSubItem.name}</h2>
+                  <h2 className="text-xl md:text-2xl font-bold mb-6">{activeSubItem.name}</h2>
                   <div className="space-y-2">
                     {activeSubItem.subItems.map(subItem => (
                       <button
@@ -1474,11 +1460,10 @@ export default function BPSPro() {
                         className="flex items-center justify-between w-full px-4 py-3 bg-white rounded border hover:bg-slate-50"
                       >
                         <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4" />
+                          <FileText className="w-4 h-4 flex-shrink-0" />
                           <span className="text-sm">{subItem.name}</span>
                         </div>
-                        {subItem.badge && <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">{subItem.badge}</span>}
-                        {subItem.complete && <CheckCircle className="w-5 h-5 text-green-500" />}
+                        {subItem.complete && <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />}
                       </button>
                     ))}
                   </div>
@@ -1494,10 +1479,10 @@ export default function BPSPro() {
                 
                 return (
                 <div>
-                  <div className="flex gap-4 mb-6">
+                  <div className="flex gap-2 md:gap-4 mb-6 flex-wrap">
                     <button 
                       onClick={() => setHsViewType('surveys')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium ${
+                      className={`flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded text-xs md:text-sm font-medium ${
                         hsViewType === 'surveys' ? 'bg-slate-900 text-white' : 'border'
                       }`}
                     >
@@ -1508,7 +1493,7 @@ export default function BPSPro() {
                     </button>
                     <button 
                       onClick={() => setHsViewType('remedials')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded text-sm ${
+                      className={`flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded text-xs md:text-sm ${
                         hsViewType === 'remedials' ? 'bg-slate-900 text-white' : 'border'
                       }`}
                     >
@@ -1518,16 +1503,16 @@ export default function BPSPro() {
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-3 mb-8">
-                    <h2 className="text-2xl font-bold">{activeSubSubItem.name}</h2>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 md:mb-8">
+                    <h2 className="text-xl md:text-2xl font-bold">{activeSubSubItem.name}</h2>
                     {isSetUp ? (
-                      <span className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full font-medium">Set up</span>
+                      <span className="bg-green-100 text-green-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set up</span>
                     ) : (
-                      <span className="bg-red-100 text-red-700 text-sm px-3 py-1 rounded-full font-medium">Set-up required</span>
+                      <span className="bg-red-100 text-red-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set-up required</span>
                     )}
                   </div>
 
-                  <div className="space-y-4 mb-8">
+                  <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 text-sm md:text-base">
                     <div><span className="font-medium">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
                     <div><span className="font-medium">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
                     <div><span className="font-medium">Next due by:</span> {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
@@ -1539,7 +1524,7 @@ export default function BPSPro() {
                     </div>
                   </div>
 
-                  <div className={`${isSetUp ? '' : 'border-2 border-red-300'} rounded-lg ${isSetUp ? '' : 'p-6'} inline-block`}>
+                  <div className={`${isSetUp ? '' : 'border-2 border-red-300'} rounded-lg ${isSetUp ? '' : 'p-4 md:p-6'} inline-block`}>
                     <button 
                       onClick={() => {
                         setCurrentSetupKey(setupKey);
@@ -1563,7 +1548,7 @@ export default function BPSPro() {
                         setModalType('setup');
                         setShowModal(true);
                       }}
-                      className="bps-blue px-6 py-2 rounded-lg  text-sm font-medium"
+                      className="bps-blue px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto"
                     >
                       {isSetUp ? 'Edit set-up' : 'Finish set-up'}
                     </button>
@@ -1581,21 +1566,21 @@ export default function BPSPro() {
                 
                 return (
                 <div>
-                  <div className="flex items-center gap-3 mb-8">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 md:mb-8">
+                    <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
                       {activeSubItem.name}
                       <Edit2 className="w-4 h-4 text-slate-400" />
                     </h2>
                   </div>
 
-                  <h3 className="text-lg mb-6">{activeSubItem.fullName}</h3>
+                  <h3 className="text-base md:text-lg mb-4 md:mb-6">{activeSubItem.fullName}</h3>
                   {isSetUp ? (
-                    <span className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full font-medium inline-block mb-6">Set up</span>
+                    <span className="bg-green-100 text-green-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium inline-block mb-4 md:mb-6">Set up</span>
                   ) : (
-                    <span className="bg-red-100 text-red-700 text-sm px-3 py-1 rounded-full font-medium inline-block mb-6">Set-up required</span>
+                    <span className="bg-red-100 text-red-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium inline-block mb-4 md:mb-6">Set-up required</span>
                   )}
 
-                  <div className="space-y-4 mb-8">
+                  <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 text-sm md:text-base">
                     <div><span className="font-medium">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
                     <div><span className="font-medium">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
                     <div><span className="font-medium">Next due by:</span> {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
@@ -1607,7 +1592,7 @@ export default function BPSPro() {
                     </div>
                   </div>
 
-                  <div className={`${isSetUp ? '' : 'border-2 border-red-300'} rounded-lg ${isSetUp ? '' : 'p-6'} inline-block mb-8`}>
+                  <div className={`${isSetUp ? '' : 'border-2 border-red-300'} rounded-lg ${isSetUp ? '' : 'p-4 md:p-6'} inline-block mb-6 md:mb-8`}>
                     <button 
                       onClick={() => {
                         setCurrentSetupKey(setupKey);
@@ -1631,15 +1616,15 @@ export default function BPSPro() {
                         setModalType('setup');
                         setShowModal(true);
                       }}
-                      className="bps-blue px-6 py-2 rounded-lg  text-sm font-medium"
+                      className="bps-blue px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto"
                     >
                       {isSetUp ? 'Edit set-up' : 'Finish set-up'}
                     </button>
                   </div>
 
-                  <div className="border-t pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold">Meter readings</h3>
+                  <div className="border-t pt-4 md:pt-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+                      <h3 className="text-base md:text-lg font-semibold">Meter readings</h3>
                       <button 
                         onClick={() => {
                           setCurrentSetupKey(`meter-${activeSubItem.id}`);
@@ -1647,7 +1632,7 @@ export default function BPSPro() {
                           setModalType('add-meter');
                           setShowModal(true);
                         }}
-                        className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2  text-sm font-medium"
+                        className="bps-blue px-4 py-2 md:py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium w-full sm:w-auto"
                       >
                         <Plus className="w-4 h-4" />
                         Add
@@ -1660,11 +1645,11 @@ export default function BPSPro() {
                       return (
                         <div className="space-y-2">
                           {readings.map((r, idx) => (
-                            <div key={idx} className="flex items-center justify-between bg-slate-50 p-3 rounded">
-                              <div>
-                                <div className="font-medium">{r.reading}</div>
+                            <div key={idx} className="flex items-center justify-between bg-slate-50 p-3 rounded gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium break-words">{r.reading}</div>
                                 <div className="text-xs text-slate-600">{new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-                                {r.notes && <div className="text-xs text-slate-500">{r.notes}</div>}
+                                {r.notes && <div className="text-xs text-slate-500 break-words">{r.notes}</div>}
                               </div>
                               <button 
                                 onClick={async () => {
@@ -1684,7 +1669,7 @@ export default function BPSPro() {
                                     await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                                   }
                                 }}
-                                className="text-red-500 hover:bg-red-50 p-2 rounded"
+                                className="text-red-500 hover:bg-red-50 p-2 rounded flex-shrink-0"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -1707,19 +1692,19 @@ export default function BPSPro() {
                 
                 return (
                 <div>
-                  <div className="flex items-center gap-3 mb-8">
-                    <h2 className="text-2xl font-bold">{activeSubItem.name === 'Terrorism insurance' ? 'Terrorism insurance renewal' : activeSubItem.name}</h2>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 md:mb-8">
+                    <h2 className="text-xl md:text-2xl font-bold">{activeSubItem.name === 'Terrorism insurance' ? 'Terrorism insurance renewal' : activeSubItem.name}</h2>
                     {isSetUp ? (
-                      <span className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full font-medium">Set up</span>
+                      <span className="bg-green-100 text-green-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set up</span>
                     ) : (
-                      <span className="bg-red-100 text-red-700 text-sm px-3 py-1 rounded-full font-medium">Set-up required</span>
+                      <span className="bg-red-100 text-red-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set-up required</span>
                     )}
                   </div>
 
-                  <div className="space-y-4 mb-8">
+                  <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 text-sm md:text-base">
                     <div><span className="font-medium">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
                     <div><span className="font-medium">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium">Next due by:</span>
                       {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}
                       <button 
@@ -1755,7 +1740,7 @@ export default function BPSPro() {
                       setModalType('setup');
                       setShowModal(true);
                     }}
-                    className="bps-blue px-6 py-2 rounded-lg  text-sm font-medium"
+                    className="bps-blue px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto"
                   >
                     {isSetUp ? 'Edit set-up' : 'Finish set-up'}
                   </button>
@@ -1766,17 +1751,17 @@ export default function BPSPro() {
               {/* INSURANCE - Claims workflow */}
               {activeSection === 'insurance' && activeClaim && (
                 <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <h2 className="text-2xl font-bold">Identify source</h2>
-                      <button className="bps-blue px-6 py-2 rounded-lg  text-sm font-medium">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      <h2 className="text-xl md:text-2xl font-bold">Identify source</h2>
+                      <button className="bps-blue px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto">
                         Complete
                       </button>
                     </div>
                   </div>
 
                   <div className="mb-8">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
                       <h3 className="font-semibold">Subtasks</h3>
                       <button 
                         onClick={() => alert('Add custom subtasks feature coming soon')}
@@ -1790,15 +1775,15 @@ export default function BPSPro() {
                         <button
                           key={step.id}
                           onClick={() => alert(`${step.name} - Click to mark as complete`)}
-                          className={`flex items-center justify-between w-full px-4 py-2 rounded text-sm ${
+                          className={`flex items-center justify-between w-full px-4 py-2.5 rounded text-sm ${
                             idx < 2 ? 'bg-slate-900 text-white' : 'bg-white border hover:bg-slate-50'
                           }`}
                         >
-                          <div className="flex items-center gap-2">
-                            <FileText className="w-4 h-4" />
-                            <span>{step.name}</span>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <FileText className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">{step.name}</span>
                           </div>
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
                             idx < 2 ? 'bg-red-500 text-white' : 'bg-red-100 text-red-700'
                           }`}>
                             {step.badge}
@@ -1810,7 +1795,7 @@ export default function BPSPro() {
 
                   <div>
                     <h3 className="font-semibold mb-2">Details</h3>
-                    <div className="mb-4">
+                    <div className="mb-4 text-sm md:text-base">
                       <span className="font-medium">Due date:</span> <span className="text-slate-600">21st Jan 2026</span>
                     </div>
                     <div>
@@ -1850,7 +1835,8 @@ export default function BPSPro() {
                       }}
                       className="text-red-500 text-sm hover:underline"
                     >
-                      Delete insurance claim</button>
+                      Delete insurance claim
+                    </button>
                   </div>
                 </div>
               )}
@@ -1864,22 +1850,22 @@ export default function BPSPro() {
                 
                 return (
                 <div>
-                  <div className="flex items-center gap-3 mb-8">
-                    <h2 className="text-2xl font-bold">{activeSubItem.name}</h2>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 md:mb-8">
+                    <h2 className="text-xl md:text-2xl font-bold">{activeSubItem.name}</h2>
                     {isSetUp ? (
-                      <span className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full font-medium">Set up</span>
+                      <span className="bg-green-100 text-green-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set up</span>
                     ) : (
-                      <span className="bg-red-100 text-red-700 text-sm px-3 py-1 rounded-full font-medium">Set-up required</span>
+                      <span className="bg-red-100 text-red-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set-up required</span>
                     )}
                   </div>
 
-                  <div className="space-y-4 mb-8">
+                  <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 text-sm md:text-base">
                     <div><span className="font-medium">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
                     <div><span className="font-medium">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
                     <div><span className="font-medium">Next due by:</span> {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
                   </div>
 
-                  <div className={`${isSetUp ? '' : 'border-2 border-red-300'} rounded-lg ${isSetUp ? '' : 'p-6'} inline-block`}>
+                  <div className={`${isSetUp ? '' : 'border-2 border-red-300'} rounded-lg ${isSetUp ? '' : 'p-4 md:p-6'} inline-block`}>
                     <button 
                       onClick={() => {
                         setCurrentSetupKey(setupKey);
@@ -1903,7 +1889,7 @@ export default function BPSPro() {
                         setModalType('setup');
                         setShowModal(true);
                       }}
-                      className="bps-blue px-6 py-2 rounded-lg  text-sm font-medium"
+                      className="bps-blue px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto"
                     >
                       {isSetUp ? 'Edit set-up' : 'Finish set-up'}
                     </button>
@@ -1914,107 +1900,31 @@ export default function BPSPro() {
             </div>
           )}
 
-          {/* SETTINGS TAB */}
-          {activeTab === 'settings' && (
+          {/* O&MS TAB */}
+          {activeTab === 'oand-ms' && (
             <div>
-              <h2 className="text-2xl font-bold mb-6">Settings</h2>
-              <div className="space-y-6">
-                <div>
-                  <button 
-                    onClick={() => alert('Showing Auto-chase settings')}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded text-sm font-medium mb-4"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Auto-chase
-                  </button>
-                  <button 
-                    onClick={() => alert('Showing General settings')}
-                    className="flex items-center gap-2 px-4 py-2 border rounded text-sm mb-4 hover:bg-slate-50"
-                  >
-                    <Settings className="w-4 h-4" />
-                    General
-                  </button>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-3">Contractor auto-chase</h3>
-                  <p className="text-sm text-slate-600 mb-4">
-                    Automated email chasers sent to the contractor/ supplier for upcoming or overdue actions. 
-                    You'll be CC'd to each email. If they reply, it'll be sent directly to to your email address.
-                  </p>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between py-2">
-                      <span className="text-sm">- Dry riser(s) contract renewal</span>
-                      <button 
-                        onClick={() => alert('Add contract first - feature coming soon')}
-                        className="text-red-500 text-sm hover:underline"
-                      >
-                        Add contract first
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between py-2">
-                      <span className="text-sm">- Dry riser (annual pressure test)</span>
-                      <button 
-                        onClick={() => alert('Add contractor first - feature coming soon')}
-                        className="text-red-500 text-sm hover:underline"
-                      >
-                        Add contractor first
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between py-2">
-                      <span className="text-sm">- Dry riser (6-monthly inspection)</span>
-                      <button 
-                        onClick={() => alert('Finish set-up first to enable auto-chase')}
-                        className="text-red-500 text-sm hover:underline"
-                      >
-                        Finish set-up first
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {activeSection === 'insurance' && (
-                  <div className="border-t pt-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="font-semibold">Settings</span>
-                      <ChevronDown className="w-4 h-4" />
-                    </div>
-                    <div className="space-y-2">
-                      <button 
-                        onClick={() => alert('Add another Terrorism insurance feature coming soon')}
-                        className="bps-blue-text text-sm hover:underline"
-                      >
-                        Add another Terrorism insurance
-                      </button>
-                      <div>
-                        <button 
-                          onClick={() => {
-                            if (confirm('Delete this asset? This action cannot be undone.')) {
-                              alert('Asset deleted');
-                              setActiveSubItem(null);
-                            }
-                          }}
-                          className="text-red-500 text-sm hover:underline"
-                        >
-                          Delete this asset
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+                <h2 className="text-xl md:text-2xl font-bold">O&Ms</h2>
+                <button 
+                  onClick={() => alert('Upload O&M document - feature coming soon')}
+                  className="bps-blue px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium w-full sm:w-auto justify-center"
+                >
+                  <Upload className="w-4 h-4" />
+                  Upload document
+                </button>
               </div>
+              <div className="text-slate-500">No O&M documents</div>
             </div>
           )}
 
           {/* ASSET REGISTER TAB */}
           {activeTab === 'asset-register' && (
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Asset register</h2>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+                <h2 className="text-xl md:text-2xl font-bold">Asset register</h2>
                 <button 
                   onClick={() => alert('Add asset register item - feature coming soon')}
-                  className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2  text-sm font-medium"
+                  className="bps-blue px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium w-full sm:w-auto justify-center"
                 >
                   <Plus className="w-4 h-4" />
                   Add item
@@ -2024,26 +1934,11 @@ export default function BPSPro() {
               <div className="text-slate-500">None</div>
             </div>
           )}
-          
-          {activeTab === 'oand-ms' && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">O&Ms</h2>
-                <button 
-                  onClick={() => alert('Upload O&M document - feature coming soon')}
-                  className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2  text-sm font-medium"
-                >
-                  <Upload className="w-4 h-4" />
-                  Upload document
-                </button>
-              </div>
-              <div className="text-slate-500">No O&M documents</div>
-            </div>
-          )}
-          
+
+          {/* NOTES TAB */}
           {activeTab === 'notes' && (
             <div>
-              <h2 className="text-2xl font-bold mb-6">Notes</h2>
+              <h2 className="text-xl md:text-2xl font-bold mb-6">Notes</h2>
               <textarea 
                 id={`notes-${activeSubItem?.id}`}
                 rows="10"
@@ -2069,10 +1964,85 @@ export default function BPSPro() {
                     await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                     alert('Notes saved!');
                   }}
-                  className="bps-blue px-6 py-2 rounded-lg  text-sm font-medium"
+                  className="bps-blue px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto"
                 >
                   Save notes
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* SETTINGS TAB */}
+          {activeTab === 'settings' && (
+            <div>
+              <h2 className="text-xl md:text-2xl font-bold mb-6">Settings</h2>
+              <div className="space-y-6">
+                <div>
+                  <button 
+                    onClick={() => alert('Showing Auto-chase settings')}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded text-sm font-medium mb-4 w-full sm:w-auto justify-center sm:justify-start"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Auto-chase
+                  </button>
+                  <button 
+                    onClick={() => alert('Showing General settings')}
+                    className="flex items-center gap-2 px-4 py-2.5 border rounded text-sm mb-4 hover:bg-slate-50 w-full sm:w-auto justify-center sm:justify-start"
+                  >
+                    <Settings className="w-4 h-4" />
+                    General
+                  </button>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-3">Contractor auto-chase</h3>
+                  <p className="text-sm text-slate-600 mb-4">
+                    Automated email chasers sent to the contractor/ supplier for upcoming or overdue actions. 
+                    You'll be CC'd to each email. If they reply, it'll be sent directly to to your email address.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2 gap-2">
+                      <span className="text-sm">- {activeSubItem?.name} contract renewal</span>
+                      <button 
+                        onClick={() => alert('Add contract first - feature coming soon')}
+                        className="text-red-500 text-sm hover:underline"
+                      >
+                        Add contract first
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {activeSection === 'insurance' && (
+                  <div className="border-t pt-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="font-semibold">Settings</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
+                    <div className="space-y-2">
+                      <button 
+                        onClick={() => alert('Add another asset - feature coming soon')}
+                        className="bps-blue-text text-sm hover:underline"
+                      >
+                        Add another {activeSubItem?.name}
+                      </button>
+                      <div>
+                        <button 
+                          onClick={() => {
+                            if (confirm('Delete this asset? This action cannot be undone.')) {
+                              alert('Asset deleted');
+                              setActiveSubItem(null);
+                            }
+                          }}
+                          className="text-red-500 text-sm hover:underline"
+                        >
+                          Delete this asset
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -2080,34 +2050,20 @@ export default function BPSPro() {
       );
     }
 
-    // UNITS section
+    // UNITS SECTION - COMPLETE
     if (activeSection === 'units') {
       const units = blockData[selectedBlock]?.units || [];
-      const occupiedCount = units.filter(u => u.residentName).length;
-      const vacantCount = units.filter(u => !u.residentName).length;
-      
       return (
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold">Units</h2>
-              {units.length > 0 && (
-                <div className="flex gap-3 mt-2 text-sm">
-                  <span className="text-slate-600">Total: <strong>{units.length}</strong></span>
-                  <span className="text-green-600">Occupied: <strong>{occupiedCount}</strong></span>
-                  <span className="text-slate-500">Vacant: <strong>{vacantCount}</strong></span>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-3">
+        <div className="p-4 md:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+            <h2 className="text-xl md:text-2xl font-bold">Units</h2>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <button 
                 onClick={() => {
-                  setBulkImportPreview([]);
-                  setBulkImportError('');
-                  setModalType('bulk-import-units');
+                  setModalType('bulk-import');
                   setShowModal(true);
                 }}
-                className="border border-slate-300 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-slate-50"
+                className="border px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium w-full sm:w-auto"
               >
                 <Upload className="w-4 h-4" />
                 Bulk import
@@ -2129,45 +2085,41 @@ export default function BPSPro() {
                   setModalType('add-unit');
                   setShowModal(true);
                 }}
-                className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium"
+                className="bps-blue px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4" />
                 Add unit
               </button>
             </div>
           </div>
-          
           {units.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
               <Building className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-              <p>No units yet</p>
-              <p className="text-sm mt-1">Add units like Flat 1, Flat 2, Penthouse, etc.</p>
+              <p>No units added yet</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {units.map((unit) => (
-                <div key={unit.id} className="bg-white border rounded-lg p-5 hover:shadow-md transition-all">
+              {units.map(unit => (
+                <div key={unit.id} className="bg-white border rounded-lg p-4">
                   <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-bold text-lg">{unit.type} {unit.number}</h3>
-                      {unit.floor && <div className="text-xs text-slate-500">Floor: {unit.floor}</div>}
-                      {unit.bedrooms && <div className="text-xs text-slate-500">{unit.bedrooms} bed</div>}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-lg truncate">{unit.type} {unit.number}</h3>
+                      <p className="text-sm text-slate-600">Floor {unit.floor} • {unit.bedrooms} bed</p>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => {
                           setUnitForm(unit);
-                          setCurrentSetupKey(unit.id);
-                          setModalType('edit-unit');
+                          setModalType('add-unit');
                           setShowModal(true);
                         }}
-                        className="text-blue-500 hover:bg-blue-50 p-1 rounded"
+                        className="text-blue-500 hover:bg-blue-50 p-2 rounded"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={async () => {
-                          if (confirm(`Delete ${unit.type} ${unit.number}?`)) {
+                          if (confirm('Delete this unit?')) {
                             const updatedUnits = units.filter(u => u.id !== unit.id);
                             const updatedBlockData = {
                               ...blockData,
@@ -2180,45 +2132,20 @@ export default function BPSPro() {
                             await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
                           }
                         }}
-                        className="text-red-500 hover:bg-red-50 p-1 rounded"
+                        className="text-red-500 hover:bg-red-50 p-2 rounded"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
-                  
-                  <div className="border-t pt-3">
-                    {unit.residentName ? (
-                      <>
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-medium text-sm">{unit.residentName}</span>
-                          {unit.isOwner ? (
-                            <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">Owner</span>
-                          ) : (
-                            <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">Tenant</span>
-                          )}
-                        </div>
-                        {unit.residentEmail && (
-                          <div className="text-xs text-slate-600 truncate">📧 {unit.residentEmail}</div>
-                        )}
-                        {unit.residentPhone && (
-                          <div className="text-xs text-slate-600">📞 {unit.residentPhone}</div>
-                        )}
-                        {unit.moveInDate && (
-                          <div className="text-xs text-slate-500 mt-1">
-                            Move-in: {new Date(unit.moveInDate).toLocaleDateString('en-GB')}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="text-sm text-slate-400 italic">Vacant</div>
-                    )}
-                    {unit.notes && (
-                      <div className="mt-2 p-2 bg-slate-50 rounded text-xs text-slate-600">
-                        {unit.notes}
-                      </div>
-                    )}
-                  </div>
+                  {unit.residentName && (
+                    <div className="border-t pt-3 mt-3">
+                      <p className="text-sm font-medium">{unit.residentName}</p>
+                      <p className="text-xs text-slate-600">{unit.isOwner ? 'Owner' : 'Tenant'}</p>
+                      {unit.residentEmail && <p className="text-xs text-slate-500 break-words">{unit.residentEmail}</p>}
+                      {unit.residentPhone && <p className="text-xs text-slate-500">{unit.residentPhone}</p>}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -2227,63 +2154,27 @@ export default function BPSPro() {
       );
     }
 
-    // CORRESPONDENCE section
+    // CORRESPONDENCE SECTION - COMPLETE
     if (activeSection === 'correspondence') {
-      const correspondences = blockData[selectedBlock]?.correspondences || [];
+      const correspondence = blockData[selectedBlock]?.correspondence || [];
+      let filteredCorrespondence = correspondence;
       
-      // Filter by direction
-      let filtered = correspondences;
-      if (correspondenceFilter === 'incoming') {
-        filtered = correspondences.filter(c => c.direction === 'Incoming');
-      } else if (correspondenceFilter === 'outgoing') {
-        filtered = correspondences.filter(c => c.direction === 'Outgoing');
+      if (correspondenceFilter !== 'all') {
+        filteredCorrespondence = correspondence.filter(c => c.direction.toLowerCase() === correspondenceFilter);
       }
       
-      // Filter by search
       if (correspondenceSearch) {
-        const s = correspondenceSearch.toLowerCase();
-        filtered = filtered.filter(c => 
-          c.subject?.toLowerCase().includes(s) ||
-          c.recipientName?.toLowerCase().includes(s) ||
-          c.recipientEmail?.toLowerCase().includes(s) ||
-          c.content?.toLowerCase().includes(s) ||
-          c.unitNumber?.toLowerCase().includes(s)
+        filteredCorrespondence = filteredCorrespondence.filter(c =>
+          c.subject.toLowerCase().includes(correspondenceSearch.toLowerCase()) ||
+          c.recipientName.toLowerCase().includes(correspondenceSearch.toLowerCase()) ||
+          c.content.toLowerCase().includes(correspondenceSearch.toLowerCase())
         );
       }
-      
-      // Sort by date (newest first)
-      filtered = [...filtered].sort((a, b) => {
-        const dateA = new Date(a.date || a.createdAt || 0).getTime();
-        const dateB = new Date(b.date || b.createdAt || 0).getTime();
-        return dateB - dateA;
-      });
-      
-      const incomingCount = correspondences.filter(c => c.direction === 'Incoming').length;
-      const outgoingCount = correspondences.filter(c => c.direction === 'Outgoing').length;
-      
-      const typeIcons = {
-        'Email': '📧',
-        'Letter': '✉️',
-        'Phone Call': '📞',
-        'Meeting': '🤝',
-        'SMS': '💬',
-        'Notice': '📋',
-        'Other': '📄'
-      };
-      
+
       return (
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold">Correspondence</h2>
-              {correspondences.length > 0 && (
-                <div className="flex gap-3 mt-2 text-sm">
-                  <span className="text-slate-600">Total: <strong>{correspondences.length}</strong></span>
-                  <span className="text-blue-600">📥 Incoming: <strong>{incomingCount}</strong></span>
-                  <span className="text-green-600">📤 Outgoing: <strong>{outgoingCount}</strong></span>
-                </div>
-              )}
-            </div>
+        <div className="p-4 md:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+            <h2 className="text-xl md:text-2xl font-bold">Correspondence</h2>
             <button 
               onClick={() => {
                 setCorrespondenceForm({
@@ -2293,7 +2184,7 @@ export default function BPSPro() {
                   recipientName: '',
                   recipientEmail: '',
                   unitNumber: '',
-                  date: new Date().toISOString().split('T')[0],
+                  date: '',
                   content: '',
                   status: 'Sent',
                   notes: ''
@@ -2301,133 +2192,88 @@ export default function BPSPro() {
                 setModalType('add-correspondence');
                 setShowModal(true);
               }}
-              className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium"
+              className="bps-blue px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium w-full sm:w-auto"
             >
               <Plus className="w-4 h-4" />
               New correspondence
             </button>
           </div>
-          
-          {correspondences.length > 0 && (
-            <>
-              {/* Filter tabs */}
-              <div className="flex gap-6 mb-6 border-b">
-                <button 
-                  onClick={() => setCorrespondenceFilter('all')}
-                  className={`pb-3 px-1 text-sm ${
-                    correspondenceFilter === 'all' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
-                  }`}
-                >
-                  All ({correspondences.length})
-                </button>
-                <button 
-                  onClick={() => setCorrespondenceFilter('incoming')}
-                  className={`pb-3 px-1 text-sm ${
-                    correspondenceFilter === 'incoming' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
-                  }`}
-                >
-                  📥 Incoming ({incomingCount})
-                </button>
-                <button 
-                  onClick={() => setCorrespondenceFilter('outgoing')}
-                  className={`pb-3 px-1 text-sm ${
-                    correspondenceFilter === 'outgoing' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
-                  }`}
-                >
-                  📤 Outgoing ({outgoingCount})
-                </button>
+
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="flex gap-2 flex-wrap">
+              <button 
+                onClick={() => setCorrespondenceFilter('all')}
+                className={`px-3 py-1.5 rounded text-sm ${
+                  correspondenceFilter === 'all' ? 'bg-slate-900 text-white' : 'border'
+                }`}
+              >
+                All
+              </button>
+              <button 
+                onClick={() => setCorrespondenceFilter('incoming')}
+                className={`px-3 py-1.5 rounded text-sm ${
+                  correspondenceFilter === 'incoming' ? 'bg-slate-900 text-white' : 'border'
+                }`}
+              >
+                Incoming
+              </button>
+              <button 
+                onClick={() => setCorrespondenceFilter('outgoing')}
+                className={`px-3 py-1.5 rounded text-sm ${
+                  correspondenceFilter === 'outgoing' ? 'bg-slate-900 text-white' : 'border'
+                }`}
+              >
+                Outgoing
+              </button>
+            </div>
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input 
+                  value={correspondenceSearch}
+                  onChange={(e) => setCorrespondenceSearch(e.target.value)}
+                  type="text" 
+                  placeholder="Search correspondence" 
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm" 
+                />
               </div>
-              
-              {/* Search */}
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input 
-                    value={correspondenceSearch}
-                    onChange={(e) => setCorrespondenceSearch(e.target.value)}
-                    type="text" 
-                    placeholder="Search by subject, recipient, content..." 
-                    className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm" 
-                  />
-                </div>
-              </div>
-            </>
-          )}
-          
-          {filtered.length === 0 ? (
+            </div>
+          </div>
+
+          {filteredCorrespondence.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
               <Mail className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-              {correspondences.length === 0 ? (
-                <>
-                  <p>No correspondence yet</p>
-                  <p className="text-sm mt-1">Track emails, letters, calls, and meetings with residents</p>
-                </>
-              ) : (
-                <p>No correspondence matches your filters</p>
-              )}
+              <p>No correspondence yet</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {filtered.map(corr => (
-                <div key={corr.id} className="bg-white border rounded-lg p-4 hover:shadow-md transition-all">
-                  <div className="flex items-start justify-between gap-4">
+              {filteredCorrespondence.map(item => (
+                <div key={item.id} className="bg-white border rounded-lg p-4">
+                  <div className="flex items-start justify-between gap-4 mb-2">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="text-lg">{typeIcons[corr.type] || '📄'}</span>
-                        <h3 className="font-medium">{corr.subject || '(No subject)'}</h3>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          corr.direction === 'Incoming' 
-                            ? 'bg-blue-100 text-blue-700' 
-                            : 'bg-green-100 text-green-700'
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 className="font-medium truncate">{item.subject}</h3>
+                        <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
+                          item.direction === 'Incoming' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
                         }`}>
-                          {corr.direction === 'Incoming' ? '📥 Incoming' : '📤 Outgoing'}
+                          {item.direction}
                         </span>
-                        <span className="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-full">
-                          {corr.type}
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap">
+                          {item.type}
                         </span>
-                        {corr.status && (
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            corr.status === 'Sent' ? 'bg-green-100 text-green-700' :
-                            corr.status === 'Received' ? 'bg-blue-100 text-blue-700' :
-                            corr.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                            corr.status === 'Replied' ? 'bg-purple-100 text-purple-700' :
-                            'bg-slate-100 text-slate-700'
-                          }`}>
-                            {corr.status}
-                          </span>
-                        )}
                       </div>
-                      
-                      <div className="text-sm text-slate-600 mb-2">
-                        {corr.direction === 'Incoming' ? 'From: ' : 'To: '}
-                        <strong>{corr.recipientName || 'Unknown'}</strong>
-                        {corr.recipientEmail && <span className="text-slate-500"> &lt;{corr.recipientEmail}&gt;</span>}
-                        {corr.unitNumber && <span className="text-slate-500"> • Unit {corr.unitNumber}</span>}
-                      </div>
-                      
-                      {corr.content && (
-                        <div className="text-sm text-slate-700 bg-slate-50 rounded p-3 mb-2 whitespace-pre-wrap">
-                          {corr.content}
-                        </div>
-                      )}
-                      
-                      {corr.notes && (
-                        <div className="text-xs text-slate-500 italic">
-                          📝 {corr.notes}
-                        </div>
-                      )}
-                      
-                      <div className="text-xs text-slate-400 mt-2">
-                        {corr.date ? new Date(corr.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No date'}
-                      </div>
+                      <p className="text-sm text-slate-600 mb-1">
+                        {item.direction === 'Incoming' ? 'From' : 'To'}: {item.recipientName}
+                        {item.unitNumber && ` (Unit ${item.unitNumber})`}
+                      </p>
+                      <p className="text-sm text-slate-500 break-words line-clamp-2">{item.content}</p>
+                      <p className="text-xs text-slate-400 mt-2">{new Date(item.date).toLocaleDateString('en-GB')}</p>
                     </div>
-                    
-                    <div className="flex gap-1 flex-shrink-0">
+                    <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => {
-                          setCorrespondenceForm(corr);
-                          setCurrentSetupKey(corr.id);
-                          setModalType('edit-correspondence');
+                          setCorrespondenceForm(item);
+                          setModalType('add-correspondence');
                           setShowModal(true);
                         }}
                         className="text-blue-500 hover:bg-blue-50 p-2 rounded"
@@ -2437,12 +2283,12 @@ export default function BPSPro() {
                       <button
                         onClick={async () => {
                           if (confirm('Delete this correspondence?')) {
-                            const updatedCorr = correspondences.filter(c => c.id !== corr.id);
+                            const updated = correspondence.filter(c => c.id !== item.id);
                             const updatedBlockData = {
                               ...blockData,
                               [selectedBlock]: {
                                 ...(blockData[selectedBlock] || {}),
-                                correspondences: updatedCorr
+                                correspondence: updated
                               }
                             };
                             setBlockData(updatedBlockData);
@@ -2463,27 +2309,13 @@ export default function BPSPro() {
       );
     }
 
-    // JOBS/PROJECTS section
+    // JOBS SECTION - COMPLETE
     if (activeSection === 'jobs') {
       const jobs = blockData[selectedBlock]?.jobs || [];
-      const activeJobs = jobs.filter(j => j.status !== 'Completed');
-      const completedJobs = jobs.filter(j => j.status === 'Completed');
-      
-      const statusColors = {
-        'Quote requested': 'bg-yellow-100 text-yellow-700',
-        'Quote received': 'bg-blue-100 text-blue-700',
-        'Approved': 'bg-purple-100 text-purple-700',
-        'In progress': 'bg-orange-100 text-orange-700',
-        'Awaiting invoice': 'bg-indigo-100 text-indigo-700',
-        'Completed': 'bg-green-100 text-green-700',
-        'On hold': 'bg-slate-100 text-slate-700',
-        'Cancelled': 'bg-red-100 text-red-700'
-      };
-      
       return (
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Jobs/projects</h2>
+        <div className="p-4 md:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+            <h2 className="text-xl md:text-2xl font-bold">Jobs/projects</h2>
             <button 
               onClick={() => {
                 setJobForm({
@@ -2501,226 +2333,134 @@ export default function BPSPro() {
                 setModalType('add-job');
                 setShowModal(true);
               }}
-              className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium"
+              className="bps-blue px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium w-full sm:w-auto"
             >
               <Plus className="w-4 h-4" />
               New job
             </button>
           </div>
-          
           {jobs.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
               <Wrench className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-              <p>No jobs or projects yet</p>
-              <p className="text-sm mt-1">Track maintenance, repairs, and improvements</p>
+              <p>No jobs yet</p>
             </div>
           ) : (
-            <>
-              {activeJobs.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="font-semibold text-sm uppercase text-slate-500 mb-3">Active ({activeJobs.length})</h3>
-                  <div className="space-y-3">
-                    {activeJobs.map(job => (
-                      <div key={job.id} className="bg-white border rounded-lg p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-medium text-lg">{job.title}</h3>
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[job.status] || 'bg-slate-100 text-slate-700'}`}>
-                                {job.status}
-                              </span>
-                              <span className="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-full">
-                                {job.type}
-                              </span>
-                            </div>
-                            {job.description && (
-                              <p className="text-sm text-slate-600 mb-2">{job.description}</p>
-                            )}
-                            <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
-                              {job.location && <div>📍 {job.location}</div>}
-                              {job.contractor && <div>👷 {job.contractor}</div>}
-                              {job.cost && <div>💰 £{job.cost}</div>}
-                              {job.startDate && <div>📅 Start: {new Date(job.startDate).toLocaleDateString('en-GB')}</div>}
-                              {job.completionDate && <div>🎯 Target: {new Date(job.completionDate).toLocaleDateString('en-GB')}</div>}
-                            </div>
-                            {job.notes && (
-                              <div className="mt-2 p-2 bg-slate-50 rounded text-xs text-slate-600">
-                                <strong>Notes:</strong> {job.notes}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex gap-2 ml-4">
-                            <select
-                              value={job.status}
-                              onChange={async (e) => {
-                                const updatedJobs = jobs.map(j => 
-                                  j.id === job.id ? { ...j, status: e.target.value } : j
-                                );
-                                const updatedBlockData = {
-                                  ...blockData,
-                                  [selectedBlock]: {
-                                    ...(blockData[selectedBlock] || {}),
-                                    jobs: updatedJobs
-                                  }
-                                };
-                                setBlockData(updatedBlockData);
-                                await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
-                              }}
-                              className="text-xs border rounded px-2 py-1"
-                            >
-                              <option>Quote requested</option>
-                              <option>Quote received</option>
-                              <option>Approved</option>
-                              <option>In progress</option>
-                              <option>Awaiting invoice</option>
-                              <option>Completed</option>
-                              <option>On hold</option>
-                              <option>Cancelled</option>
-                            </select>
-                            <button
-                              onClick={() => {
-                                setJobForm(job);
-                                setCurrentSetupKey(job.id);
-                                setModalType('edit-job');
-                                setShowModal(true);
-                              }}
-                              className="text-blue-500 hover:bg-blue-50 p-2 rounded"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={async () => {
-                                if (confirm(`Delete "${job.title}"?`)) {
-                                  const updatedJobs = jobs.filter(j => j.id !== job.id);
-                                  const updatedBlockData = {
-                                    ...blockData,
-                                    [selectedBlock]: {
-                                      ...(blockData[selectedBlock] || {}),
-                                      jobs: updatedJobs
-                                    }
-                                  };
-                                  setBlockData(updatedBlockData);
-                                  await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
-                                }
-                              }}
-                              className="text-red-500 hover:bg-red-50 p-2 rounded"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
+            <div className="space-y-3">
+              {jobs.map(job => (
+                <div key={job.id} className="bg-white border rounded-lg p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 className="font-medium truncate">{job.title}</h3>
+                        <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
+                          job.status === 'Complete' ? 'bg-green-100 text-green-700' :
+                          job.status === 'In progress' ? 'bg-blue-100 text-blue-700' :
+                          'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {job.status}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap">
+                          {job.type}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {completedJobs.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-sm uppercase text-slate-500 mb-3">Completed ({completedJobs.length})</h3>
-                  <div className="space-y-3">
-                    {completedJobs.map(job => (
-                      <div key={job.id} className="bg-white border rounded-lg p-4 opacity-60">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-medium text-lg line-through">{job.title}</h3>
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
-                                ✓ {job.status}
-                              </span>
-                              <span className="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-full">
-                                {job.type}
-                              </span>
-                            </div>
-                            {job.description && (
-                              <p className="text-sm text-slate-600 mb-2">{job.description}</p>
-                            )}
-                            <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
-                              {job.contractor && <div>👷 {job.contractor}</div>}
-                              {job.cost && <div>💰 £{job.cost}</div>}
-                              {job.completionDate && <div>✅ Completed: {new Date(job.completionDate).toLocaleDateString('en-GB')}</div>}
-                            </div>
-                          </div>
-                          <button
-                            onClick={async () => {
-                              if (confirm(`Delete "${job.title}"?`)) {
-                                const updatedJobs = jobs.filter(j => j.id !== job.id);
-                                const updatedBlockData = {
-                                  ...blockData,
-                                  [selectedBlock]: {
-                                    ...(blockData[selectedBlock] || {}),
-                                    jobs: updatedJobs
-                                  }
-                                };
-                                setBlockData(updatedBlockData);
-                                await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
+                      {job.contractor && <p className="text-sm text-slate-600">Contractor: {job.contractor}</p>}
+                      {job.cost && <p className="text-sm text-slate-600">Cost: £{job.cost}</p>}
+                      {job.description && <p className="text-sm text-slate-500 mt-2 break-words">{job.description}</p>}
+                      <div className="flex items-center gap-3 mt-2 text-xs text-slate-400 flex-wrap">
+                        {job.startDate && <span>Start: {new Date(job.startDate).toLocaleDateString('en-GB')}</span>}
+                        {job.completionDate && <span>Complete: {new Date(job.completionDate).toLocaleDateString('en-GB')}</span>}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => {
+                          setJobForm(job);
+                          setModalType('add-job');
+                          setShowModal(true);
+                        }}
+                        className="text-blue-500 hover:bg-blue-50 p-2 rounded"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (confirm('Delete this job?')) {
+                            const updatedJobs = jobs.filter(j => j.id !== job.id);
+                            const updatedBlockData = {
+                              ...blockData,
+                              [selectedBlock]: {
+                                ...(blockData[selectedBlock] || {}),
+                                jobs: updatedJobs
                               }
-                            }}
-                            className="text-red-500 hover:bg-red-50 p-2 rounded"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                            };
+                            setBlockData(updatedBlockData);
+                            await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
+                          }
+                        }}
+                        className="text-red-500 hover:bg-red-50 p-2 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              )}
-            </>
+              ))}
+            </div>
           )}
         </div>
       );
     }
 
-    // PORTAL section
+    // PORTAL SECTION
     if (activeSection === 'portal') {
       return (
-        <div className="p-8">
-          <h2 className="text-2xl font-bold mb-6">Portal</h2>
-          <div className="bg-white border rounded-lg p-8 text-center">
-            <DoorOpen className="w-16 h-16 mx-auto mb-4 bps-blue-text" />
-            <h3 className="text-lg font-semibold mb-2">Resident Portal</h3>
-            <p className="text-sm text-slate-600 mb-4">Access the resident-facing portal at:</p>
-            <a 
-              href="https://www.myblockonline.co.uk/rel3/BlockLogin" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bps-blue-text hover:underline font-medium"
-            >
-              myblockonline.co.uk
-            </a>
+        <div className="p-4 md:p-8">
+          <h2 className="text-xl md:text-2xl font-bold mb-6">Resident Portal</h2>
+          <div className="text-center py-12 text-slate-500">
+            <DoorOpen className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+            <p>Portal configuration coming soon</p>
           </div>
         </div>
       );
     }
 
-    // O&Ms section
+    // O&MS SECTION
     if (activeSection === 'oms') {
       return (
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Operations & Maintenance</h2>
+        <div className="p-4 md:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+            <h2 className="text-xl md:text-2xl font-bold">O&Ms (Operation & Maintenance Manuals)</h2>
             <button 
-              onClick={() => alert('Upload O&M document - feature coming soon')}
-              className="bps-blue px-4 py-2 rounded-lg flex items-center gap-2  text-sm font-medium"
+              onClick={() => alert('Upload O&M documents - feature coming soon')}
+              className="bps-blue px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium w-full sm:w-auto"
             >
               <Upload className="w-4 h-4" />
-              Upload document
+              Upload documents
             </button>
           </div>
           <div className="text-center py-12 text-slate-500">
             <FileText className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-            <p>No O&M documents yet</p>
+            <p>No O&M documents uploaded yet</p>
           </div>
         </div>
       );
     }
 
+    // DOCUMENTS SECTION (main, no subitem selected)
+    if (activeSection === 'documents' && !activeSubItem) {
+      return (
+        <div className="p-4 md:p-8">
+          <h2 className="text-xl md:text-2xl font-bold mb-6">Documents</h2>
+          <p className="text-sm text-slate-600 mb-4">Select a document category from the left sidebar</p>
+        </div>
+      );
+    }
+    
     return (
-      <div className="flex items-center justify-center h-full text-slate-500">
+      <div className="flex items-center justify-center h-full text-slate-500 p-4">
         <div className="text-center">
           <FileText className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-          <p>Select an item from the left</p>
+          <p className="text-sm md:text-base">Select an item from the left</p>
         </div>
       </div>
     );
@@ -2732,12 +2472,6 @@ export default function BPSPro() {
 
   const currentBlock = blocks.find(b => b.id === selectedBlock);
   const subNavItems = renderSubNav();
-
-  const getBadgeColor = (item) => {
-    if (item.badgeColor === 'yellow') return 'bg-yellow-500';
-    if (item.badgeColor === 'green') return 'bg-green-500';
-    return 'bg-red-500';
-  };
 
   return (
     <div className="flex h-screen bg-white font-sans overflow-hidden">
@@ -2754,27 +2488,42 @@ export default function BPSPro() {
         .hover-bps-text:hover { color: #2563EB !important; }
       `}</style>
 
+      {/* Mobile Overlay for Main Nav */}
+      {showMainNav && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setShowMainNav(false)}
+        />
+      )}
+
       {/* Left Main Navigation */}
-      <div className="w-52 bg-slate-900 text-white flex flex-col flex-shrink-0">
+      <div className={`fixed lg:relative inset-y-0 left-0 transform ${showMainNav ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out w-64 lg:w-52 bg-slate-900 text-white flex flex-col flex-shrink-0 z-50`}>
         <div className="p-4 border-b border-slate-700">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 border-2 border-white rounded flex items-center justify-center">
-              <Building className="w-5 h-5" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 border-2 border-white rounded flex items-center justify-center">
+                <Building className="w-5 h-5" />
+              </div>
+              <div className="text-sm font-bold">BPS PRO</div>
             </div>
-            <div className="text-sm font-bold">BPS PRO</div>
+            <button
+              onClick={() => setShowMainNav(false)}
+              className="lg:hidden text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
           <div className="text-xs text-slate-400">Block Property Solutions</div>
-          <div className="text-sm font-medium mt-1">
- {typeof window !== 'undefined' && window.__bps_user_email}
-</div>
+          <div className="text-sm font-medium mt-1 truncate">
+            {typeof window !== 'undefined' && window.__bps_user_email}
+          </div>
           <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">
             <span>👑</span> Admin
           </div>
           <button
-            onClick={() => {
-              if (typeof window !== 'undefined' && window.__bps_logout) {
-  window.__bps_logout();
-      }
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = '/login';
             }}
             className="mt-2 w-full text-xs bg-red-500/20 hover:bg-red-500/30 text-red-200 px-2 py-1 rounded"
           >
@@ -2783,7 +2532,6 @@ export default function BPSPro() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-2">
-          {/* Home Button - Always visible */}
           <button
             onClick={() => {
               setShowAllBlocks(true);
@@ -2792,8 +2540,9 @@ export default function BPSPro() {
               setActiveSubSubItem(null);
               setActiveClaim(null);
               setActiveTab('home');
+              setShowMainNav(false);
             }}
-            className={`flex items-center justify-between w-full px-3 py-2 rounded text-sm mb-1 ${
+            className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
               showAllBlocks ? 'bg-slate-700' : 'hover:bg-slate-800'
             }`}
           >
@@ -2803,7 +2552,6 @@ export default function BPSPro() {
             </div>
           </button>
 
-          {/* Other sections - Only show when a block is selected */}
           {!showAllBlocks && selectedBlock && mainNav.slice(1).map(item => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
@@ -2817,8 +2565,9 @@ export default function BPSPro() {
                   setActiveSubSubItem(null);
                   setActiveClaim(null);
                   setActiveTab('home');
+                  setShowMainNav(false);
                 }}
-                className={`flex items-center justify-between w-full px-3 py-2 rounded text-sm mb-1 ${
+                className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
                   isActive ? 'bg-slate-700' : 'hover:bg-slate-800'
                 }`}
               >
@@ -2826,21 +2575,10 @@ export default function BPSPro() {
                   <Icon className="w-4 h-4" />
                   <span>{item.name}</span>
                 </div>
-                {item.badge && item.badgeColor === 'multi' && (
-                  <div className="flex items-center gap-1">
-                    <span className="bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">1</span>
-                    <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{item.badge}</span>
-                  </div>
-                )}
-                {item.badge && item.badgeColor !== 'multi' && (
-                  <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{item.badge}</span>
-                )}
-                {item.complete && <CheckCircle className="w-4 h-4 text-green-500" />}
               </button>
             );
           })}
 
-          {/* Residents section - Only show when a block is selected */}
           {!showAllBlocks && selectedBlock && (
             <>
               <div className="mt-4 mb-2 px-3 text-xs text-slate-500 uppercase tracking-wide">Residents</div>
@@ -2854,8 +2592,9 @@ export default function BPSPro() {
                       setActiveSection(item.id);
                       setActiveSubItem(null);
                       setActiveTab('home');
+                      setShowMainNav(false);
                     }}
-                    className={`flex items-center justify-between w-full px-3 py-2 rounded text-sm mb-1 ${
+                    className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
                       isActive ? 'bg-slate-700' : 'hover:bg-slate-800'
                     }`}
                   >
@@ -2863,16 +2602,10 @@ export default function BPSPro() {
                       <Icon className="w-4 h-4" />
                       <span>{item.name}</span>
                     </div>
-                    {item.badge && <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{item.badge}</span>}
                   </button>
                 );
               })}
-            </>
-          )}
 
-          {/* Block info section - Only show when a block is selected */}
-          {!showAllBlocks && selectedBlock && (
-            <>
               <div className="mt-4 mb-2 px-3 text-xs text-slate-500 uppercase tracking-wide">Block info</div>
               {blockInfoNav.map(item => {
                 const Icon = item.icon;
@@ -2884,8 +2617,9 @@ export default function BPSPro() {
                       setActiveSection(item.id);
                       setActiveSubItem(null);
                       setActiveTab('home');
+                      setShowMainNav(false);
                     }}
-                    className={`flex items-center justify-between w-full px-3 py-2 rounded text-sm mb-1 ${
+                    className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
                       isActive ? 'bg-slate-700' : 'hover:bg-slate-800'
                     }`}
                   >
@@ -2893,16 +2627,10 @@ export default function BPSPro() {
                       <Icon className="w-4 h-4" />
                       <span>{item.name}</span>
                     </div>
-                    {item.badge && <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{item.badge}</span>}
                   </button>
                 );
               })}
-            </>
-          )}
 
-          {/* Settings section - Only show when a block is selected */}
-          {!showAllBlocks && selectedBlock && (
-            <>
               <div className="mt-4 mb-2 px-3 text-xs text-slate-500 uppercase tracking-wide">Settings</div>
               {settingsNav.map(item => {
                 const Icon = item.icon;
@@ -2914,8 +2642,9 @@ export default function BPSPro() {
                       setActiveSection(item.id);
                       setActiveSubItem(null);
                       setActiveTab('home');
+                      setShowMainNav(false);
                     }}
-                    className={`flex items-center justify-between w-full px-3 py-2 rounded text-sm mb-1 ${
+                    className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
                       isActive ? 'bg-slate-700' : 'hover:bg-slate-800'
                     }`}
                   >
@@ -2930,7 +2659,6 @@ export default function BPSPro() {
           )}
         </div>
 
-        {/* All blocks selector - Only show when a block is selected */}
         {!showAllBlocks && selectedBlock && (
           <div className="border-t border-slate-700 p-3">
             <div className="text-xs text-slate-500 mb-2">All blocks</div>
@@ -2938,20 +2666,21 @@ export default function BPSPro() {
               onClick={() => {
                 setShowAllBlocks(true);
                 setActiveSection('home');
+                setShowMainNav(false);
               }}
               className="flex items-center justify-between w-full px-3 py-2 bg-slate-700 rounded text-sm hover:bg-slate-600"
             >
-              <div className="flex items-center gap-2">
-                <Building className="w-4 h-4" />
+              <div className="flex items-center gap-2 min-w-0">
+                <Building className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">{currentBlock?.shortName}</span>
               </div>
               {(() => {
                 const currentBlockData = blockData[selectedBlock] || { tasks: [] };
                 const taskCount = currentBlockData.tasks?.length || 0;
                 return taskCount > 0 ? (
-                  <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{taskCount}</span>
+                  <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0">{taskCount}</span>
                 ) : (
-                  <span className="bg-slate-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">0</span>
+                  <span className="bg-slate-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0">0</span>
                 );
               })()}
             </button>
@@ -2959,27 +2688,33 @@ export default function BPSPro() {
         )}
       </div>
 
-      {/* Middle Sidebar */}
-      {subNavItems.length > 0 && (
-        <div className="w-64 bg-white border-r border-slate-200 overflow-y-auto flex-shrink-0">
-          <div className="p-6">
-            <h2 className="text-lg font-bold mb-4">
-              {activeSection === 'hs' ? 'Health & Safety' : 
-               activeSection === 'utilities' ? 'Utilities' : 
-               activeSection === 'insurance' ? 'Insurance' :
-               activeSection === 'documents' ? 'Documents' :
-               activeSection === 'issues' ? 'Reported issues/complaints' : 'Section'}
-            </h2>
+      {/* Mobile Overlay for Sub Nav */}
+      {showSubNav && subNavItems.length > 0 && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setShowSubNav(false)}
+        />
+      )}
 
-            {activeSection === 'issues' && (
-              <div className="flex gap-3 mb-4">
-                <button className="bps-blue-text text-xs hover:underline">Recipient settings</button>
-                <button className="bps-blue px-3 py-1.5 rounded flex items-center gap-2  text-xs font-medium">
-                  <Plus className="w-3 h-3" />
-                  New issue or complaint
-                </button>
-              </div>
-            )}
+      {/* Middle Sidebar - Mobile friendly */}
+      {subNavItems.length > 0 && (
+        <div className={`fixed lg:relative inset-y-0 left-0 transform ${showSubNav ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out w-64 bg-white border-r border-slate-200 overflow-y-auto flex-shrink-0 z-40`}>
+          <div className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base md:text-lg font-bold">
+                {activeSection === 'hs' ? 'H&S' : 
+                 activeSection === 'utilities' ? 'Utilities' : 
+                 activeSection === 'insurance' ? 'Insurance' :
+                 activeSection === 'documents' ? 'Documents' :
+                 activeSection === 'issues' ? 'Issues' : 'Section'}
+              </h2>
+              <button
+                onClick={() => setShowSubNav(false)}
+                className="lg:hidden text-slate-600 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
             <p className="text-xs text-slate-500 uppercase mb-3 tracking-wide">Select</p>
             
@@ -2999,24 +2734,16 @@ export default function BPSPro() {
                         setActiveClaim(null);
                       }
                       setActiveTab('home');
+                      setShowSubNav(false);
                     }}
-                    className={`flex items-center justify-between w-full px-3 py-2 rounded text-sm mb-1 ${
+                    className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
                       activeSubItem?.id === item.id ? 'bg-slate-900 text-white' : 'hover:bg-slate-50'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      <span>{item.name || 'Item'}</span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{item.name || 'Item'}</span>
                     </div>
-                    {item.badge && (
-                      <span className={`text-xs px-2 py-0.5 rounded-full min-w-[20px] text-center ${
-                        activeSubItem?.id === item.id 
-                          ? item.badgeColor === 'yellow' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'
-                          : item.badgeColor === 'yellow' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {item.badge}
-                      </span>
-                    )}
                   </button>
                 </React.Fragment>
               );
@@ -3029,23 +2756,16 @@ export default function BPSPro() {
                   setActiveSubItem(item);
                   setActiveSubSubItem(null);
                   setActiveTab('home');
+                  setShowSubNav(false);
                 }}
-                className={`flex items-center justify-between w-full px-3 py-2 rounded text-sm mb-1 ${
+                className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
                   activeSubItem?.id === item.id ? 'bg-slate-900 text-white' : 'hover:bg-slate-50'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  <span>{item.name}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{item.name}</span>
                 </div>
-                {item.badge && (
-                  <span className={`text-xs px-2 py-0.5 rounded-full min-w-[20px] text-center ${
-                    activeSubItem?.id === item.id ? 'bg-red-500 text-white' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
-                {item.complete && <CheckCircle className="w-4 h-4 text-green-500" />}
               </button>
             ))}
           </div>
@@ -3054,43 +2774,36 @@ export default function BPSPro() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
-        <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
-          {showAllBlocks ? (
-            <h1 className="text-lg font-bold">All Blocks</h1>
-          ) : (
-            <h1 className="text-lg font-bold">
-              {currentBlock?.name}
-            </h1>
-          )}
-          <div className="flex items-center gap-4 text-sm text-slate-600">
-            <button 
-              onClick={() => alert('Presentation mode coming soon!')}
-              className="hover-bps-text flex items-center gap-1"
+        {/* Top Header - Mobile friendly */}
+        <div className="bg-white border-b border-slate-200 px-3 md:px-6 py-3 md:py-4 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0">
+            <button
+              onClick={() => setShowMainNav(true)}
+              className="lg:hidden text-slate-600 p-1.5"
             >
+              <Menu className="w-5 h-5" />
+            </button>
+            {subNavItems.length > 0 && (
+              <button
+                onClick={() => setShowSubNav(true)}
+                className="lg:hidden text-slate-600 p-1.5"
+              >
+                <FileText className="w-5 h-5" />
+              </button>
+            )}
+            <h1 className="text-base md:text-lg font-bold truncate">
+              {showAllBlocks ? 'All Blocks' : currentBlock?.name}
+            </h1>
+          </div>
+          <div className="hidden md:flex items-center gap-4 text-sm text-slate-600">
+            <button className="hover-bps-text flex items-center gap-1">
               📺 Pres. mode
             </button>
-            <button 
-              onClick={() => alert('Request a feature: Email keanu@blockpropertysolutions.co.uk')}
-              className="hover-bps-text flex items-center gap-1"
-            >
-              👤 Req. feature
+            <button className="hover-bps-text flex items-center gap-1">
+              👤 Feature
             </button>
-            <button 
-              onClick={() => alert('Help: Contact 0800 001 6646 or info@blockpropertysolutions.co.uk')}
-              className="hover-bps-text flex items-center gap-1"
-            >
+            <button className="hover-bps-text flex items-center gap-1">
               ❓ Help
-            </button>
-            <button 
-              onClick={() => {
-                if (confirm('Are you sure you want to log out?')) {
-                  alert('You have been logged out');
-                }
-              }}
-              className="hover-bps-text flex items-center gap-1"
-            >
-              🚪 Log out
             </button>
           </div>
         </div>
@@ -3100,18 +2813,20 @@ export default function BPSPro() {
         </div>
       </div>
 
+      {/* MODALS SECTION - ALL MODALS */}
+      
       {/* Setup Modal */}
       {showModal && modalType === 'setup' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Finish set-up</h3>
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">Finish set-up</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Frequency *</label>
                 <select 
                   value={setupForm.frequency}
                   onChange={(e) => setSetupForm({...setupForm, frequency: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm"
                 >
                   <option>Annual</option>
                   <option>6-Monthly</option>
@@ -3126,7 +2841,7 @@ export default function BPSPro() {
                   value={setupForm.lastCompleted}
                   onChange={(e) => setSetupForm({...setupForm, lastCompleted: e.target.value})}
                   type="date" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                 />
               </div>
               <div>
@@ -3135,7 +2850,7 @@ export default function BPSPro() {
                   value={setupForm.nextDue}
                   onChange={(e) => setSetupForm({...setupForm, nextDue: e.target.value})}
                   type="date" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                 />
               </div>
               <div>
@@ -3144,7 +2859,7 @@ export default function BPSPro() {
                   value={setupForm.assignedTo}
                   onChange={(e) => setSetupForm({...setupForm, assignedTo: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="Name of contractor or person" 
                 />
               </div>
@@ -3153,7 +2868,7 @@ export default function BPSPro() {
                 <select 
                   value={setupForm.autoChase}
                   onChange={(e) => setSetupForm({...setupForm, autoChase: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm"
                 >
                   <option>Disabled</option>
                   <option>7 days before</option>
@@ -3162,7 +2877,7 @@ export default function BPSPro() {
                 </select>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button 
                 onClick={() => {
                   setShowModal(false);
@@ -3174,7 +2889,7 @@ export default function BPSPro() {
                     autoChase: 'Disabled'
                   });
                 }} 
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -3220,7 +2935,7 @@ export default function BPSPro() {
                   });
                   setCurrentSetupKey(null);
                 }} 
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm "
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
               >
                 Save
               </button>
@@ -3232,8 +2947,8 @@ export default function BPSPro() {
       {/* Add Block Modal */}
       {showModal && modalType === 'add-block' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Add new block</h3>
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">Add new block</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Block name *</label>
@@ -3241,7 +2956,7 @@ export default function BPSPro() {
                   value={newBlockForm.name}
                   onChange={(e) => setNewBlockForm({...newBlockForm, name: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="e.g., Riverside Apartments" 
                 />
               </div>
@@ -3251,7 +2966,7 @@ export default function BPSPro() {
                   value={newBlockForm.shortName}
                   onChange={(e) => setNewBlockForm({...newBlockForm, shortName: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="e.g., Riverside Apt" 
                 />
               </div>
@@ -3261,7 +2976,7 @@ export default function BPSPro() {
                   value={newBlockForm.address}
                   onChange={(e) => setNewBlockForm({...newBlockForm, address: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="Full address" 
                 />
               </div>
@@ -3270,7 +2985,7 @@ export default function BPSPro() {
                 <select 
                   value={newBlockForm.height}
                   onChange={(e) => setNewBlockForm({...newBlockForm, height: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm"
                 >
                   <option>Under 11m</option>
                   <option>11m - 18m</option>
@@ -3278,7 +2993,7 @@ export default function BPSPro() {
                 </select>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button 
                 onClick={() => {
                   setShowModal(false);
@@ -3289,7 +3004,7 @@ export default function BPSPro() {
                     height: 'Under 11m'
                   });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -3341,7 +3056,7 @@ export default function BPSPro() {
                     height: 'Under 11m'
                   });
                 }}
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm "
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
               >
                 Add block
               </button>
@@ -3353,8 +3068,8 @@ export default function BPSPro() {
       {/* Add Task Modal */}
       {showModal && modalType === 'add-task' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">New task</h3>
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">New task</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Task title *</label>
@@ -3362,7 +3077,7 @@ export default function BPSPro() {
                   value={newTaskForm.title}
                   onChange={(e) => setNewTaskForm({...newTaskForm, title: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="e.g., Schedule fire alarm test" 
                 />
               </div>
@@ -3372,7 +3087,7 @@ export default function BPSPro() {
                   value={newTaskForm.description}
                   onChange={(e) => setNewTaskForm({...newTaskForm, description: e.target.value})}
                   rows="3"
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="Add details about this task..." 
                 />
               </div>
@@ -3382,7 +3097,7 @@ export default function BPSPro() {
                   value={newTaskForm.dueDate}
                   onChange={(e) => setNewTaskForm({...newTaskForm, dueDate: e.target.value})}
                   type="date" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                 />
               </div>
               <div>
@@ -3390,7 +3105,7 @@ export default function BPSPro() {
                 <select 
                   value={newTaskForm.priority}
                   onChange={(e) => setNewTaskForm({...newTaskForm, priority: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm"
                 >
                   <option>Low</option>
                   <option>Medium</option>
@@ -3402,7 +3117,7 @@ export default function BPSPro() {
                 <select 
                   value={newTaskForm.category}
                   onChange={(e) => setNewTaskForm({...newTaskForm, category: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm"
                 >
                   <option>General</option>
                   <option>Documents</option>
@@ -3414,7 +3129,7 @@ export default function BPSPro() {
                 </select>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button 
                 onClick={() => {
                   setShowModal(false);
@@ -3426,7 +3141,7 @@ export default function BPSPro() {
                     description: ''
                   });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -3469,7 +3184,7 @@ export default function BPSPro() {
                     description: ''
                   });
                 }}
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm "
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
               >
                 Add task
               </button>
@@ -3481,8 +3196,8 @@ export default function BPSPro() {
       {/* Add Responsible Person Modal */}
       {showModal && modalType === 'add-rp' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Add Responsible Person</h3>
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">Add Responsible Person</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Name *</label>
@@ -3490,7 +3205,7 @@ export default function BPSPro() {
                   value={rpForm.name}
                   onChange={(e) => setRpForm({...rpForm, name: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="Full name" 
                 />
               </div>
@@ -3500,7 +3215,7 @@ export default function BPSPro() {
                   value={rpForm.role}
                   onChange={(e) => setRpForm({...rpForm, role: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="e.g., Property Manager, Director" 
                 />
               </div>
@@ -3510,7 +3225,7 @@ export default function BPSPro() {
                   value={rpForm.email}
                   onChange={(e) => setRpForm({...rpForm, email: e.target.value})}
                   type="email" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="email@example.com" 
                 />
               </div>
@@ -3520,18 +3235,18 @@ export default function BPSPro() {
                   value={rpForm.phone}
                   onChange={(e) => setRpForm({...rpForm, phone: e.target.value})}
                   type="tel" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="0800 000 0000" 
                 />
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button 
                 onClick={() => {
                   setShowModal(false);
                   setRpForm({ name: '', role: '', email: '', phone: '' });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -3554,7 +3269,7 @@ export default function BPSPro() {
                   setShowModal(false);
                   setRpForm({ name: '', role: '', email: '', phone: '' });
                 }}
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm "
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
               >
                 Add
               </button>
@@ -3566,8 +3281,8 @@ export default function BPSPro() {
       {/* Add Meter Reading Modal */}
       {showModal && modalType === 'add-meter' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Add meter reading</h3>
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">Add meter reading</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Date *</label>
@@ -3575,7 +3290,7 @@ export default function BPSPro() {
                   value={meterReadingForm.date}
                   onChange={(e) => setMeterReadingForm({...meterReadingForm, date: e.target.value})}
                   type="date" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                 />
               </div>
               <div>
@@ -3584,7 +3299,7 @@ export default function BPSPro() {
                   value={meterReadingForm.reading}
                   onChange={(e) => setMeterReadingForm({...meterReadingForm, reading: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="e.g., 12345 kWh" 
                 />
               </div>
@@ -3594,18 +3309,18 @@ export default function BPSPro() {
                   value={meterReadingForm.notes}
                   onChange={(e) => setMeterReadingForm({...meterReadingForm, notes: e.target.value})}
                   rows="2"
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="Optional notes" 
                 />
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button 
                 onClick={() => {
                   setShowModal(false);
                   setMeterReadingForm({ date: '', reading: '', notes: '' });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -3633,7 +3348,7 @@ export default function BPSPro() {
                   setMeterReadingForm({ date: '', reading: '', notes: '' });
                   setCurrentSetupKey(null);
                 }}
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm "
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
               >
                 Add reading
               </button>
@@ -3645,8 +3360,8 @@ export default function BPSPro() {
       {/* Add Issue Modal */}
       {showModal && modalType === 'add-issue' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">New issue or complaint</h3>
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">New issue or complaint</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Title *</label>
@@ -3654,7 +3369,7 @@ export default function BPSPro() {
                   value={issueForm.title}
                   onChange={(e) => setIssueForm({...issueForm, title: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="e.g., Broken communal door" 
                 />
               </div>
@@ -3664,7 +3379,7 @@ export default function BPSPro() {
                   value={issueForm.location}
                   onChange={(e) => setIssueForm({...issueForm, location: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="e.g., Ground floor lobby, Flat 3" 
                 />
               </div>
@@ -3674,7 +3389,7 @@ export default function BPSPro() {
                   value={issueForm.description}
                   onChange={(e) => setIssueForm({...issueForm, description: e.target.value})}
                   rows="3"
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="Describe the issue..." 
                 />
               </div>
@@ -3683,7 +3398,7 @@ export default function BPSPro() {
                 <select 
                   value={issueForm.priority}
                   onChange={(e) => setIssueForm({...issueForm, priority: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm"
                 >
                   <option>Low</option>
                   <option>Medium</option>
@@ -3691,13 +3406,13 @@ export default function BPSPro() {
                 </select>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button 
                 onClick={() => {
                   setShowModal(false);
                   setIssueForm({ title: '', description: '', priority: 'Medium', location: '' });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -3726,7 +3441,7 @@ export default function BPSPro() {
                   setShowModal(false);
                   setIssueForm({ title: '', description: '', priority: 'Medium', location: '' });
                 }}
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm "
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
               >
                 Report issue
               </button>
@@ -3738,8 +3453,8 @@ export default function BPSPro() {
       {/* Edit Block Modal */}
       {showModal && modalType === 'edit-block' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Edit block details</h3>
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">Edit block details</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Block name *</label>
@@ -3747,7 +3462,7 @@ export default function BPSPro() {
                   value={editBlockForm.name}
                   onChange={(e) => setEditBlockForm({...editBlockForm, name: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                 />
               </div>
               <div>
@@ -3756,7 +3471,7 @@ export default function BPSPro() {
                   value={editBlockForm.shortName}
                   onChange={(e) => setEditBlockForm({...editBlockForm, shortName: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                 />
               </div>
               <div>
@@ -3765,7 +3480,7 @@ export default function BPSPro() {
                   value={editBlockForm.address}
                   onChange={(e) => setEditBlockForm({...editBlockForm, address: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                 />
               </div>
               <div>
@@ -3773,7 +3488,7 @@ export default function BPSPro() {
                 <select 
                   value={editBlockForm.height}
                   onChange={(e) => setEditBlockForm({...editBlockForm, height: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm"
                 >
                   <option>Under 11m</option>
                   <option>11m - 18m</option>
@@ -3781,10 +3496,10 @@ export default function BPSPro() {
                 </select>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button 
                 onClick={() => setShowModal(false)}
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -3803,860 +3518,9 @@ export default function BPSPro() {
                   await window.storage.set('bps_pro_blocks', JSON.stringify(updatedBlocks));
                   setShowModal(false);
                 }}
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm "
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
               >
                 Save changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add/Edit Correspondence Modal */}
-      {showModal && (modalType === 'add-correspondence' || modalType === 'edit-correspondence') && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4">{modalType === 'edit-correspondence' ? 'Edit correspondence' : 'New correspondence'}</h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Type *</label>
-                  <select 
-                    value={correspondenceForm.type}
-                    onChange={(e) => setCorrespondenceForm({...correspondenceForm, type: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option>Email</option>
-                    <option>Letter</option>
-                    <option>Phone Call</option>
-                    <option>Meeting</option>
-                    <option>SMS</option>
-                    <option>Notice</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Direction *</label>
-                  <select 
-                    value={correspondenceForm.direction}
-                    onChange={(e) => setCorrespondenceForm({...correspondenceForm, direction: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option>Outgoing</option>
-                    <option>Incoming</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Subject *</label>
-                <input 
-                  value={correspondenceForm.subject}
-                  onChange={(e) => setCorrespondenceForm({...correspondenceForm, subject: e.target.value})}
-                  type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="e.g., Service charge update, Maintenance notice" 
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    {correspondenceForm.direction === 'Incoming' ? 'From (Name)' : 'To (Name)'}
-                  </label>
-                  <input 
-                    value={correspondenceForm.recipientName}
-                    onChange={(e) => setCorrespondenceForm({...correspondenceForm, recipientName: e.target.value})}
-                    type="text" 
-                    className="w-full border rounded-lg px-3 py-2 text-sm" 
-                    placeholder="Recipient name" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Unit number</label>
-                  <input 
-                    value={correspondenceForm.unitNumber}
-                    onChange={(e) => setCorrespondenceForm({...correspondenceForm, unitNumber: e.target.value})}
-                    type="text" 
-                    className="w-full border rounded-lg px-3 py-2 text-sm" 
-                    placeholder="e.g., Flat 5" 
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Email address</label>
-                <input 
-                  value={correspondenceForm.recipientEmail}
-                  onChange={(e) => setCorrespondenceForm({...correspondenceForm, recipientEmail: e.target.value})}
-                  type="email" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="email@example.com" 
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Date</label>
-                  <input 
-                    value={correspondenceForm.date}
-                    onChange={(e) => setCorrespondenceForm({...correspondenceForm, date: e.target.value})}
-                    type="date" 
-                    className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Status</label>
-                  <select 
-                    value={correspondenceForm.status}
-                    onChange={(e) => setCorrespondenceForm({...correspondenceForm, status: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option>Sent</option>
-                    <option>Received</option>
-                    <option>Pending</option>
-                    <option>Replied</option>
-                    <option>Closed</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Content/Message</label>
-                <textarea 
-                  value={correspondenceForm.content}
-                  onChange={(e) => setCorrespondenceForm({...correspondenceForm, content: e.target.value})}
-                  rows="5"
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="The email body, letter content, or call summary..." 
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Internal notes</label>
-                <textarea 
-                  value={correspondenceForm.notes}
-                  onChange={(e) => setCorrespondenceForm({...correspondenceForm, notes: e.target.value})}
-                  rows="2"
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="Private notes (not part of the message)..." 
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button 
-                onClick={() => {
-                  setShowModal(false);
-                  setCurrentSetupKey(null);
-                }}
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={async () => {
-                  if (!correspondenceForm.subject) {
-                    alert('Please enter a subject');
-                    return;
-                  }
-                  
-                  const existingCorr = blockData[selectedBlock]?.correspondences || [];
-                  let updatedCorr;
-                  
-                  if (modalType === 'edit-correspondence' && currentSetupKey) {
-                    updatedCorr = existingCorr.map(c => 
-                      c.id === currentSetupKey ? { ...correspondenceForm, id: currentSetupKey } : c
-                    );
-                  } else {
-                    const newCorr = {
-                      id: String(Date.now()),
-                      ...correspondenceForm,
-                      createdAt: new Date().toISOString()
-                    };
-                    updatedCorr = [...existingCorr, newCorr];
-                  }
-                  
-                  const updatedBlockData = {
-                    ...blockData,
-                    [selectedBlock]: {
-                      ...(blockData[selectedBlock] || {}),
-                      correspondences: updatedCorr
-                    }
-                  };
-                  setBlockData(updatedBlockData);
-                  await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
-                  setShowModal(false);
-                  setCurrentSetupKey(null);
-                }}
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm"
-              >
-                {modalType === 'edit-correspondence' ? 'Save changes' : 'Add correspondence'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bulk Import Units Modal */}
-      {showModal && modalType === 'bulk-import-units' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4">Bulk import units</h3>
-            
-            {bulkImportPreview.length === 0 ? (
-              <>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <h4 className="font-semibold text-sm mb-2">📋 How to import from Excel/Sheets</h4>
-                  <ol className="text-sm text-slate-700 space-y-1 ml-4 list-decimal">
-                    <li>Open your Excel or Google Sheets</li>
-                    <li>Make sure the columns match the format below</li>
-                    <li><strong>Select all your data</strong> (including header row) and copy (Ctrl+C / Cmd+C)</li>
-                    <li><strong>Paste it into the box below</strong> (Ctrl+V / Cmd+V)</li>
-                    <li>Click "Preview"</li>
-                  </ol>
-                </div>
-
-                <div className="bg-slate-50 border rounded-lg p-3 mb-4">
-                  <h4 className="font-semibold text-xs mb-2">Required columns (in any order):</h4>
-                  <div className="grid grid-cols-2 gap-1 text-xs text-slate-600">
-                    <div>• <strong>Type</strong> (Flat, Penthouse, etc.)</div>
-                    <div>• <strong>Number</strong> (1, 2A, etc.) <span className="text-red-500">*required</span></div>
-                    <div>• <strong>Floor</strong></div>
-                    <div>• <strong>Bedrooms</strong></div>
-                    <div>• <strong>Resident Name</strong></div>
-                    <div>• <strong>Email</strong></div>
-                    <div>• <strong>Phone</strong></div>
-                    <div>• <strong>Move-in Date</strong></div>
-                    <div>• <strong>Is Owner</strong> (yes/no)</div>
-                    <div>• <strong>Notes</strong></div>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <button 
-                    onClick={() => {
-                      const sampleData = `Type	Number	Floor	Bedrooms	Resident Name	Email	Phone	Move-in Date	Is Owner	Notes
-Flat	1	Ground	2	John Smith	john@example.com	07700 900123	2024-01-15	yes	
-Flat	2	Ground	1					no	Vacant
-Flat	3	1st	2	Sarah Williams	sarah@example.com	07700 900789	2023-09-01	no	
-Penthouse	PH1	5th	3	Jane Doe	jane@example.com	07700 900456	2023-06-01	no	Long-term tenant`;
-                      const textarea = document.getElementById('bulk-paste-area');
-                      if (textarea) textarea.value = sampleData;
-                    }}
-                    className="text-xs bps-blue-text hover:underline"
-                  >
-                    📋 Insert sample data to test
-                  </button>
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Paste your spreadsheet data here:</label>
-                  <textarea 
-                    id="bulk-paste-area"
-                    rows="10"
-                    className="w-full border rounded-lg px-3 py-2 text-xs font-mono"
-                    placeholder="Paste copied cells from Excel or Google Sheets here..."
-                  />
-                  <p className="text-xs text-slate-500 mt-2">💡 Tip: When you paste from Excel/Sheets, columns are separated by tabs automatically</p>
-                </div>
-                
-                {bulkImportError && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-sm text-red-700">
-                    ❌ {bulkImportError}
-                  </div>
-                )}
-                
-                <div className="flex gap-3">
-                  <button 
-                    onClick={() => {
-                      setShowModal(false);
-                      setBulkImportPreview([]);
-                      setBulkImportError('');
-                    }}
-                    className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={() => {
-                      const text = document.getElementById('bulk-paste-area')?.value || '';
-                      if (!text.trim()) {
-                        setBulkImportError('Please paste some data first');
-                        return;
-                      }
-                      
-                      setBulkImportError('');
-                      
-                      try {
-                        const lines = text.split(/\r?\n/).filter(line => line.trim());
-                        if (lines.length < 2) {
-                          setBulkImportError('Need a header row and at least one data row');
-                          return;
-                        }
-                        
-                        // Auto-detect separator: tab (from Excel/Sheets paste) or comma (CSV)
-                        const firstLine = lines[0];
-                        const separator = firstLine.includes('\t') ? '\t' : ',';
-                        
-                        const parseLine = (line) => {
-                          if (separator === '\t') {
-                            return line.split('\t').map(v => v.trim());
-                          }
-                          // Handle CSV with quotes
-                          const result = [];
-                          let current = '';
-                          let inQuotes = false;
-                          for (let i = 0; i < line.length; i++) {
-                            const char = line[i];
-                            if (char === '"') {
-                              inQuotes = !inQuotes;
-                            } else if (char === ',' && !inQuotes) {
-                              result.push(current.trim());
-                              current = '';
-                            } else {
-                              current += char;
-                            }
-                          }
-                          result.push(current.trim());
-                          return result;
-                        };
-                        
-                        const headers = parseLine(lines[0]).map(h => h.toLowerCase().trim());
-                        const rows = lines.slice(1).map(line => {
-                          const values = parseLine(line);
-                          const row = {};
-                          headers.forEach((h, i) => {
-                            row[h] = values[i] || '';
-                          });
-                          return row;
-                        });
-                        
-                        const parsed = rows.map((row, idx) => {
-                          const getField = (...keys) => {
-                            for (const key of keys) {
-                              if (row[key] !== undefined && row[key] !== '') return row[key];
-                            }
-                            return '';
-                          };
-                          
-                          return {
-                            id: String(Date.now() + idx),
-                            type: getField('type') || 'Flat',
-                            number: getField('number', 'unit number', 'unit'),
-                            floor: getField('floor'),
-                            bedrooms: getField('bedrooms', 'beds'),
-                            residentName: getField('resident name', 'resident', 'name'),
-                            residentEmail: getField('email'),
-                            residentPhone: getField('phone', 'telephone'),
-                            moveInDate: getField('move-in date', 'movein date', 'move in date'),
-                            isOwner: ['yes', 'y', 'true', '1', 'owner'].includes(String(getField('is owner', 'owner', 'is owner (yes/no)')).toLowerCase()),
-                            notes: getField('notes'),
-                            valid: !!getField('number', 'unit number', 'unit')
-                          };
-                        });
-                        
-                        const validRows = parsed.filter(r => r.valid);
-                        if (validRows.length === 0) {
-                          setBulkImportError('No valid units found. Make sure you have a "Number" column with values.');
-                          return;
-                        }
-                        
-                        setBulkImportPreview(parsed);
-                      } catch (err) {
-                        setBulkImportError('Error parsing data: ' + err.message);
-                      }
-                    }}
-                    className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm"
-                  >
-                    Preview
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="mb-4">
-                  <p className="text-sm">
-                    Found <strong>{bulkImportPreview.filter(r => r.valid).length}</strong> valid units
-                    {bulkImportPreview.filter(r => !r.valid).length > 0 && (
-                      <span className="text-red-600">
-                        {' '}• <strong>{bulkImportPreview.filter(r => !r.valid).length}</strong> invalid (missing number)
-                      </span>
-                    )}
-                  </p>
-                </div>
-                
-                <div className="border rounded-lg overflow-hidden mb-4 max-h-96 overflow-y-auto">
-                  <table className="w-full text-xs">
-                    <thead className="bg-slate-100 sticky top-0">
-                      <tr>
-                        <th className="text-left p-2">Type</th>
-                        <th className="text-left p-2">Number</th>
-                        <th className="text-left p-2">Floor</th>
-                        <th className="text-left p-2">Beds</th>
-                        <th className="text-left p-2">Resident</th>
-                        <th className="text-left p-2">Email</th>
-                        <th className="text-left p-2">Owner</th>
-                        <th className="text-center p-2">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {bulkImportPreview.map((row, idx) => (
-                        <tr key={idx} className={`border-t ${!row.valid ? 'bg-red-50' : ''}`}>
-                          <td className="p-2">{row.type}</td>
-                          <td className="p-2 font-medium">{row.number || '⚠️ Missing'}</td>
-                          <td className="p-2">{row.floor}</td>
-                          <td className="p-2">{row.bedrooms}</td>
-                          <td className="p-2">{row.residentName || <span className="text-slate-400">Vacant</span>}</td>
-                          <td className="p-2 truncate max-w-[150px]">{row.residentEmail}</td>
-                          <td className="p-2">{row.isOwner ? '✓' : '-'}</td>
-                          <td className="p-2 text-center">
-                            {row.valid ? (
-                              <span className="text-green-600">✓</span>
-                            ) : (
-                              <span className="text-red-600">✗</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                
-                <div className="flex gap-3">
-                  <button 
-                    onClick={() => {
-                      setBulkImportPreview([]);
-                      setBulkImportError('');
-                    }}
-                    className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
-                  >
-                    Back
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setShowModal(false);
-                      setBulkImportPreview([]);
-                      setBulkImportError('');
-                    }}
-                    className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={async () => {
-                      const validUnits = bulkImportPreview.filter(r => r.valid).map(({valid, ...unit}) => unit);
-                      
-                      if (validUnits.length === 0) {
-                        alert('No valid units to import');
-                        return;
-                      }
-                      
-                      const existingUnits = blockData[selectedBlock]?.units || [];
-                      const updatedUnits = [...existingUnits, ...validUnits];
-                      
-                      updatedUnits.sort((a, b) => {
-                        const aNum = parseInt(a.number) || 999;
-                        const bNum = parseInt(b.number) || 999;
-                        if (aNum !== bNum) return aNum - bNum;
-                        return String(a.number).localeCompare(String(b.number));
-                      });
-                      
-                      const updatedBlockData = {
-                        ...blockData,
-                        [selectedBlock]: {
-                          ...(blockData[selectedBlock] || {}),
-                          units: updatedUnits
-                        }
-                      };
-                      setBlockData(updatedBlockData);
-                      await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
-                      
-                      alert(`✅ Successfully imported ${validUnits.length} units!`);
-                      setShowModal(false);
-                      setBulkImportPreview([]);
-                      setBulkImportError('');
-                    }}
-                    className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm"
-                  >
-                    Import {bulkImportPreview.filter(r => r.valid).length} units
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Add/Edit Unit Modal */}
-      {showModal && (modalType === 'add-unit' || modalType === 'edit-unit') && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4">{modalType === 'edit-unit' ? 'Edit unit' : 'Add new unit'}</h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Type *</label>
-                  <select 
-                    value={unitForm.type}
-                    onChange={(e) => setUnitForm({...unitForm, type: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option>Flat</option>
-                    <option>Apartment</option>
-                    <option>Penthouse</option>
-                    <option>House</option>
-                    <option>Maisonette</option>
-                    <option>Duplex</option>
-                    <option>Studio</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Number/Name *</label>
-                  <input 
-                    value={unitForm.number}
-                    onChange={(e) => setUnitForm({...unitForm, number: e.target.value})}
-                    type="text" 
-                    className="w-full border rounded-lg px-3 py-2 text-sm" 
-                    placeholder="e.g., 1, 2A, Penthouse" 
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Floor</label>
-                  <input 
-                    value={unitForm.floor}
-                    onChange={(e) => setUnitForm({...unitForm, floor: e.target.value})}
-                    type="text" 
-                    className="w-full border rounded-lg px-3 py-2 text-sm" 
-                    placeholder="e.g., Ground, 1st, 2nd" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Bedrooms</label>
-                  <input 
-                    value={unitForm.bedrooms}
-                    onChange={(e) => setUnitForm({...unitForm, bedrooms: e.target.value})}
-                    type="text" 
-                    className="w-full border rounded-lg px-3 py-2 text-sm" 
-                    placeholder="e.g., 1, 2, 3" 
-                  />
-                </div>
-              </div>
-              
-              <div className="border-t pt-4">
-                <h4 className="font-semibold text-sm mb-3">Resident details (optional)</h4>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Resident name</label>
-                    <input 
-                      value={unitForm.residentName}
-                      onChange={(e) => setUnitForm({...unitForm, residentName: e.target.value})}
-                      type="text" 
-                      className="w-full border rounded-lg px-3 py-2 text-sm" 
-                      placeholder="Leave blank if vacant" 
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input 
-                        type="checkbox"
-                        checked={unitForm.isOwner}
-                        onChange={(e) => setUnitForm({...unitForm, isOwner: e.target.checked})}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">This resident is the owner (not tenant)</span>
-                    </label>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Email</label>
-                    <input 
-                      value={unitForm.residentEmail}
-                      onChange={(e) => setUnitForm({...unitForm, residentEmail: e.target.value})}
-                      type="email" 
-                      className="w-full border rounded-lg px-3 py-2 text-sm" 
-                      placeholder="resident@example.com" 
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Phone</label>
-                    <input 
-                      value={unitForm.residentPhone}
-                      onChange={(e) => setUnitForm({...unitForm, residentPhone: e.target.value})}
-                      type="tel" 
-                      className="w-full border rounded-lg px-3 py-2 text-sm" 
-                      placeholder="0800 000 0000" 
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Move-in date</label>
-                    <input 
-                      value={unitForm.moveInDate}
-                      onChange={(e) => setUnitForm({...unitForm, moveInDate: e.target.value})}
-                      type="date" 
-                      className="w-full border rounded-lg px-3 py-2 text-sm" 
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Notes</label>
-                <textarea 
-                  value={unitForm.notes}
-                  onChange={(e) => setUnitForm({...unitForm, notes: e.target.value})}
-                  rows="2"
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="Any additional notes about this unit..." 
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button 
-                onClick={() => {
-                  setShowModal(false);
-                  setCurrentSetupKey(null);
-                }}
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={async () => {
-                  if (!unitForm.number) {
-                    alert('Please enter a unit number/name');
-                    return;
-                  }
-                  
-                  const existingUnits = blockData[selectedBlock]?.units || [];
-                  let updatedUnits;
-                  
-                  if (modalType === 'edit-unit' && currentSetupKey) {
-                    updatedUnits = existingUnits.map(u => 
-                      u.id === currentSetupKey ? { ...unitForm, id: currentSetupKey } : u
-                    );
-                  } else {
-                    const newUnit = {
-                      id: String(Date.now()),
-                      ...unitForm,
-                      createdAt: new Date().toISOString()
-                    };
-                    updatedUnits = [...existingUnits, newUnit];
-                  }
-                  
-                  // Sort units by number
-                  updatedUnits.sort((a, b) => {
-                    const aNum = parseInt(a.number) || 999;
-                    const bNum = parseInt(b.number) || 999;
-                    if (aNum !== bNum) return aNum - bNum;
-                    return a.number.localeCompare(b.number);
-                  });
-                  
-                  const updatedBlockData = {
-                    ...blockData,
-                    [selectedBlock]: {
-                      ...(blockData[selectedBlock] || {}),
-                      units: updatedUnits
-                    }
-                  };
-                  setBlockData(updatedBlockData);
-                  await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
-                  setShowModal(false);
-                  setCurrentSetupKey(null);
-                }}
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm"
-              >
-                {modalType === 'edit-unit' ? 'Save changes' : 'Add unit'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Job Modal */}
-      {showModal && (modalType === 'add-job' || modalType === 'edit-job') && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4">{modalType === 'edit-job' ? 'Edit job' : 'New job/project'}</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Job title *</label>
-                <input 
-                  value={jobForm.title}
-                  onChange={(e) => setJobForm({...jobForm, title: e.target.value})}
-                  type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="e.g., Replace communal door, Repaint hallway" 
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Type</label>
-                  <select 
-                    value={jobForm.type}
-                    onChange={(e) => setJobForm({...jobForm, type: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option>Maintenance</option>
-                    <option>Repair</option>
-                    <option>Improvement</option>
-                    <option>Cleaning</option>
-                    <option>Inspection</option>
-                    <option>Compliance</option>
-                    <option>Emergency</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Status</label>
-                  <select 
-                    value={jobForm.status}
-                    onChange={(e) => setJobForm({...jobForm, status: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option>Quote requested</option>
-                    <option>Quote received</option>
-                    <option>Approved</option>
-                    <option>In progress</option>
-                    <option>Awaiting invoice</option>
-                    <option>Completed</option>
-                    <option>On hold</option>
-                    <option>Cancelled</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea 
-                  value={jobForm.description}
-                  onChange={(e) => setJobForm({...jobForm, description: e.target.value})}
-                  rows="3"
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="Describe the work to be done..." 
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Location</label>
-                <input 
-                  value={jobForm.location}
-                  onChange={(e) => setJobForm({...jobForm, location: e.target.value})}
-                  type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="e.g., Ground floor lobby, Roof, Flat 5" 
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Contractor/Supplier</label>
-                <input 
-                  value={jobForm.contractor}
-                  onChange={(e) => setJobForm({...jobForm, contractor: e.target.value})}
-                  type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="Company or person doing the work" 
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Cost (£)</label>
-                <input 
-                  value={jobForm.cost}
-                  onChange={(e) => setJobForm({...jobForm, cost: e.target.value})}
-                  type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="e.g., 1500" 
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Start date</label>
-                  <input 
-                    value={jobForm.startDate}
-                    onChange={(e) => setJobForm({...jobForm, startDate: e.target.value})}
-                    type="date" 
-                    className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Target completion</label>
-                  <input 
-                    value={jobForm.completionDate}
-                    onChange={(e) => setJobForm({...jobForm, completionDate: e.target.value})}
-                    type="date" 
-                    className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Notes</label>
-                <textarea 
-                  value={jobForm.notes}
-                  onChange={(e) => setJobForm({...jobForm, notes: e.target.value})}
-                  rows="2"
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
-                  placeholder="Additional notes..." 
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button 
-                onClick={() => {
-                  setShowModal(false);
-                  setCurrentSetupKey(null);
-                }}
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={async () => {
-                  if (!jobForm.title) {
-                    alert('Please enter a job title');
-                    return;
-                  }
-                  
-                  const existingJobs = blockData[selectedBlock]?.jobs || [];
-                  let updatedJobs;
-                  
-                  if (modalType === 'edit-job' && currentSetupKey) {
-                    updatedJobs = existingJobs.map(j => 
-                      j.id === currentSetupKey ? { ...jobForm, id: currentSetupKey } : j
-                    );
-                  } else {
-                    const newJob = {
-                      id: String(Date.now()),
-                      ...jobForm,
-                      createdAt: new Date().toISOString()
-                    };
-                    updatedJobs = [...existingJobs, newJob];
-                  }
-                  
-                  const updatedBlockData = {
-                    ...blockData,
-                    [selectedBlock]: {
-                      ...(blockData[selectedBlock] || {}),
-                      jobs: updatedJobs
-                    }
-                  };
-                  setBlockData(updatedBlockData);
-                  await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
-                  setShowModal(false);
-                  setCurrentSetupKey(null);
-                }}
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm"
-              >
-                {modalType === 'edit-job' ? 'Save changes' : 'Add job'}
               </button>
             </div>
           </div>
@@ -4666,8 +3530,8 @@ Penthouse	PH1	5th	3	Jane Doe	jane@example.com	07700 900456	2023-06-01	no	Long-te
       {/* Edit Managing Agent Modal */}
       {showModal && modalType === 'edit-agent' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Edit managing agent</h3>
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">Edit managing agent</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Managing agent name *</label>
@@ -4675,7 +3539,7 @@ Penthouse	PH1	5th	3	Jane Doe	jane@example.com	07700 900456	2023-06-01	no	Long-te
                   value={editAgentForm.name}
                   onChange={(e) => setEditAgentForm({...editAgentForm, name: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="e.g., Block Property Solutions"
                 />
               </div>
@@ -4685,7 +3549,7 @@ Penthouse	PH1	5th	3	Jane Doe	jane@example.com	07700 900456	2023-06-01	no	Long-te
                   value={editAgentForm.address}
                   onChange={(e) => setEditAgentForm({...editAgentForm, address: e.target.value})}
                   rows="2"
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="Full business address"
                 />
               </div>
@@ -4695,7 +3559,7 @@ Penthouse	PH1	5th	3	Jane Doe	jane@example.com	07700 900456	2023-06-01	no	Long-te
                   value={editAgentForm.manager}
                   onChange={(e) => setEditAgentForm({...editAgentForm, manager: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="Manager name"
                 />
               </div>
@@ -4705,15 +3569,15 @@ Penthouse	PH1	5th	3	Jane Doe	jane@example.com	07700 900456	2023-06-01	no	Long-te
                   value={editAgentForm.email}
                   onChange={(e) => setEditAgentForm({...editAgentForm, email: e.target.value})}
                   type="email" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
                   placeholder="manager@example.com"
                 />
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button 
                 onClick={() => setShowModal(false)}
-                className="flex-1 border rounded-lg px-4 py-2 text-sm hover:bg-slate-50"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -4732,7 +3596,7 @@ Penthouse	PH1	5th	3	Jane Doe	jane@example.com	07700 900456	2023-06-01	no	Long-te
                   await window.storage.set('bps_pro_blocks', JSON.stringify(updatedBlocks));
                   setShowModal(false);
                 }}
-                className="flex-1 bps-blue rounded-lg px-4 py-2 text-sm "
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
               >
                 Save changes
               </button>
@@ -4740,6 +3604,731 @@ Penthouse	PH1	5th	3	Jane Doe	jane@example.com	07700 900456	2023-06-01	no	Long-te
           </div>
         </div>
       )}
+
+      {/* Add/Edit Job Modal */}
+      {showModal && modalType === 'add-job' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">{jobForm.id ? 'Edit job' : 'New job'}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Job title *</label>
+                <input 
+                  value={jobForm.title}
+                  onChange={(e) => setJobForm({...jobForm, title: e.target.value})}
+                  type="text" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="e.g., Repair communal door"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <select 
+                  value={jobForm.type}
+                  onChange={(e) => setJobForm({...jobForm, type: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm"
+                >
+                  <option>Maintenance</option>
+                  <option>Repair</option>
+                  <option>Installation</option>
+                  <option>Inspection</option>
+                  <option>Upgrade</option>
+                  <option>Emergency</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <textarea 
+                  value={jobForm.description}
+                  onChange={(e) => setJobForm({...jobForm, description: e.target.value})}
+                  rows="3"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="Describe the work required..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Location</label>
+                <input 
+                  value={jobForm.location}
+                  onChange={(e) => setJobForm({...jobForm, location: e.target.value})}
+                  type="text" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="e.g., Ground floor lobby"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Contractor</label>
+                <input 
+                  value={jobForm.contractor}
+                  onChange={(e) => setJobForm({...jobForm, contractor: e.target.value})}
+                  type="text" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="Contractor name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Cost (£)</label>
+                <input 
+                  value={jobForm.cost}
+                  onChange={(e) => setJobForm({...jobForm, cost: e.target.value})}
+                  type="number" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Start date</label>
+                  <input 
+                    value={jobForm.startDate}
+                    onChange={(e) => setJobForm({...jobForm, startDate: e.target.value})}
+                    type="date" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Completion date</label>
+                  <input 
+                    value={jobForm.completionDate}
+                    onChange={(e) => setJobForm({...jobForm, completionDate: e.target.value})}
+                    type="date" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select 
+                  value={jobForm.status}
+                  onChange={(e) => setJobForm({...jobForm, status: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm"
+                >
+                  <option>Quote requested</option>
+                  <option>Quote received</option>
+                  <option>Approved</option>
+                  <option>In progress</option>
+                  <option>Complete</option>
+                  <option>Cancelled</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Notes</label>
+                <textarea 
+                  value={jobForm.notes}
+                  onChange={(e) => setJobForm({...jobForm, notes: e.target.value})}
+                  rows="2"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="Additional notes..."
+                />
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              <button 
+                onClick={() => {
+                  setShowModal(false);
+                  setJobForm({
+                    title: '',
+                    description: '',
+                    type: 'Maintenance',
+                    contractor: '',
+                    cost: '',
+                    startDate: '',
+                    completionDate: '',
+                    status: 'Quote requested',
+                    location: '',
+                    notes: ''
+                  });
+                }}
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  if (!jobForm.title) {
+                    alert('Please enter a job title');
+                    return;
+                  }
+                  
+                  const jobs = blockData[selectedBlock]?.jobs || [];
+                  let updatedJobs;
+                  
+                  if (jobForm.id) {
+                    updatedJobs = jobs.map(j => j.id === jobForm.id ? jobForm : j);
+                  } else {
+                    const newJob = {
+                      ...jobForm,
+                      id: String(Date.now()),
+                      createdAt: new Date().toISOString()
+                    };
+                    updatedJobs = [...jobs, newJob];
+                  }
+                  
+                  const updatedBlockData = {
+                    ...blockData,
+                    [selectedBlock]: {
+                      ...(blockData[selectedBlock] || {}),
+                      jobs: updatedJobs
+                    }
+                  };
+                  
+                  setBlockData(updatedBlockData);
+                  await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
+                  
+                  setShowModal(false);
+                  setJobForm({
+                    title: '',
+                    description: '',
+                    type: 'Maintenance',
+                    contractor: '',
+                    cost: '',
+                    startDate: '',
+                    completionDate: '',
+                    status: 'Quote requested',
+                    location: '',
+                    notes: ''
+                  });
+                }}
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
+              >
+                {jobForm.id ? 'Save changes' : 'Add job'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Unit Modal */}
+      {showModal && modalType === 'add-unit' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">{unitForm.id ? 'Edit unit' : 'Add unit'}</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Type *</label>
+                  <select 
+                    value={unitForm.type}
+                    onChange={(e) => setUnitForm({...unitForm, type: e.target.value})}
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm"
+                  >
+                    <option>Flat</option>
+                    <option>House</option>
+                    <option>Studio</option>
+                    <option>Penthouse</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Unit number *</label>
+                  <input 
+                    value={unitForm.number}
+                    onChange={(e) => setUnitForm({...unitForm, number: e.target.value})}
+                    type="text" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                    placeholder="e.g., 1A"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Floor</label>
+                  <input 
+                    value={unitForm.floor}
+                    onChange={(e) => setUnitForm({...unitForm, floor: e.target.value})}
+                    type="text" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                    placeholder="e.g., 1, G"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Bedrooms</label>
+                  <input 
+                    value={unitForm.bedrooms}
+                    onChange={(e) => setUnitForm({...unitForm, bedrooms: e.target.value})}
+                    type="number" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="border-t pt-4">
+                <h4 className="font-medium mb-3">Resident information</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Name</label>
+                    <input 
+                      value={unitForm.residentName}
+                      onChange={(e) => setUnitForm({...unitForm, residentName: e.target.value})}
+                      type="text" 
+                      className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                      placeholder="Resident name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <input 
+                      value={unitForm.residentEmail}
+                      onChange={(e) => setUnitForm({...unitForm, residentEmail: e.target.value})}
+                      type="email" 
+                      className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                      placeholder="email@example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Phone</label>
+                    <input 
+                      value={unitForm.residentPhone}
+                      onChange={(e) => setUnitForm({...unitForm, residentPhone: e.target.value})}
+                      type="tel" 
+                      className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                      placeholder="Phone number"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Move-in date</label>
+                    <input 
+                      value={unitForm.moveInDate}
+                      onChange={(e) => setUnitForm({...unitForm, moveInDate: e.target.value})}
+                      type="date" 
+                      className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={unitForm.isOwner}
+                      onChange={(e) => setUnitForm({...unitForm, isOwner: e.target.checked})}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">Owner (unchecked = tenant)</span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Notes</label>
+                <textarea 
+                  value={unitForm.notes}
+                  onChange={(e) => setUnitForm({...unitForm, notes: e.target.value})}
+                  rows="2"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="Additional notes..."
+                />
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              <button 
+                onClick={() => {
+                  setShowModal(false);
+                  setUnitForm({
+                    type: 'Flat',
+                    number: '',
+                    floor: '',
+                    bedrooms: '',
+                    residentName: '',
+                    residentEmail: '',
+                    residentPhone: '',
+                    moveInDate: '',
+                    isOwner: false,
+                    notes: ''
+                  });
+                }}
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  if (!unitForm.type || !unitForm.number) {
+                    alert('Please fill in unit type and number');
+                    return;
+                  }
+                  
+                  const units = blockData[selectedBlock]?.units || [];
+                  let updatedUnits;
+                  
+                  if (unitForm.id) {
+                    updatedUnits = units.map(u => u.id === unitForm.id ? unitForm : u);
+                  } else {
+                    const newUnit = {
+                      ...unitForm,
+                      id: String(Date.now()),
+                      createdAt: new Date().toISOString()
+                    };
+                    updatedUnits = [...units, newUnit];
+                  }
+                  
+                  const updatedBlockData = {
+                    ...blockData,
+                    [selectedBlock]: {
+                      ...(blockData[selectedBlock] || {}),
+                      units: updatedUnits
+                    }
+                  };
+                  
+                  setBlockData(updatedBlockData);
+                  await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
+                  
+                  setShowModal(false);
+                  setUnitForm({
+                    type: 'Flat',
+                    number: '',
+                    floor: '',
+                    bedrooms: '',
+                    residentName: '',
+                    residentEmail: '',
+                    residentPhone: '',
+                    moveInDate: '',
+                    isOwner: false,
+                    notes: ''
+                  });
+                }}
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
+              >
+                {unitForm.id ? 'Save changes' : 'Add unit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Import Units Modal */}
+      {showModal && modalType === 'bulk-import' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">Bulk import units</h3>
+            <div className="mb-6">
+              <p className="text-sm text-slate-600 mb-4">
+                Upload a CSV file with the following columns: Type, Number, Floor, Bedrooms, ResidentName, ResidentEmail, ResidentPhone, MoveInDate, IsOwner (true/false)
+              </p>
+              <input 
+                type="file" 
+                accept=".csv"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  
+                  setBulkImportFileName(file.name);
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    try {
+                      const text = event.target.result;
+                      const lines = text.split('\n').filter(l => l.trim());
+                      const headers = lines[0].split(',').map(h => h.trim());
+                      
+                      const preview = [];
+                      for (let i = 1; i < Math.min(6, lines.length); i++) {
+                        const values = lines[i].split(',').map(v => v.trim());
+                        const unit = {
+                          type: values[0] || 'Flat',
+                          number: values[1] || '',
+                          floor: values[2] || '',
+                          bedrooms: values[3] || '',
+                          residentName: values[4] || '',
+                          residentEmail: values[5] || '',
+                          residentPhone: values[6] || '',
+                          moveInDate: values[7] || '',
+                          isOwner: values[8]?.toLowerCase() === 'true'
+                        };
+                        preview.push(unit);
+                      }
+                      
+                      setBulkImportPreview(preview);
+                      setBulkImportError('');
+                    } catch (error) {
+                      setBulkImportError('Error parsing CSV file. Please check the format.');
+                      setBulkImportPreview([]);
+                    }
+                  };
+                  reader.readAsText(file);
+                }}
+                className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+              />
+              {bulkImportFileName && (
+                <p className="text-sm text-slate-600 mt-2">Selected: {bulkImportFileName}</p>
+              )}
+              {bulkImportError && (
+                <p className="text-sm text-red-500 mt-2">{bulkImportError}</p>
+              )}
+            </div>
+            
+            {bulkImportPreview.length > 0 && (
+              <div className="mb-6">
+                <h4 className="font-medium mb-2">Preview (first 5 rows)</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm border">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="border px-2 py-1 text-left">Type</th>
+                        <th className="border px-2 py-1 text-left">Number</th>
+                        <th className="border px-2 py-1 text-left">Floor</th>
+                        <th className="border px-2 py-1 text-left">Beds</th>
+                        <th className="border px-2 py-1 text-left">Resident</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bulkImportPreview.map((unit, idx) => (
+                        <tr key={idx}>
+                          <td className="border px-2 py-1">{unit.type}</td>
+                          <td className="border px-2 py-1">{unit.number}</td>
+                          <td className="border px-2 py-1">{unit.floor}</td>
+                          <td className="border px-2 py-1">{unit.bedrooms}</td>
+                          <td className="border px-2 py-1">{unit.residentName}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button 
+                onClick={() => {
+                  setShowModal(false);
+                  setBulkImportPreview([]);
+                  setBulkImportError('');
+                  setBulkImportFileName('');
+                }}
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  if (bulkImportPreview.length === 0) {
+                    alert('Please upload a CSV file first');
+                    return;
+                  }
+                  
+                  const units = blockData[selectedBlock]?.units || [];
+                  const newUnits = bulkImportPreview.map(unit => ({
+                    ...unit,
+                    id: String(Date.now() + Math.random()),
+                    createdAt: new Date().toISOString()
+                  }));
+                  
+                  const updatedBlockData = {
+                    ...blockData,
+                    [selectedBlock]: {
+                      ...(blockData[selectedBlock] || {}),
+                      units: [...units, ...newUnits]
+                    }
+                  };
+                  
+                  setBlockData(updatedBlockData);
+                  await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
+                  
+                  alert(`Successfully imported ${newUnits.length} units`);
+                  setShowModal(false);
+                  setBulkImportPreview([]);
+                  setBulkImportError('');
+                  setBulkImportFileName('');
+                }}
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
+                disabled={bulkImportPreview.length === 0}
+              >
+                Import units
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Correspondence Modal */}
+      {showModal && modalType === 'add-correspondence' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg md:text-xl font-bold mb-4">{correspondenceForm.id ? 'Edit correspondence' : 'New correspondence'}</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Type</label>
+                  <select 
+                    value={correspondenceForm.type}
+                    onChange={(e) => setCorrespondenceForm({...correspondenceForm, type: e.target.value})}
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm"
+                  >
+                    <option>Email</option>
+                    <option>Letter</option>
+                    <option>Phone call</option>
+                    <option>Meeting</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Direction</label>
+                  <select 
+                    value={correspondenceForm.direction}
+                    onChange={(e) => setCorrespondenceForm({...correspondenceForm, direction: e.target.value})}
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm"
+                  >
+                    <option>Outgoing</option>
+                    <option>Incoming</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Subject *</label>
+                <input 
+                  value={correspondenceForm.subject}
+                  onChange={(e) => setCorrespondenceForm({...correspondenceForm, subject: e.target.value})}
+                  type="text" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="e.g., Noise complaint - Unit 3A"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Recipient name *</label>
+                  <input 
+                    value={correspondenceForm.recipientName}
+                    onChange={(e) => setCorrespondenceForm({...correspondenceForm, recipientName: e.target.value})}
+                    type="text" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                    placeholder="Name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Unit number</label>
+                  <input 
+                    value={correspondenceForm.unitNumber}
+                    onChange={(e) => setCorrespondenceForm({...correspondenceForm, unitNumber: e.target.value})}
+                    type="text" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                    placeholder="e.g., 3A"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <input 
+                  value={correspondenceForm.recipientEmail}
+                  onChange={(e) => setCorrespondenceForm({...correspondenceForm, recipientEmail: e.target.value})}
+                  type="email" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="email@example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Date</label>
+                <input 
+                  value={correspondenceForm.date}
+                  onChange={(e) => setCorrespondenceForm({...correspondenceForm, date: e.target.value})}
+                  type="date" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Content *</label>
+                <textarea 
+                  value={correspondenceForm.content}
+                  onChange={(e) => setCorrespondenceForm({...correspondenceForm, content: e.target.value})}
+                  rows="4"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="Message content..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select 
+                  value={correspondenceForm.status}
+                  onChange={(e) => setCorrespondenceForm({...correspondenceForm, status: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm"
+                >
+                  <option>Draft</option>
+                  <option>Sent</option>
+                  <option>Received</option>
+                  <option>Pending reply</option>
+                  <option>Resolved</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Notes</label>
+                <textarea 
+                  value={correspondenceForm.notes}
+                  onChange={(e) => setCorrespondenceForm({...correspondenceForm, notes: e.target.value})}
+                  rows="2"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm" 
+                  placeholder="Internal notes..."
+                />
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              <button 
+                onClick={() => {
+                  setShowModal(false);
+                  setCorrespondenceForm({
+                    type: 'Email',
+                    direction: 'Outgoing',
+                    subject: '',
+                    recipientName: '',
+                    recipientEmail: '',
+                    unitNumber: '',
+                    date: '',
+                    content: '',
+                    status: 'Sent',
+                    notes: ''
+                  });
+                }}
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm hover:bg-slate-50 order-2 sm:order-1"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  if (!correspondenceForm.subject || !correspondenceForm.recipientName || !correspondenceForm.content) {
+                    alert('Please fill in subject, recipient name, and content');
+                    return;
+                  }
+                  
+                  const correspondence = blockData[selectedBlock]?.correspondence || [];
+                  let updatedCorrespondence;
+                  
+                  if (correspondenceForm.id) {
+                    updatedCorrespondence = correspondence.map(c => c.id === correspondenceForm.id ? correspondenceForm : c);
+                  } else {
+                    const newItem = {
+                      ...correspondenceForm,
+                      id: String(Date.now()),
+                      date: correspondenceForm.date || new Date().toISOString().split('T')[0],
+                      createdAt: new Date().toISOString()
+                    };
+                    updatedCorrespondence = [...correspondence, newItem];
+                  }
+                  
+                  const updatedBlockData = {
+                    ...blockData,
+                    [selectedBlock]: {
+                      ...(blockData[selectedBlock] || {}),
+                      correspondence: updatedCorrespondence
+                    }
+                  };
+                  
+                  setBlockData(updatedBlockData);
+                  await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
+                  
+                  setShowModal(false);
+                  setCorrespondenceForm({
+                    type: 'Email',
+                    direction: 'Outgoing',
+                    subject: '',
+                    recipientName: '',
+                    recipientEmail: '',
+                    unitNumber: '',
+                    date: '',
+                    content: '',
+                    status: 'Sent',
+                    notes: ''
+                  });
+                }}
+                className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
+              >
+                {correspondenceForm.id ? 'Save changes' : 'Add correspondence'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
     </div>
   );
 }
