@@ -2457,12 +2457,163 @@ export default function BPSPro() {
       );
     }
 
-    // DOCUMENTS SECTION (main, no subitem selected)
+    // H&S SECTION (main, no subitem selected) - MOBILE FRIENDLY
+    if (activeSection === 'hs' && !activeSubItem) {
+      return (
+        <div className="p-4 md:p-8">
+          <h2 className="text-xl md:text-2xl font-bold mb-6">H&S</h2>
+          
+          {/* Desktop: show instruction, Mobile: show list */}
+          <div className="hidden lg:block">
+            <p className="text-sm text-slate-600 mb-4">Select a category from the left sidebar</p>
+          </div>
+          
+          {/* Mobile: Show categories as clickable list */}
+          <div className="lg:hidden">
+            <p className="text-sm text-slate-600 mb-4">Select a category:</p>
+            <div className="space-y-2">
+              {hsItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveSubItem(item);
+                    setActiveTab('home');
+                  }}
+                  className="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bps-blue-border hover:shadow-md transition-all text-left"
+                >
+                  <FileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                  <span className="font-medium">{item.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // INSURANCE SECTION (main, no subitem selected) - MOBILE FRIENDLY
+    if (activeSection === 'insurance' && !activeSubItem) {
+      return (
+        <div className="p-4 md:p-8">
+          <h2 className="text-xl md:text-2xl font-bold mb-6">Insurance</h2>
+          
+          {/* Desktop: show instruction, Mobile: show list */}
+          <div className="hidden lg:block">
+            <p className="text-sm text-slate-600 mb-4">Select a category from the left sidebar</p>
+          </div>
+          
+          {/* Mobile: Show categories as clickable list */}
+          <div className="lg:hidden">
+            <p className="text-sm text-slate-600 mb-4">Select a category:</p>
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Policy Documents</h3>
+                <div className="space-y-2">
+                  {insuranceCategories.policy.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveSubItem({...item, category: 'Policy documents'});
+                        setActiveClaim(null);
+                        setActiveTab('home');
+                      }}
+                      className="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bps-blue-border hover:shadow-md transition-all text-left"
+                    >
+                      <FileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                      <span className="font-medium">{item.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Other</h3>
+                <div className="space-y-2">
+                  {insuranceCategories.other.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveSubItem({...item, category: 'Other'});
+                        setActiveClaim(null);
+                        setActiveTab('home');
+                      }}
+                      className="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bps-blue-border hover:shadow-md transition-all text-left"
+                    >
+                      <FileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                      <span className="font-medium">{item.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // UTILITIES SECTION (main, no subitem selected) - MOBILE FRIENDLY
+    if (activeSection === 'utilities' && !activeSubItem) {
+      return (
+        <div className="p-4 md:p-8">
+          <h2 className="text-xl md:text-2xl font-bold mb-6">Utilities</h2>
+          
+          {/* Desktop: show instruction, Mobile: show list */}
+          <div className="hidden lg:block">
+            <p className="text-sm text-slate-600 mb-4">Select a utility from the left sidebar</p>
+          </div>
+          
+          {/* Mobile: Show utilities as clickable list */}
+          <div className="lg:hidden">
+            <p className="text-sm text-slate-600 mb-4">Select a utility:</p>
+            <div className="space-y-2">
+              {utilityItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveSubItem(item);
+                    setActiveTab('home');
+                  }}
+                  className="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bps-blue-border hover:shadow-md transition-all text-left"
+                >
+                  <Zap className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                  <span className="font-medium">{item.fullName}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // DOCUMENTS SECTION (main, no subitem selected) - MOBILE FRIENDLY
     if (activeSection === 'documents' && !activeSubItem) {
       return (
         <div className="p-4 md:p-8">
           <h2 className="text-xl md:text-2xl font-bold mb-6">Documents</h2>
-          <p className="text-sm text-slate-600 mb-4">Select a document category from the left sidebar</p>
+          
+          {/* Desktop: show instruction, Mobile: show list */}
+          <div className="hidden lg:block">
+            <p className="text-sm text-slate-600 mb-4">Select a document category from the left sidebar</p>
+          </div>
+          
+          {/* Mobile: Show categories as clickable list */}
+          <div className="lg:hidden">
+            <p className="text-sm text-slate-600 mb-4">Select a category:</p>
+            <div className="space-y-2">
+              {documentCategories[0].items.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveSubItem(item);
+                    setActiveTab('home');
+                  }}
+                  className="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bps-blue-border hover:shadow-md transition-all text-left"
+                >
+                  <FileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                  <span className="font-medium">{item.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       );
     }
