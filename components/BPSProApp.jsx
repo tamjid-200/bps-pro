@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap } from 'lucide-react';
 
 export default function BPSPro() {
   const [blocks, setBlocks] = useState([]);
@@ -20,6 +19,9 @@ export default function BPSPro() {
   const [showMainNav, setShowMainNav] = useState(false);
   const [showSubNav, setShowSubNav] = useState(false);
   const [showHelpSection, setShowHelpSection] = useState(false); // For collapsible Help & Support
+  const [showTrainingSection, setShowTrainingSection] = useState(false); // For collapsible Training
+  const [showTrainingModal, setShowTrainingModal] = useState(false); // For training module modal
+  const [selectedModule, setSelectedModule] = useState(null); // Selected training module
   
   // Info modal state (for Pres. mode, Feature, Help buttons)
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -125,6 +127,27 @@ export default function BPSPro() {
   
   // Custom modal state
   const [customModal, setCustomModal] = useState({ show: false, title: '', message: '' });
+
+  // Helper functions for task counting and status
+  const getTotalTasksForBlock = (blockId) => {
+    const currentBlockData = blockData[blockId] || { tasks: [] };
+    return currentBlockData.tasks?.length || 0;
+  };
+
+  const hasOverdueTasks = (blockId) => {
+    const currentBlockData = blockData[blockId] || { tasks: [] };
+    const tasks = currentBlockData.tasks || [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return tasks.some(task => {
+      if (task.completed) return false;
+      if (!task.dueDate) return false;
+      const dueDate = new Date(task.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      return dueDate < today;
+    });
+  };
 
   // Main navigation
   const mainNav = [
@@ -516,10 +539,26 @@ export default function BPSPro() {
                         <h3 className="font-bold text-base md:text-lg mb-1 truncate">{block.shortName || block.name}</h3>
                         <p className="text-xs text-slate-500 line-clamp-2">{block.address}</p>
                       </div>
+                      {/* Task count badge or checkmark */}
+                      {taskCount > 0 ? (
+                        hasOverdueTasks(block.id) ? (
+                          <div className="flex-shrink-0 bg-red-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold">
+                            {taskCount}
+                          </div>
+                        ) : (
+                          <div className="flex-shrink-0 bg-green-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center">
+                            <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
+                          </div>
+                        )
+                      ) : (
+                        <div className="flex-shrink-0 bg-green-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {taskCount > 0 ? (
-                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">{taskCount} tasks</span>
+                        <span className="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded-full">{taskCount} tasks</span>
                       ) : (
                         <span className="bg-slate-300 text-slate-600 text-xs px-2 py-1 rounded-full">0 tasks</span>
                       )}
@@ -1187,7 +1226,7 @@ export default function BPSPro() {
           <h2 className="text-xl md:text-2xl font-bold mb-6">Settings</h2>
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             <div className="w-full lg:w-64">
-              <p className="text-xs text-slate-500 uppercase mb-3">Select</p>
+              <p className="text-xs uppercase mb-3">Select</p>
               <button 
                 onClick={() => setSettingsTab('assets')}
                 className={`flex items-center gap-2 w-full px-4 py-2.5 rounded mb-2 text-sm ${
@@ -2533,7 +2572,7 @@ export default function BPSPro() {
             <p className="text-sm text-slate-600 mb-4">Select a category:</p>
             <div className="space-y-3">
               <div>
-                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Policy Documents</h3>
+                <h3 className="text-sm font-medium uppercase tracking-wide mb-2">Policy Documents</h3>
                 <div className="space-y-2">
                   {insuranceCategories.policy.map(item => (
                     <button
@@ -2552,7 +2591,7 @@ export default function BPSPro() {
                 </div>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Other</h3>
+                <h3 className="text-sm font-medium uppercase tracking-wide mb-2">Other</h3>
                 <div className="space-y-2">
                   {insuranceCategories.other.map(item => (
                     <button
@@ -2685,8 +2724,8 @@ export default function BPSPro() {
       )}
 
       {/* Left Main Navigation */}
-      <div className={`fixed lg:relative inset-y-0 left-0 transform ${showMainNav ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out w-64 lg:w-52 bg-slate-900 text-white flex flex-col flex-shrink-0 z-50`}>
-        <div className="p-4 border-b border-slate-700">
+      <div className={`fixed lg:relative inset-y-0 left-0 transform ${showMainNav ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out w-64 lg:w-52 text-white flex flex-col flex-shrink-0 z-50`} style={{ backgroundColor: '#1d89c6' }}>
+        <div className="p-4 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 border-2 border-white rounded flex items-center justify-center">
@@ -2706,8 +2745,14 @@ export default function BPSPro() {
             <span>👑</span> Admin
           </div>
           <button
-            onClick={async () => {
-              await supabase.auth.signOut();
+            onClick={() => {
+              // Clear auth state
+              localStorage.removeItem('bps_auth');
+              localStorage.removeItem('bps_user');
+              if (typeof window !== 'undefined') {
+                delete window.__bps_user_email;
+              }
+              // Redirect to login
               window.location.href = '/login';
             }}
             className="mt-2 w-full text-xs bg-red-500/20 hover:bg-red-500/30 text-red-200 px-2 py-1 rounded"
@@ -2716,10 +2761,10 @@ export default function BPSPro() {
           </button>
           
           {/* Mobile-only: Collapsible Help & Support Section */}
-          <div className="mt-4 pt-4 border-t border-slate-700 lg:hidden">
+          <div className="mt-4 pt-4 lg:hidden" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.2)' }}>
             <button 
               onClick={() => setShowHelpSection(!showHelpSection)}
-              className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition-colors"
+              className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded transition-colors"
             >
               <span className="font-medium">Help & Support</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showHelpSection ? 'rotate-180' : ''}`} />
@@ -2736,7 +2781,7 @@ export default function BPSPro() {
                     setShowInfoModal(true);
                     setShowMainNav(false);
                   }}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded"
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded"
                 >
                   <span>📺</span>
                   <span>Pres. mode</span>
@@ -2750,7 +2795,7 @@ export default function BPSPro() {
                     setShowInfoModal(true);
                     setShowMainNav(false);
                   }}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded"
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded"
                 >
                   <span>👤</span>
                   <span>Request Feature</span>
@@ -2764,7 +2809,7 @@ export default function BPSPro() {
                     setShowInfoModal(true);
                     setShowMainNav(false);
                   }}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded"
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded"
                 >
                   <span>❓</span>
                   <span>Help</span>
@@ -2786,7 +2831,7 @@ export default function BPSPro() {
               setShowMainNav(false);
             }}
             className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
-              showAllBlocks ? 'bg-slate-700' : 'hover:bg-slate-800'
+              showAllBlocks ? 'bg-white/20' : 'hover:bg-white/10'
             }`}
           >
             <div className="flex items-center gap-2">
@@ -2794,6 +2839,39 @@ export default function BPSPro() {
               <span>Home</span>
             </div>
           </button>
+
+          {/* Training Section - Collapsible */}
+          <div className="mb-1">
+            <button 
+              onClick={() => setShowTrainingSection(!showTrainingSection)}
+              className="flex items-center justify-between w-full px-3 py-2.5 rounded text-sm hover:bg-white/10"
+            >
+              <div className="flex items-center gap-2">
+                <GraduationCap className="w-4 h-4" />
+                <span>Training</span>
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform ${showTrainingSection ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showTrainingSection && (
+              <div className="ml-6 mt-1 space-y-1">
+                {['Module 1', 'Module 2', 'Module 3', 'Module 4'].map((module, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setSelectedModule(module);
+                      setShowTrainingModal(true);
+                      setShowMainNav(false);
+                    }}
+                    className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm hover:bg-white/10 text-left"
+                  >
+                    <span className="text-xs">📚</span>
+                    <span>{module}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {!showAllBlocks && selectedBlock && mainNav.slice(1).map(item => {
             const Icon = item.icon;
@@ -2811,7 +2889,7 @@ export default function BPSPro() {
                   setShowMainNav(false);
                 }}
                 className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
-                  isActive ? 'bg-slate-700' : 'hover:bg-slate-800'
+                  isActive ? 'bg-white/20' : 'hover:bg-white/10'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -2824,7 +2902,7 @@ export default function BPSPro() {
 
           {!showAllBlocks && selectedBlock && (
             <>
-              <div className="mt-4 mb-2 px-3 text-xs text-slate-500 uppercase tracking-wide">Residents</div>
+              <div className="mt-4 mb-2 px-3 text-xs uppercase tracking-wide" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Residents</div>
               {residentNav.map(item => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.id;
@@ -2838,7 +2916,7 @@ export default function BPSPro() {
                       setShowMainNav(false);
                     }}
                     className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
-                      isActive ? 'bg-slate-700' : 'hover:bg-slate-800'
+                      isActive ? 'bg-white/20' : 'hover:bg-white/10'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -2849,7 +2927,7 @@ export default function BPSPro() {
                 );
               })}
 
-              <div className="mt-4 mb-2 px-3 text-xs text-slate-500 uppercase tracking-wide">Block info</div>
+              <div className="mt-4 mb-2 px-3 text-xs uppercase tracking-wide" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Block info</div>
               {blockInfoNav.map(item => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.id;
@@ -2863,7 +2941,7 @@ export default function BPSPro() {
                       setShowMainNav(false);
                     }}
                     className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
-                      isActive ? 'bg-slate-700' : 'hover:bg-slate-800'
+                      isActive ? 'bg-white/20' : 'hover:bg-white/10'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -2874,7 +2952,7 @@ export default function BPSPro() {
                 );
               })}
 
-              <div className="mt-4 mb-2 px-3 text-xs text-slate-500 uppercase tracking-wide">Settings</div>
+              <div className="mt-4 mb-2 px-3 text-xs uppercase tracking-wide">Settings</div>
               {settingsNav.map(item => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.id;
@@ -2888,7 +2966,7 @@ export default function BPSPro() {
                       setShowMainNav(false);
                     }}
                     className={`flex items-center justify-between w-full px-3 py-2.5 rounded text-sm mb-1 ${
-                      isActive ? 'bg-slate-700' : 'hover:bg-slate-800'
+                      isActive ? 'bg-white/20' : 'hover:bg-white/10'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -2959,14 +3037,14 @@ export default function BPSPro() {
               </button>
             </div>
 
-            <p className="text-xs text-slate-500 uppercase mb-3 tracking-wide">Select</p>
+            <p className="text-xs uppercase mb-3 tracking-wide">Select</p>
             
             {activeSection === 'insurance' && subNavItems.map((item, idx) => {
               const showCategory = idx === 0 || subNavItems[idx - 1].category !== item.category;
               return (
                 <React.Fragment key={`${item.category}-${item.id}`}>
                   {showCategory && (
-                    <div className="text-xs text-slate-500 uppercase mb-2 mt-4 tracking-wide">{item.category}</div>
+                    <div className="text-xs uppercase mb-2 mt-4 tracking-wide">{item.category}</div>
                   )}
                   <button
                     onClick={() => {
@@ -4627,6 +4705,53 @@ export default function BPSPro() {
                 className="bps-blue px-6 py-2.5 rounded-lg text-sm font-medium"
               >
                 OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Training Module Modal */}
+      {showTrainingModal && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowTrainingModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg p-6 md:p-8 w-full max-w-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
+                  <GraduationCap className="w-6 h-6" style={{ color: '#1d89c6' }} />
+                  {selectedModule}
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">BPS Pro Training</p>
+              </div>
+              <button
+                onClick={() => setShowTrainingModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="bg-slate-50 rounded-lg p-8 text-center border-2 border-dashed border-slate-300">
+              <div className="text-6xl mb-4">🎥</div>
+              <h4 className="text-lg font-semibold text-slate-700 mb-2">Training Video Coming Soon</h4>
+              <p className="text-slate-600 text-sm">
+                This module's training content will be added shortly.
+              </p>
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowTrainingModal(false)}
+                className="px-6 py-2.5 rounded-lg text-sm font-medium text-white"
+                style={{ backgroundColor: '#1d89c6' }}
+              >
+                Close
               </button>
             </div>
           </div>
