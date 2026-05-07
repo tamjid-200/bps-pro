@@ -2702,9 +2702,6 @@ export default function BPSPro() {
             </button>
           </div>
           <div className="text-xs text-slate-400">Block Property Solutions</div>
-          <div className="text-sm font-medium mt-1 truncate">
-            {typeof window !== 'undefined' && window.__bps_user_email}
-          </div>
           <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">
             <span>👑</span> Admin
           </div>
