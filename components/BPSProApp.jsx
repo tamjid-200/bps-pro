@@ -149,6 +149,53 @@ export default function BPSPro() {
     });
   };
 
+  // Check if all tasks are completed for a block
+  const areAllTasksCompleted = (blockId) => {
+    const currentBlockData = blockData[blockId] || { tasks: [] };
+    const tasks = currentBlockData.tasks || [];
+    
+    if (tasks.length === 0) return false; // No tasks = no green checkmark
+    
+    // All tasks must be completed
+    return tasks.every(task => task.completed === true);
+  };
+
+  // Get count for each navigation section
+  const getNavCount = (sectionId) => {
+    if (!selectedBlock || !blockData[selectedBlock]) return 0;
+    const currentBlockData = blockData[selectedBlock];
+    
+    switch(sectionId) {
+      case 'documents':
+        return (currentBlockData.documents || []).length;
+      case 'hs':
+        return (currentBlockData.hsItems || []).length;
+      case 'insurance':
+        return (currentBlockData.insurance || []).length;
+      case 'utilities':
+        return (currentBlockData.utilities || []).length;
+      case 'jobs':
+        return (currentBlockData.jobs || []).length;
+      case 'issues':
+        return (currentBlockData.issues || []).length;
+      case 'units':
+        return (currentBlockData.units || []).length;
+      case 'correspondence':
+        return (currentBlockData.correspondence || []).length;
+      case 'all-tasks':
+        return (currentBlockData.tasks || []).length;
+      default:
+        return 0;
+    }
+  };
+
+  // Check if section has no overdue/incomplete items (show green checkmark)
+  const isNavComplete = (sectionId) => {
+    if (!selectedBlock || !blockData[selectedBlock]) return true;
+    const count = getNavCount(sectionId);
+    return count === 0;
+  };
+
   // Main navigation
   const mainNav = [
     { id: 'home', name: 'Home', icon: Home },
@@ -540,33 +587,21 @@ export default function BPSPro() {
                         <p className="text-xs text-slate-500 line-clamp-2">{block.address}</p>
                       </div>
                       {/* Task count badge or checkmark */}
-                      {taskCount > 0 ? (
-                        hasOverdueTasks(block.id) ? (
-                          <div className="flex-shrink-0 bg-red-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold">
-                            {taskCount}
-                          </div>
-                        ) : (
-                          <div className="flex-shrink-0 bg-green-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center">
-                            <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
-                          </div>
-                        )
-                      ) : (
-                        <div className="flex-shrink-0 bg-green-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center">
-                          <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
+                      {areAllTasksCompleted(block.id) ? (
+                        <div className="flex-shrink-0 bg-green-500 text-white w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />
                         </div>
-                      )}
+                      ) : taskCount > 0 ? (
+                        <div className="flex-shrink-0 bg-red-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold">
+                          {taskCount}
+                        </div>
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {taskCount > 0 ? (
                         <span className="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded-full">{taskCount} tasks</span>
                       ) : (
                         <span className="bg-slate-300 text-slate-600 text-xs px-2 py-1 rounded-full">0 tasks</span>
-                      )}
-                      {taskCount > 0 && (
-                        <>
-                          <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">⚠️</span>
-                          <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">🔴</span>
-                        </>
                       )}
                     </div>
                     </button>
@@ -1032,7 +1067,21 @@ export default function BPSPro() {
               <div className="flex-1 w-full">
                 <div className="flex flex-col sm:flex-row items-start justify-between mb-2 gap-3">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-xl md:text-2xl font-bold mb-1 break-words">{currentBlock?.shortName || currentBlock?.name}</h2>
+                    <div className="flex items-center gap-3 mb-1">
+                      <h2 className="text-xl md:text-2xl font-bold break-words">{currentBlock?.shortName || currentBlock?.name}</h2>
+                      {/* Task count badge */}
+                      {(() => {
+                        const totalTasks = getTotalTasksForBlock(selectedBlock);
+                        if (totalTasks > 0) {
+                          return (
+                            <div className="flex-shrink-0 bg-red-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-bold">
+                              {totalTasks}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
                     <p className="text-sm md:text-base text-slate-600 mb-3">Also known as {currentBlock?.name}</p>
                   </div>
                   <button
@@ -2755,7 +2804,10 @@ export default function BPSPro() {
               // Redirect to login
               window.location.href = '/login';
             }}
-            className="mt-2 w-full text-xs bg-red-500/20 hover:bg-red-500/30 text-red-200 px-2 py-1 rounded"
+            className="mt-2 w-full text-xs text-white px-2 py-1 rounded transition-colors"
+            style={{ backgroundColor: '#515152' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#515152'}
           >
             Log Out
           </button>
@@ -2840,38 +2892,40 @@ export default function BPSPro() {
             </div>
           </button>
 
-          {/* Training Section - Collapsible */}
-          <div className="mb-1">
-            <button 
-              onClick={() => setShowTrainingSection(!showTrainingSection)}
-              className="flex items-center justify-between w-full px-3 py-2.5 rounded text-sm hover:bg-white/10"
-            >
-              <div className="flex items-center gap-2">
-                <GraduationCap className="w-4 h-4" />
-                <span>Training</span>
-              </div>
-              <ChevronDown className={`w-4 h-4 transition-transform ${showTrainingSection ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {showTrainingSection && (
-              <div className="ml-6 mt-1 space-y-1">
-                {['Module 1', 'Module 2', 'Module 3', 'Module 4'].map((module, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setSelectedModule(module);
-                      setShowTrainingModal(true);
-                      setShowMainNav(false);
-                    }}
-                    className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm hover:bg-white/10 text-left"
-                  >
-                    <span className="text-xs">📚</span>
-                    <span>{module}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Training Section - Collapsible (HOME ONLY) */}
+          {showAllBlocks && (
+            <div className="mb-1">
+              <button 
+                onClick={() => setShowTrainingSection(!showTrainingSection)}
+                className="flex items-center justify-between w-full px-3 py-2.5 rounded text-sm hover:bg-white/10"
+              >
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4" />
+                  <span>Training</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showTrainingSection ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {showTrainingSection && (
+                <div className="ml-6 mt-1 space-y-1">
+                  {['Module 1', 'Module 2', 'Module 3', 'Module 4'].map((module, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedModule(module);
+                        setShowTrainingModal(true);
+                        setShowMainNav(false);
+                      }}
+                      className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm hover:bg-white/10 text-left"
+                    >
+                      <span className="text-xs">📚</span>
+                      <span>{module}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {!showAllBlocks && selectedBlock && mainNav.slice(1).map(item => {
             const Icon = item.icon;
@@ -2896,6 +2950,26 @@ export default function BPSPro() {
                   <Icon className="w-4 h-4" />
                   <span>{item.name}</span>
                 </div>
+                {/* Count badge or checkmark */}
+                {(() => {
+                  const count = getNavCount(item.id);
+                  const isComplete = isNavComplete(item.id);
+                  
+                  if (count > 0) {
+                    return (
+                      <div className="flex-shrink-0 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
+                        {count}
+                      </div>
+                    );
+                  } else if (isComplete && item.id !== 'portal') {
+                    return (
+                      <div className="flex-shrink-0 bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4" />
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </button>
             );
           })}
@@ -2923,6 +2997,26 @@ export default function BPSPro() {
                       <Icon className="w-4 h-4" />
                       <span>{item.name}</span>
                     </div>
+                    {/* Count badge or checkmark */}
+                    {(() => {
+                      const count = getNavCount(item.id);
+                      const isComplete = isNavComplete(item.id);
+                      
+                      if (count > 0) {
+                        return (
+                          <div className="flex-shrink-0 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
+                            {count}
+                          </div>
+                        );
+                      } else if (isComplete) {
+                        return (
+                          <div className="flex-shrink-0 bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center">
+                            <CheckCircle className="w-4 h-4" />
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </button>
                 );
               })}
@@ -2948,11 +3042,24 @@ export default function BPSPro() {
                       <Icon className="w-4 h-4" />
                       <span>{item.name}</span>
                     </div>
+                    {/* Count badge or checkmark */}
+                    {(() => {
+                      const count = getNavCount(item.id);
+                      
+                      if (count > 0) {
+                        return (
+                          <div className="flex-shrink-0 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
+                            {count}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </button>
                 );
               })}
 
-              <div className="mt-4 mb-2 px-3 text-xs uppercase tracking-wide">Settings</div>
+              <div className="mt-4 mb-2 px-3 text-xs uppercase tracking-wide" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Settings</div>
               {settingsNav.map(item => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.id;
