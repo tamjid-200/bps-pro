@@ -2752,14 +2752,14 @@ export default function BPSPro() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         * { font-family: 'Inter', -apple-system, sans-serif; }
-        .bps-blue { background-color: #3B82F6 !important; color: white !important; }
-        .bps-blue:hover { background-color: #2563EB !important; }
-        .bps-blue-text { color: #3B82F6 !important; }
-        .bps-blue-text:hover { color: #2563EB !important; }
-        .bps-blue-border { border-color: #3B82F6 !important; }
-        .bps-blue-bg-circle { background-color: #2563EB !important; }
-        .hover-bps-border:hover { border-color: #3B82F6 !important; }
-        .hover-bps-text:hover { color: #2563EB !important; }
+        .bps-blue { background-color: #1d89c6 !important; color: white !important; }
+        .bps-blue:hover { background-color: #1670a8 !important; }
+        .bps-blue-text { color: #1d89c6 !important; }
+        .bps-blue-text:hover { color: #1670a8 !important; }
+        .bps-blue-border { border-color: #1d89c6 !important; }
+        .bps-blue-bg-circle { background-color: #1d89c6 !important; }
+        .hover-bps-border:hover { border-color: #1d89c6 !important; }
+        .hover-bps-text:hover { color: #1670a8 !important; }
       `}</style>
 
       {/* Mobile Overlay for Main Nav */}
@@ -2906,7 +2906,12 @@ export default function BPSPro() {
               
               {showTrainingSection && (
                 <div className="ml-6 mt-1 space-y-1">
-                  {['Module 1', 'Module 2', 'Module 3', 'Module 4'].map((module, idx) => (
+                  {[
+                    'Module 1 - How to use Blocks Online',
+                    'Module 2 - How to use Blocks Online', 
+                    'Module 3 - How to use Blocks Online',
+                    'Module 4 - How to use Blocks Online'
+                  ].map((module, idx) => (
                     <button
                       key={idx}
                       onClick={() => {
@@ -4837,7 +4842,7 @@ export default function BPSPro() {
           onClick={() => setShowTrainingModal(false)}
         >
           <div 
-            className="bg-white rounded-lg p-6 md:p-8 w-full max-w-2xl shadow-2xl"
+            className="bg-white rounded-lg p-6 md:p-8 w-full max-w-4xl shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-6">
@@ -4856,13 +4861,84 @@ export default function BPSPro() {
               </button>
             </div>
             
-            <div className="bg-slate-50 rounded-lg p-8 text-center border-2 border-dashed border-slate-300">
-              <div className="text-6xl mb-4">🎥</div>
-              <h4 className="text-lg font-semibold text-slate-700 mb-2">Training Video Coming Soon</h4>
-              <p className="text-slate-600 text-sm">
-                This module's training content will be added shortly.
-              </p>
-            </div>
+            {/* Video Content */}
+            {selectedModule === 'Module 1 - How to use Blocks Online' ? (
+              <div className="bg-slate-900 rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%', position: 'relative' }}>
+                <iframe
+                  src="https://www.loom.com/embed/50f5a5255c154afb9dcff36215554ef4?sid=a8f3c4e5-5b3e-4d3f-9e8a-7c6d5e4f3a2b"
+                  frameBorder="0"
+                  webkitallowfullscreen="true"
+                  mozallowfullscreen="true"
+                  allowFullScreen
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%'
+                  }}
+                />
+              </div>
+            ) : selectedModule === 'Module 2 - How to use Blocks Online' ? (
+              <div className="bg-slate-900 rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%', position: 'relative' }}>
+                <iframe
+                  src="https://www.loom.com/embed/e9d5897256fb4cae8f2ca6a4e79763b6"
+                  frameBorder="0"
+                  webkitallowfullscreen="true"
+                  mozallowfullscreen="true"
+                  allowFullScreen
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%'
+                  }}
+                />
+              </div>
+            ) : selectedModule === 'Module 3 - How to use Blocks Online' ? (
+              <div className="bg-slate-900 rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%', position: 'relative' }}>
+                <iframe
+                  src="https://www.loom.com/embed/18b6abf98a3b4bd1a4faa2c9b333e693"
+                  frameBorder="0"
+                  webkitallowfullscreen="true"
+                  mozallowfullscreen="true"
+                  allowFullScreen
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%'
+                  }}
+                />
+              </div>
+            ) : selectedModule === 'Module 4 - How to use Blocks Online' ? (
+              <div className="bg-slate-900 rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%', position: 'relative' }}>
+                <iframe
+                  src="https://www.loom.com/embed/85d0c596ca154e33b10ffde3acb20324"
+                  frameBorder="0"
+                  webkitallowfullscreen="true"
+                  mozallowfullscreen="true"
+                  allowFullScreen
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%'
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="bg-slate-50 rounded-lg p-8 text-center border-2 border-dashed border-slate-300">
+                <div className="text-6xl mb-4">🎥</div>
+                <h4 className="text-lg font-semibold text-slate-700 mb-2">Training Video Coming Soon</h4>
+                <p className="text-slate-600 text-sm">
+                  This module's training content will be added shortly.
+                </p>
+              </div>
+            )}
             
             <div className="mt-6 flex justify-end">
               <button
