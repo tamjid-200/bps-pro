@@ -19,6 +19,7 @@ export default function BPSPro() {
   // Mobile menu states
   const [showMainNav, setShowMainNav] = useState(false);
   const [showSubNav, setShowSubNav] = useState(false);
+  const [showHelpSection, setShowHelpSection] = useState(false); // For collapsible Help & Support
   
   // Info modal state (for Pres. mode, Feature, Help buttons)
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -2699,50 +2700,62 @@ export default function BPSPro() {
             Log Out
           </button>
           
-          {/* Mobile-only: Pres. mode, Feature, Help buttons */}
-          <div className="mt-4 pt-4 border-t border-slate-700 space-y-2">
+          {/* Mobile-only: Collapsible Help & Support Section */}
+          <div className="mt-4 pt-4 border-t border-slate-700">
             <button 
-              onClick={() => {
-                setInfoModalContent({
-                  title: 'Presentation Mode',
-                  message: 'Coming Soon'
-                });
-                setShowInfoModal(true);
-                setShowMainNav(false);
-              }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded"
+              onClick={() => setShowHelpSection(!showHelpSection)}
+              className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition-colors"
             >
-              <span>📺</span>
-              <span>Pres. mode</span>
+              <span className="font-medium">Help & Support</span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${showHelpSection ? 'rotate-180' : ''}`} />
             </button>
-            <button 
-              onClick={() => {
-                setInfoModalContent({
-                  title: 'Request a Feature',
-                  message: 'Email: keanu@blockpropertysolutions.co.uk\n\nShare your ideas and suggestions with us.'
-                });
-                setShowInfoModal(true);
-                setShowMainNav(false);
-              }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded"
-            >
-              <span>👤</span>
-              <span>Request Feature</span>
-            </button>
-            <button 
-              onClick={() => {
-                setInfoModalContent({
-                  title: 'Need Help?',
-                  message: 'Email: keanu@blockpropertysolutions.co.uk\n\nWe typically respond within 24 hours.'
-                });
-                setShowInfoModal(true);
-                setShowMainNav(false);
-              }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded"
-            >
-              <span>❓</span>
-              <span>Help</span>
-            </button>
+            
+            {showHelpSection && (
+              <div className="mt-2 space-y-1 pl-3">
+                <button 
+                  onClick={() => {
+                    setInfoModalContent({
+                      title: 'Presentation Mode',
+                      message: 'Coming Soon'
+                    });
+                    setShowInfoModal(true);
+                    setShowMainNav(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded"
+                >
+                  <span>📺</span>
+                  <span>Pres. mode</span>
+                </button>
+                <button 
+                  onClick={() => {
+                    setInfoModalContent({
+                      title: 'Request a Feature',
+                      message: 'Email: keanu@blockpropertysolutions.co.uk\n\nShare your ideas and suggestions with us.'
+                    });
+                    setShowInfoModal(true);
+                    setShowMainNav(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded"
+                >
+                  <span>👤</span>
+                  <span>Request Feature</span>
+                </button>
+                <button 
+                  onClick={() => {
+                    setInfoModalContent({
+                      title: 'Need Help?',
+                      message: 'Email: keanu@blockpropertysolutions.co.uk\n\nWe typically respond within 24 hours.'
+                    });
+                    setShowInfoModal(true);
+                    setShowMainNav(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded"
+                >
+                  <span>❓</span>
+                  <span>Help</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
