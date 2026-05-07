@@ -20,6 +20,10 @@ export default function BPSPro() {
   const [showMainNav, setShowMainNav] = useState(false);
   const [showSubNav, setShowSubNav] = useState(false);
   
+  // Info modal state (for Pres. mode, Feature, Help buttons)
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [infoModalContent, setInfoModalContent] = useState({ title: '', message: '' });
+  
   const [newBlockForm, setNewBlockForm] = useState({
     name: '',
     shortName: '',
@@ -117,6 +121,9 @@ export default function BPSPro() {
   });
   const [correspondenceFilter, setCorrespondenceFilter] = useState('all');
   const [correspondenceSearch, setCorrespondenceSearch] = useState('');
+  
+  // Custom modal state
+  const [customModal, setCustomModal] = useState({ show: false, title: '', message: '' });
 
   // Main navigation
   const mainNav = [
@@ -2691,6 +2698,52 @@ export default function BPSPro() {
           >
             Log Out
           </button>
+          
+          {/* Mobile-only: Pres. mode, Feature, Help buttons */}
+          <div className="mt-4 pt-4 border-t border-slate-700 space-y-2">
+            <button 
+              onClick={() => {
+                setInfoModalContent({
+                  title: 'Presentation Mode',
+                  message: 'Coming Soon'
+                });
+                setShowInfoModal(true);
+                setShowMainNav(false);
+              }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded"
+            >
+              <span>📺</span>
+              <span>Pres. mode</span>
+            </button>
+            <button 
+              onClick={() => {
+                setInfoModalContent({
+                  title: 'Request a Feature',
+                  message: 'Email: keanu@blockpropertysolutions.co.uk\n\nShare your ideas and suggestions with us.'
+                });
+                setShowInfoModal(true);
+                setShowMainNav(false);
+              }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded"
+            >
+              <span>👤</span>
+              <span>Request Feature</span>
+            </button>
+            <button 
+              onClick={() => {
+                setInfoModalContent({
+                  title: 'Need Help?',
+                  message: 'Email: keanu@blockpropertysolutions.co.uk\n\nWe typically respond within 24 hours.'
+                });
+                setShowInfoModal(true);
+                setShowMainNav(false);
+              }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded"
+            >
+              <span>❓</span>
+              <span>Help</span>
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-2">
@@ -2959,19 +3012,37 @@ export default function BPSPro() {
           </div>
           <div className="hidden md:flex items-center gap-4 text-sm text-slate-600">
             <button 
-              onClick={() => alert('Presentation Mode - Coming Soon')}
+              onClick={() => {
+                setInfoModalContent({
+                  title: 'Presentation Mode',
+                  message: 'Coming Soon'
+                });
+                setShowInfoModal(true);
+              }}
               className="hover-bps-text flex items-center gap-1"
             >
               📺 Pres. mode
             </button>
             <button 
-              onClick={() => alert('Request a Feature\n\nEmail: keanu@blockpropertysolutions.co.uk\n\nShare your ideas and suggestions with us.')}
+              onClick={() => {
+                setInfoModalContent({
+                  title: 'Request a Feature',
+                  message: 'Email: keanu@blockpropertysolutions.co.uk\n\nShare your ideas and suggestions with us.'
+                });
+                setShowInfoModal(true);
+              }}
               className="hover-bps-text flex items-center gap-1"
             >
               👤 Feature
             </button>
             <button 
-              onClick={() => alert('Need Help?\n\nEmail: keanu@blockpropertysolutions.co.uk\n\nWe typically respond within 24 hours.')}
+              onClick={() => {
+                setInfoModalContent({
+                  title: 'Need Help?',
+                  message: 'Email: keanu@blockpropertysolutions.co.uk\n\nWe typically respond within 24 hours.'
+                });
+                setShowInfoModal(true);
+              }}
               className="hover-bps-text flex items-center gap-1"
             >
               ❓ Help
@@ -4494,6 +4565,40 @@ export default function BPSPro() {
                 className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
               >
                 {correspondenceForm.id ? 'Save changes' : 'Add correspondence'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Info Modal (Pres. mode, Feature, Help) - Click anywhere to close */}
+      {showInfoModal && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowInfoModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg p-6 md:p-8 w-full max-w-md shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-4">
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900">{infoModalContent.title}</h3>
+              <button
+                onClick={() => setShowInfoModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="text-slate-600 whitespace-pre-line text-sm md:text-base leading-relaxed">
+              {infoModalContent.message}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowInfoModal(false)}
+                className="bps-blue px-6 py-2.5 rounded-lg text-sm font-medium"
+              >
+                OK
               </button>
             </div>
           </div>
