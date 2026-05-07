@@ -3087,7 +3087,7 @@ export default function BPSPro() {
 
         {!showAllBlocks && selectedBlock && (
           <div className="border-t border-slate-700 p-3">
-            <div className="text-xs text-slate-500 mb-2">All blocks</div>
+            <div className="text-xs text-white mb-2">All blocks</div>
             <button 
               onClick={() => {
                 setShowAllBlocks(true);
@@ -3217,9 +3217,23 @@ export default function BPSPro() {
                 <FileText className="w-5 h-5" />
               </button>
             )}
-            <h1 className="text-base md:text-lg font-bold truncate">
-              {showAllBlocks ? 'All Blocks' : currentBlock?.name}
-            </h1>
+            <div className="flex items-center gap-2 md:gap-3">
+              <h1 className="text-base md:text-lg font-bold truncate">
+                {showAllBlocks ? 'All Blocks' : currentBlock?.name}
+              </h1>
+              {/* Task count badge in header */}
+              {!showAllBlocks && selectedBlock && (() => {
+                const totalTasks = getTotalTasksForBlock(selectedBlock);
+                if (totalTasks > 0) {
+                  return (
+                    <div className="flex-shrink-0 bg-red-500 text-white w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold">
+                      {totalTasks}
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+            </div>
           </div>
           <div className="hidden md:flex items-center gap-4 text-sm text-slate-600">
             <button 
