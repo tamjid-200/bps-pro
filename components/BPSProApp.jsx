@@ -1006,7 +1006,7 @@ export default function BPSPro() {
                       className="bg-white border rounded-lg p-4 flex items-center justify-between w-full text-left hover:bps-blue-border hover:shadow-md transition-all cursor-pointer group"
                     >
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium group-hover:bps-blue-text truncate">{itemName}</div>
+                        <div className="font-medium text-slate-900 group-hover:bps-blue-text truncate">{itemName}</div>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                           <span className="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-full">{sectionName}</span>
                           <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full whitespace-nowrap">Set-up required</span>
@@ -1121,7 +1121,7 @@ export default function BPSPro() {
                       className="w-5 h-5 mt-0.5 flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <div className={`font-medium ${task.completed ? 'line-through' : ''} break-words`}>{task.title}</div>
+                      <div className={`font-medium text-slate-900 ${task.completed ? 'line-through' : ''} break-words`}>{task.title}</div>
                       {task.description && (
                         <div className="text-sm text-slate-600 mt-1 break-words">{task.description}</div>
                       )}
@@ -1790,7 +1790,7 @@ export default function BPSPro() {
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-base md:text-lg font-semibold">Documents</h4>
                       <button
-                        onClick={() => handleFileUpload('insurance', activeSubItem.id)}
+                        onClick={() => handleFileUpload('hs', `${activeSubItem.id}-${activeSubSubItem.id}`)}
                         disabled={uploadingFile}
                         className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                       >
@@ -1801,7 +1801,7 @@ export default function BPSPro() {
                     
                     {/* Uploaded Files List */}
                     {(() => {
-                      const files = getUploadedFiles('insurance', activeSubItem.id);
+                      const files = getUploadedFiles('hs', `${activeSubItem.id}-${activeSubSubItem.id}`);
                       if (files.length === 0) {
                         return (
                           <div className="text-center py-8 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
@@ -1836,7 +1836,7 @@ export default function BPSPro() {
                                   <Download className="w-4 h-4" />
                                 </button>
                                 <button
-                                  onClick={() => handleFileDelete('insurance', activeSubItem.id, idx)}
+                                  onClick={() => handleFileDelete('hs', `${activeSubItem.id}-${activeSubSubItem.id}`, idx)}
                                   className="p-2 hover:bg-red-100 rounded text-red-600 transition-colors"
                                   title="Delete"
                                 >
@@ -2254,6 +2254,71 @@ export default function BPSPro() {
                     >
                       {isSetUp ? 'Edit set-up' : 'Finish set-up'}
                     </button>
+                  </div>
+                  
+                  {/* File Upload Section */}
+                  <div className="mt-6 md:mt-8 border-t border-slate-200 pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-base md:text-lg font-semibold">Documents</h4>
+                      <button
+                        onClick={() => handleFileUpload('documents', activeSubItem.id)}
+                        disabled={uploadingFile}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                      >
+                        <Upload className="w-4 h-4" />
+                        {uploadingFile ? 'Uploading...' : '📎 Upload Document'}
+                      </button>
+                    </div>
+                    
+                    {/* Uploaded Files List */}
+                    {(() => {
+                      const files = getUploadedFiles('documents', activeSubItem.id);
+                      if (files.length === 0) {
+                        return (
+                          <div className="text-center py-8 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
+                            <div className="text-4xl mb-2">📄</div>
+                            <p className="text-slate-500 text-sm">No documents uploaded yet</p>
+                            <p className="text-slate-400 text-xs mt-1">Accepted: PDF, JPG, PNG</p>
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <div className="space-y-2">
+                          {files.map((file, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="text-2xl flex-shrink-0">
+                                  {file.type.includes('pdf') ? '📄' : '🖼️'}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate">{file.name}</p>
+                                  <p className="text-xs text-slate-500">
+                                    {(file.size / 1024).toFixed(1)} KB • {new Date(file.uploadedAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <button
+                                  onClick={() => handleFileDownload(file)}
+                                  className="p-2 hover:bg-slate-200 rounded text-slate-600 transition-colors"
+                                  title="Download"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleFileDelete('documents', activeSubItem.id, idx)}
+                                  className="p-2 hover:bg-red-100 rounded text-red-600 transition-colors"
+                                  title="Delete"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
                 );
