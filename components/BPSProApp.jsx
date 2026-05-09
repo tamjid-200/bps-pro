@@ -24,6 +24,7 @@ export default function BPSPro() {
   const [showTrainingModal, setShowTrainingModal] = useState(false); // For training module modal
   const [selectedModule, setSelectedModule] = useState(null); // Selected training module
   const [selectedVideo, setSelectedVideo] = useState(null); // Selected video within module
+  const [uploadingFile, setUploadingFile] = useState(false); // File upload in progress
   
   // Info modal state (for Pres. mode, Feature, Help buttons)
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -196,6 +197,122 @@ export default function BPSPro() {
     if (!selectedBlock || !blockData[selectedBlock]) return true;
     const count = getNavCount(sectionId);
     return count === 0;
+  };
+
+  // File upload and management functions
+  const handleFileUpload = async (section, subSection = null) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.jpg,.jpeg,.png,.gif';
+    input.multiple = true;
+    
+    input.onchange = async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      
+      setUploadingFile(true);
+      
+      try {
+        const currentData = blockData[selectedBlock] || {};
+        const uploadedFiles = currentData.uploadedFiles || {};
+        
+        // Create section key (e.g., "insurance-building" or "documents-fire-doors")
+        const sectionKey = subSection ? `${section}-${subSection}` : section;
+        const sectionFiles = uploadedFiles[sectionKey] || [];
+        
+        // Process each file
+        for (const file of files) {
+          const reader = new FileReader();
+          const fileData = await new Promise((resolve) => {
+            reader.onload = (event) => {
+              resolve({
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                data: event.target.result,
+                uploadedAt: new Date().toISOString()
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+          
+          sectionFiles.push(fileData);
+        }
+        
+        // Update block data with new files
+        uploadedFiles[sectionKey] = sectionFiles;
+        const updatedData = {
+          ...currentData,
+          uploadedFiles
+        };
+        
+        setBlockData(prev => ({
+          ...prev,
+          [selectedBlock]: updatedData
+        }));
+        
+        // Save to storage
+        await window.storage.set('bps_pro_block_data', JSON.stringify({
+          ...blockData,
+          [selectedBlock]: updatedData
+        }));
+        
+      } catch (error) {
+        console.error('File upload error:', error);
+        alert('Error uploading files. Please try again.');
+      } finally {
+        setUploadingFile(false);
+      }
+    };
+    
+    input.click();
+  };
+  
+  const handleFileDelete = async (section, subSection, fileIndex) => {
+    if (!confirm('Are you sure you want to delete this file?')) return;
+    
+    try {
+      const currentData = blockData[selectedBlock] || {};
+      const uploadedFiles = { ...(currentData.uploadedFiles || {}) };
+      const sectionKey = subSection ? `${section}-${subSection}` : section;
+      const sectionFiles = [...(uploadedFiles[sectionKey] || [])];
+      
+      sectionFiles.splice(fileIndex, 1);
+      uploadedFiles[sectionKey] = sectionFiles;
+      
+      const updatedData = {
+        ...currentData,
+        uploadedFiles
+      };
+      
+      setBlockData(prev => ({
+        ...prev,
+        [selectedBlock]: updatedData
+      }));
+      
+      await window.storage.set('bps_pro_block_data', JSON.stringify({
+        ...blockData,
+        [selectedBlock]: updatedData
+      }));
+      
+    } catch (error) {
+      console.error('File delete error:', error);
+      alert('Error deleting file. Please try again.');
+    }
+  };
+  
+  const handleFileDownload = (fileData) => {
+    const link = document.createElement('a');
+    link.href = fileData.data;
+    link.download = fileData.name;
+    link.click();
+  };
+  
+  const getUploadedFiles = (section, subSection = null) => {
+    if (!selectedBlock || !blockData[selectedBlock]) return [];
+    const uploadedFiles = blockData[selectedBlock].uploadedFiles || {};
+    const sectionKey = subSection ? `${section}-${subSection}` : section;
+    return uploadedFiles[sectionKey] || [];
   };
 
   // Main navigation
@@ -1666,6 +1783,71 @@ export default function BPSPro() {
                     >
                       {isSetUp ? 'Edit set-up' : 'Finish set-up'}
                     </button>
+                  </div>
+                  
+                  {/* File Upload Section */}
+                  <div className="mt-6 md:mt-8 border-t border-slate-200 pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-base md:text-lg font-semibold">Documents</h4>
+                      <button
+                        onClick={() => handleFileUpload('insurance', activeSubItem.id)}
+                        disabled={uploadingFile}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                      >
+                        <Upload className="w-4 h-4" />
+                        {uploadingFile ? 'Uploading...' : '📎 Upload Document'}
+                      </button>
+                    </div>
+                    
+                    {/* Uploaded Files List */}
+                    {(() => {
+                      const files = getUploadedFiles('insurance', activeSubItem.id);
+                      if (files.length === 0) {
+                        return (
+                          <div className="text-center py-8 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
+                            <div className="text-4xl mb-2">📄</div>
+                            <p className="text-slate-500 text-sm">No documents uploaded yet</p>
+                            <p className="text-slate-400 text-xs mt-1">Accepted: PDF, JPG, PNG</p>
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <div className="space-y-2">
+                          {files.map((file, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="text-2xl flex-shrink-0">
+                                  {file.type.includes('pdf') ? '📄' : '🖼️'}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate">{file.name}</p>
+                                  <p className="text-xs text-slate-500">
+                                    {(file.size / 1024).toFixed(1)} KB • {new Date(file.uploadedAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <button
+                                  onClick={() => handleFileDownload(file)}
+                                  className="p-2 hover:bg-slate-200 rounded text-slate-600 transition-colors"
+                                  title="Download"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleFileDelete('insurance', activeSubItem.id, idx)}
+                                  className="p-2 hover:bg-red-100 rounded text-red-600 transition-colors"
+                                  title="Delete"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
                 );
