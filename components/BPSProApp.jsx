@@ -861,7 +861,7 @@ export default function BPSPro() {
             <button 
               onClick={() => setTaskFilter('all')}
               className={`pb-3 px-1 text-xs md:text-sm whitespace-nowrap flex-shrink-0 ${
-                taskFilter === 'all' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
+                taskFilter === 'all' ? 'border-b-2 bps-blue-border font-medium bps-blue-text' : 'text-slate-600'
               }`}
             >
               All
@@ -869,7 +869,7 @@ export default function BPSPro() {
             <button 
               onClick={() => setTaskFilter('upcoming')}
               className={`pb-3 px-1 text-xs md:text-sm flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
-                taskFilter === 'upcoming' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
+                taskFilter === 'upcoming' ? 'border-b-2 bps-blue-border font-medium bps-blue-text' : 'text-slate-600'
               }`}
             >
               Upcoming
@@ -882,7 +882,7 @@ export default function BPSPro() {
             <button 
               onClick={() => setTaskFilter('overdue')}
               className={`pb-3 px-1 text-xs md:text-sm flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
-                taskFilter === 'overdue' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
+                taskFilter === 'overdue' ? 'border-b-2 bps-blue-border font-medium bps-blue-text' : 'text-slate-600'
               }`}
             >
               Overdue
@@ -895,7 +895,7 @@ export default function BPSPro() {
             <button 
               onClick={() => setTaskFilter('setup')}
               className={`pb-3 px-1 text-xs md:text-sm flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
-                taskFilter === 'setup' ? 'border-b-2 bps-blue-border font-medium' : 'text-slate-600'
+                taskFilter === 'setup' ? 'border-b-2 bps-blue-border font-medium bps-blue-text' : 'text-slate-600'
               }`}
             >
               Set-up
@@ -1589,7 +1589,7 @@ export default function BPSPro() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className={`font-medium ${issue.resolved ? 'line-through' : ''} break-words`}>{issue.title}</h3>
+                        <h3 className={`font-medium text-slate-900 ${issue.resolved ? 'line-through' : ''} break-words`}>{issue.title}</h3>
                         <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
                           issue.priority === 'High' ? 'bg-red-100 text-red-700' :
                           issue.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
@@ -2413,7 +2413,7 @@ export default function BPSPro() {
                   </button>
                   <button 
                     onClick={() => alert('Showing General settings')}
-                    className="flex items-center gap-2 px-4 py-2.5 border rounded text-sm placeholder:text-slate-500 mb-4 hover:bg-slate-50 w-full sm:w-auto justify-center sm:justify-start"
+                    className="flex items-center gap-2 px-4 py-2.5 border rounded text-sm text-slate-900 placeholder:text-slate-500 mb-4 hover:bg-slate-50 w-full sm:w-auto justify-center sm:justify-start"
                   >
                     <Settings className="w-4 h-4" />
                     General
