@@ -620,7 +620,7 @@ export default function BPSPro() {
         <div className="p-4 md:p-8">
           <div className="max-w-6xl">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-              <h2 className="text-xl md:text-2xl font-bold">All blocks</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-slate-900">All blocks</h2>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 <button 
                   onClick={async () => {
@@ -702,7 +702,7 @@ export default function BPSPro() {
                         <Building className="w-6 h-6 md:w-8 md:h-8 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-base md:text-lg mb-1 truncate">{block.shortName || block.name}</h3>
+                        <h3 className="font-bold text-slate-900 text-base md:text-lg mb-1 truncate">{block.shortName || block.name}</h3>
                         <p className="text-xs text-slate-500 line-clamp-2">{block.address}</p>
                       </div>
                     </div>
@@ -844,7 +844,7 @@ export default function BPSPro() {
       return (
         <div className="p-4 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 md:mb-6 gap-3">
-            <h2 className="text-xl md:text-2xl font-bold">All tasks</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">All tasks</h2>
             <button 
               onClick={() => {
                 setModalType('add-task');
@@ -1357,7 +1357,7 @@ export default function BPSPro() {
 
             <div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-                <h3 className="font-bold text-base md:text-lg">Managing agent</h3>
+                <h3 className="font-bold text-slate-900 text-base md:text-lg">Managing agent</h3>
                 <button
                   onClick={() => {
                     setEditAgentForm({
@@ -1433,7 +1433,7 @@ export default function BPSPro() {
             <div className="flex-1">
               {settingsTab === 'assets' && (
                 <>
-                  <h3 className="text-lg md:text-xl font-bold mb-4">Add/ remove assets</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Add/ remove assets</h3>
                   <div className="mb-4">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -1515,7 +1515,7 @@ export default function BPSPro() {
               
               {settingsTab === 'auto-chase' && (
                 <>
-                  <h3 className="text-lg md:text-xl font-bold mb-4">Contractor auto-chase</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Contractor auto-chase</h3>
                   <p className="text-sm text-slate-600 mb-4">
                     Automated email chasers sent to the contractor/ supplier for upcoming or overdue actions.
                   </p>
@@ -1525,7 +1525,7 @@ export default function BPSPro() {
               
               {settingsTab === 'resident' && (
                 <>
-                  <h3 className="text-lg md:text-xl font-bold mb-4">Resident settings</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Resident settings</h3>
                   <p className="text-sm text-slate-600 mb-4">Configure resident communication preferences.</p>
                   <div className="text-slate-500">Coming soon</div>
                 </>
@@ -1533,7 +1533,7 @@ export default function BPSPro() {
               
               {settingsTab === 'site-staff' && (
                 <>
-                  <h3 className="text-lg md:text-xl font-bold mb-4">Site staff</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Site staff</h3>
                   <p className="text-sm text-slate-600 mb-4">Manage site staff members.</p>
                   <button 
                     onClick={() => alert('Add site staff coming soon!')}
@@ -1556,7 +1556,7 @@ export default function BPSPro() {
       return (
         <div className="p-4 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-            <h2 className="text-xl md:text-2xl font-bold">Reported issues/complaints</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">Reported issues/complaints</h2>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <button 
                 onClick={() => alert('Recipient settings: Configure who receives issue notifications')}
@@ -1735,7 +1735,7 @@ export default function BPSPro() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 md:mb-8">
-                    <h2 className="text-xl md:text-2xl font-bold">{activeSubSubItem.name}</h2>
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900">{activeSubSubItem.name}</h2>
                     {isSetUp ? (
                       <span className="bg-green-100 text-green-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set up</span>
                     ) : (
@@ -1989,7 +1989,7 @@ export default function BPSPro() {
                 return (
                 <div>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 md:mb-8">
-                    <h2 className="text-xl md:text-2xl font-bold">{activeSubItem.name === 'Terrorism insurance' ? 'Terrorism insurance renewal' : activeSubItem.name}</h2>
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900">{activeSubItem.name === 'Terrorism insurance' ? 'Terrorism insurance renewal' : activeSubItem.name}</h2>
                     {isSetUp ? (
                       <span className="bg-green-100 text-green-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set up</span>
                     ) : (
@@ -2114,7 +2114,7 @@ export default function BPSPro() {
                 <div>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                      <h2 className="text-xl md:text-2xl font-bold">Identify source</h2>
+                      <h2 className="text-xl md:text-2xl font-bold text-slate-900">Identify source</h2>
                       <button className="bps-blue px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto">
                         Complete
                       </button>
@@ -2212,7 +2212,7 @@ export default function BPSPro() {
                 return (
                 <div>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 md:mb-8">
-                    <h2 className="text-xl md:text-2xl font-bold">{activeSubItem.name}</h2>
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900">{activeSubItem.name}</h2>
                     {isSetUp ? (
                       <span className="bg-green-100 text-green-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set up</span>
                     ) : (
@@ -2330,7 +2330,7 @@ export default function BPSPro() {
           {activeTab === 'oand-ms' && (
             <div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-                <h2 className="text-xl md:text-2xl font-bold">O&Ms</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900">O&Ms</h2>
                 <button 
                   onClick={() => alert('Upload O&M document - feature coming soon')}
                   className="bps-blue px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium w-full sm:w-auto justify-center"
@@ -2347,7 +2347,7 @@ export default function BPSPro() {
           {activeTab === 'asset-register' && (
             <div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-                <h2 className="text-xl md:text-2xl font-bold">Asset register</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900">Asset register</h2>
                 <button 
                   onClick={() => alert('Add asset register item - feature coming soon')}
                   className="bps-blue px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium w-full sm:w-auto justify-center"
@@ -2482,7 +2482,7 @@ export default function BPSPro() {
       return (
         <div className="p-4 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-            <h2 className="text-xl md:text-2xl font-bold">Units</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">Units</h2>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <button 
                 onClick={() => {
@@ -2529,7 +2529,7 @@ export default function BPSPro() {
                 <div key={unit.id} className="bg-white border rounded-lg p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg truncate">{unit.type} {unit.number}</h3>
+                      <h3 className="font-bold text-slate-900 text-lg truncate">{unit.type} {unit.number}</h3>
                       <p className="text-sm text-slate-600">Floor {unit.floor} • {unit.bedrooms} bed</p>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
@@ -2600,7 +2600,7 @@ export default function BPSPro() {
       return (
         <div className="p-4 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-            <h2 className="text-xl md:text-2xl font-bold">Correspondence</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">Correspondence</h2>
             <button 
               onClick={() => {
                 setCorrespondenceForm({
@@ -2741,7 +2741,7 @@ export default function BPSPro() {
       return (
         <div className="p-4 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-            <h2 className="text-xl md:text-2xl font-bold">Jobs/projects</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">Jobs/projects</h2>
             <button 
               onClick={() => {
                 setJobForm({
@@ -2866,7 +2866,7 @@ export default function BPSPro() {
       return (
         <div className="p-4 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-            <h2 className="text-xl md:text-2xl font-bold">O&Ms (Operation & Maintenance Manuals)</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">O&Ms (Operation & Maintenance Manuals)</h2>
             <button 
               onClick={() => alert('Upload O&M documents - feature coming soon')}
               className="bps-blue px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium w-full sm:w-auto"
@@ -3464,7 +3464,7 @@ export default function BPSPro() {
         <div className={`fixed lg:relative inset-y-0 left-0 transform ${showSubNav ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out w-64 bg-white border-r border-slate-200 overflow-y-auto overscroll-contain flex-shrink-0 z-40`} style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
           <div className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base md:text-lg font-bold">
+              <h2 className="text-base md:text-lg font-bold text-slate-900">
                 {activeSection === 'hs' ? 'H&S' : 
                  activeSection === 'utilities' ? 'Utilities' : 
                  activeSection === 'insurance' ? 'Insurance' :
@@ -3479,7 +3479,7 @@ export default function BPSPro() {
               </button>
             </div>
 
-            <p className="text-xs uppercase mb-3 tracking-wide">Select</p>
+            <p className="text-xs uppercase mb-3 tracking-wide text-slate-600">Select</p>
             
             {activeSection === 'insurance' && subNavItems.map((item, idx) => {
               const showCategory = idx === 0 || subNavItems[idx - 1].category !== item.category;
@@ -3555,7 +3555,7 @@ export default function BPSPro() {
               </button>
             )}
             <div className="flex items-center gap-2 md:gap-3">
-              <h1 className="text-base md:text-lg font-bold truncate">
+              <h1 className="text-base md:text-lg font-bold text-slate-900 truncate">
                 {showAllBlocks ? 'All Blocks' : currentBlock?.name}
               </h1>
               {/* Task count badge in header */}
@@ -3623,7 +3623,7 @@ export default function BPSPro() {
       {showModal && modalType === 'setup' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">Finish set-up</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Finish set-up</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Frequency *</label>
@@ -3752,7 +3752,7 @@ export default function BPSPro() {
       {showModal && modalType === 'add-block' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">Add new block</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Add new block</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Block name *</label>
@@ -3873,7 +3873,7 @@ export default function BPSPro() {
       {showModal && modalType === 'add-task' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">New task</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">New task</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Task title *</label>
@@ -4001,7 +4001,7 @@ export default function BPSPro() {
       {showModal && modalType === 'add-rp' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">Add Responsible Person</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Add Responsible Person</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Name *</label>
@@ -4086,7 +4086,7 @@ export default function BPSPro() {
       {showModal && modalType === 'add-meter' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">Add meter reading</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Add meter reading</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Date *</label>
@@ -4165,7 +4165,7 @@ export default function BPSPro() {
       {showModal && modalType === 'add-issue' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">New issue or complaint</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">New issue or complaint</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Title *</label>
@@ -4258,7 +4258,7 @@ export default function BPSPro() {
       {showModal && modalType === 'edit-block' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">Edit block details</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Edit block details</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Block name *</label>
@@ -4335,7 +4335,7 @@ export default function BPSPro() {
       {showModal && modalType === 'edit-agent' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">Edit managing agent</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Edit managing agent</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Managing agent name *</label>
@@ -4413,7 +4413,7 @@ export default function BPSPro() {
       {showModal && modalType === 'add-job' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">{jobForm.id ? 'Edit job' : 'New job'}</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">{jobForm.id ? 'Edit job' : 'New job'}</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Job title *</label>
@@ -4606,7 +4606,7 @@ export default function BPSPro() {
       {showModal && modalType === 'add-unit' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">{unitForm.id ? 'Edit unit' : 'Add unit'}</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">{unitForm.id ? 'Edit unit' : 'Add unit'}</h3>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -4799,7 +4799,7 @@ export default function BPSPro() {
       {showModal && modalType === 'bulk-import' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">Bulk import units</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Bulk import units</h3>
             <div className="mb-6">
               <p className="text-sm text-slate-600 mb-4">
                 Upload a CSV file with the following columns: Type, Number, Floor, Bedrooms, ResidentName, ResidentEmail, ResidentPhone, MoveInDate, IsOwner (true/false)
@@ -4942,7 +4942,7 @@ export default function BPSPro() {
       {showModal && modalType === 'add-correspondence' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold mb-4">{correspondenceForm.id ? 'Edit correspondence' : 'New correspondence'}</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">{correspondenceForm.id ? 'Edit correspondence' : 'New correspondence'}</h3>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
