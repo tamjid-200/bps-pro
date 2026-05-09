@@ -2040,6 +2040,71 @@ export default function BPSPro() {
                   >
                     {isSetUp ? 'Edit set-up' : 'Finish set-up'}
                   </button>
+                  
+                  {/* File Upload Section */}
+                  <div className="mt-6 md:mt-8 border-t border-slate-200 pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-base md:text-lg font-semibold">Documents</h4>
+                      <button
+                        onClick={() => handleFileUpload('insurance', activeSubItem.id)}
+                        disabled={uploadingFile}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                      >
+                        <Upload className="w-4 h-4" />
+                        {uploadingFile ? 'Uploading...' : '📎 Upload Document'}
+                      </button>
+                    </div>
+                    
+                    {/* Uploaded Files List */}
+                    {(() => {
+                      const files = getUploadedFiles('insurance', activeSubItem.id);
+                      if (files.length === 0) {
+                        return (
+                          <div className="text-center py-8 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
+                            <div className="text-4xl mb-2">📄</div>
+                            <p className="text-slate-500 text-sm">No documents uploaded yet</p>
+                            <p className="text-slate-400 text-xs mt-1">Accepted: PDF, JPG, PNG</p>
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <div className="space-y-2">
+                          {files.map((file, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="text-2xl flex-shrink-0">
+                                  {file.type.includes('pdf') ? '📄' : '🖼️'}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate">{file.name}</p>
+                                  <p className="text-xs text-slate-500">
+                                    {(file.size / 1024).toFixed(1)} KB • {new Date(file.uploadedAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <button
+                                  onClick={() => handleFileDownload(file)}
+                                  className="p-2 hover:bg-slate-200 rounded text-slate-600 transition-colors"
+                                  title="Download"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleFileDelete('insurance', activeSubItem.id, idx)}
+                                  className="p-2 hover:bg-red-100 rounded text-red-600 transition-colors"
+                                  title="Delete"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
                 );
               })()}
