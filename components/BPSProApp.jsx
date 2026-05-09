@@ -652,8 +652,8 @@ export default function BPSPro() {
               {blocks.length === 0 ? (
                 <div className="col-span-full text-center py-12 text-slate-500">
                   <Building className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-                  <p className="text-lg mb-2">No blocks yet</p>
-                  <p className="text-sm">Click "Add new block" to get started</p>
+                  <p className="text-lg text-slate-900 mb-2">No blocks yet</p>
+                  <p className="text-sm text-slate-900">Click "Add new block" to get started</p>
                 </div>
               ) : (
                 blocks.map(block => {
@@ -924,7 +924,7 @@ export default function BPSPro() {
             setupRequiredCount === 0 ? (
               <div className="text-center py-12 text-slate-500">
                 <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-300" />
-                <p className="font-medium">All items are set up!</p>
+                <p className="font-medium text-slate-900">All items are set up!</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -1014,7 +1014,7 @@ export default function BPSPro() {
                       </div>
                       <div className="flex items-center gap-2 bps-blue-text text-sm font-medium ml-4 flex-shrink-0">
                         <span className="hidden sm:inline">Set up</span>
-                        <span className="text-lg">→</span>
+                        <span className="text-lg text-slate-900">→</span>
                       </div>
                     </button>
                   );
@@ -1087,7 +1087,7 @@ export default function BPSPro() {
                       </div>
                       <div className="flex items-center gap-2 bps-blue-text text-sm font-medium ml-4 flex-shrink-0">
                         <span className="hidden sm:inline">Review</span>
-                        <span className="text-lg">→</span>
+                        <span className="text-lg text-slate-900">→</span>
                       </div>
                     </button>
                   );
@@ -1185,7 +1185,7 @@ export default function BPSPro() {
                 <div className="flex flex-col sm:flex-row items-start justify-between mb-2 gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
-                      <h2 className="text-xl md:text-2xl font-bold break-words">{currentBlock?.shortName || currentBlock?.name}</h2>
+                      <h2 className="text-xl md:text-2xl font-bold text-slate-900 break-words">{currentBlock?.shortName || currentBlock?.name}</h2>
                       {/* Task count badge */}
                       {(() => {
                         const totalTasks = getTotalTasksForBlock(selectedBlock);
@@ -1219,13 +1219,13 @@ export default function BPSPro() {
                     Edit
                   </button>
                 </div>
-                <p className="text-sm text-slate-600 mb-1"><span className="font-medium">Address:</span> {currentBlock?.address}</p>
-                <p className="text-sm text-slate-600"><span className="font-medium">Height category:</span> {currentBlock?.height}</p>
+                <p className="text-sm text-slate-600 mb-1"><span className="font-medium text-slate-900">Address:</span> {currentBlock?.address}</p>
+                <p className="text-sm text-slate-600"><span className="font-medium text-slate-900">Height category:</span> {currentBlock?.height}</p>
               </div>
             </div>
 
             <div className="border-2 border-red-300 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
-              <h3 className="font-bold mb-4 text-base md:text-lg">Evacuation strategy:</h3>
+              <h3 className="font-bold text-slate-900 mb-4 text-base md:text-lg">Evacuation strategy:</h3>
               <div className="space-y-3 mb-4">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input 
@@ -1246,7 +1246,7 @@ export default function BPSPro() {
                     }}
                     className="mt-1 flex-shrink-0" 
                   />
-                  <span className="text-sm md:text-base">Simultaneous</span>
+                  <span className="text-sm md:text-base text-slate-900">Simultaneous</span>
                 </label>
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input 
@@ -1268,7 +1268,7 @@ export default function BPSPro() {
                     className="mt-1 flex-shrink-0" 
                   />
                   <div>
-                    <div className="font-medium text-sm md:text-base">Stay put</div>
+                    <div className="font-medium text-slate-900 text-sm md:text-base">Stay put</div>
                     <div className="text-xs md:text-sm text-slate-600 mt-1">
                       (Also called defend in place) Residents in flats not directly affected by the fire remain in their own homes
                       unless instructed otherwise by the fire and rescue service (FRS) or they feel unsafe.
@@ -1299,7 +1299,7 @@ export default function BPSPro() {
                     }}
                     className="mt-1 flex-shrink-0" 
                   />
-                  <span className="text-sm md:text-base">Phased</span>
+                  <span className="text-sm md:text-base text-slate-900">Phased</span>
                 </label>
               </div>
               <button 
@@ -1311,13 +1311,13 @@ export default function BPSPro() {
             </div>
 
             <div className="border-2 border-red-300 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
-              <h3 className="font-bold mb-4 text-base md:text-lg">Responsible Person (RP)</h3>
+              <h3 className="font-bold text-slate-900 mb-4 text-base md:text-lg">Responsible Person (RP)</h3>
               {(blockData[selectedBlock]?.responsiblePersons || []).length > 0 && (
                 <div className="space-y-2 mb-4">
                   {(blockData[selectedBlock]?.responsiblePersons || []).map((rp, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-slate-50 p-3 rounded gap-3">
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm md:text-base truncate">{rp.name}</div>
+                        <div className="font-medium text-slate-900 text-sm md:text-base truncate">{rp.name}</div>
                         <div className="text-xs text-slate-600">{rp.role}</div>
                         <div className="text-xs text-slate-500 break-words">{rp.email} • {rp.phone}</div>
                       </div>
@@ -1375,10 +1375,10 @@ export default function BPSPro() {
                   Edit
                 </button>
               </div>
-              <p className="text-sm mb-1 break-words"><span className="font-medium">Managing agent:</span> {currentBlock?.managingAgent?.name}</p>
-              <p className="text-sm mb-1 break-words"><span className="font-medium">Address:</span> {currentBlock?.managingAgent?.address}</p>
-              <p className="text-sm mb-1 break-words"><span className="font-medium">Property manager:</span> {currentBlock?.managingAgent?.manager}</p>
-              <p className="text-sm break-words"><span className="font-medium">Email:</span> {currentBlock?.managingAgent?.email}</p>
+              <p className="text-sm mb-1 break-words"><span className="font-medium text-slate-900">Managing agent:</span> {currentBlock?.managingAgent?.name}</p>
+              <p className="text-sm mb-1 break-words"><span className="font-medium text-slate-900">Address:</span> {currentBlock?.managingAgent?.address}</p>
+              <p className="text-sm mb-1 break-words"><span className="font-medium text-slate-900">Property manager:</span> {currentBlock?.managingAgent?.manager}</p>
+              <p className="text-sm break-words"><span className="font-medium text-slate-900">Email:</span> {currentBlock?.managingAgent?.email}</p>
             </div>
           </div>
         </div>
@@ -1389,10 +1389,10 @@ export default function BPSPro() {
     if (activeSection === 'block-settings') {
       return (
         <div className="p-4 md:p-8">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">Settings</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">Settings</h2>
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             <div className="w-full lg:w-64">
-              <p className="text-xs uppercase mb-3">Select</p>
+              <p className="text-xs uppercase text-slate-600 mb-3">Select</p>
               <button 
                 onClick={() => setSettingsTab('assets')}
                 className={`flex items-center gap-2 w-full px-4 py-2.5 rounded mb-2 text-sm ${
@@ -1446,7 +1446,7 @@ export default function BPSPro() {
                       />
                     </div>
                   </div>
-                  <h4 className="font-medium mb-3 text-sm md:text-base">Service and maintenance (H&S items)</h4>
+                  <h4 className="font-medium text-slate-900 mb-3 text-sm md:text-base">Service and maintenance (H&S items)</h4>
                   <div className="space-y-2">
                     {blockAssets
                       .filter(asset => asset.name.toLowerCase().includes(assetSearch.toLowerCase()))
@@ -1455,7 +1455,7 @@ export default function BPSPro() {
                         const isActive = blockAssetState !== undefined ? blockAssetState : asset.active;
                         return (
                           <div key={asset.id} className="flex items-center justify-between py-2 border-b gap-3">
-                            <span className="text-sm flex-1 min-w-0 break-words">{asset.name}</span>
+                            <span className="text-sm text-slate-900 flex-1 min-w-0 break-words">{asset.name}</span>
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {isActive ? (
                                 <>
@@ -1682,7 +1682,7 @@ export default function BPSPro() {
               {/* H&S Section */}
               {activeSection === 'hs' && activeSubItem.subItems && !activeSubSubItem && (
                 <div className="mb-8">
-                  <h2 className="text-xl md:text-2xl font-bold mb-6">{activeSubItem.name}</h2>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">{activeSubItem.name}</h2>
                   <div className="space-y-2">
                     {activeSubItem.subItems.map(subItem => (
                       <button
@@ -1692,7 +1692,7 @@ export default function BPSPro() {
                       >
                         <div className="flex items-center gap-2">
                           <FileText className="w-4 h-4 flex-shrink-0" />
-                          <span className="text-sm">{subItem.name}</span>
+                          <span className="text-sm text-slate-900">{subItem.name}</span>
                         </div>
                         {subItem.complete && <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />}
                       </button>
@@ -1744,12 +1744,12 @@ export default function BPSPro() {
                   </div>
 
                   <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 text-sm md:text-base">
-                    <div><span className="font-medium">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
-                    <div><span className="font-medium">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
-                    <div><span className="font-medium">Next due by:</span> {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
-                    <div><span className="font-medium">Assigned to:</span> {isSetUp ? <span className="text-slate-700">{setup.assignedTo || 'Unassigned'}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
+                    <div><span className="font-medium text-slate-900">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
+                    <div><span className="font-medium text-slate-900">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
+                    <div><span className="font-medium text-slate-900">Next due by:</span> {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
+                    <div><span className="font-medium text-slate-900">Assigned to:</span> {isSetUp ? <span className="text-slate-700">{setup.assignedTo || 'Unassigned'}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">Auto-chase:</span>
+                      <span className="font-medium text-slate-900">Auto-chase:</span>
                       {isSetUp ? <span className="text-slate-700">{setup.autoChase}</span> : <span className="text-slate-500">[set-up required]</span>}
                       <Info className="w-4 h-4 text-slate-400" />
                     </div>
@@ -1788,7 +1788,7 @@ export default function BPSPro() {
                   {/* File Upload Section */}
                   <div className="mt-6 md:mt-8 border-t border-slate-200 pt-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-base md:text-lg font-semibold">Documents</h4>
+                      <h4 className="text-base md:text-lg font-semibold text-slate-900">Documents</h4>
                       <button
                         onClick={() => handleFileUpload('hs', `${activeSubItem.id}-${activeSubSubItem.id}`)}
                         disabled={uploadingFile}
@@ -1863,7 +1863,7 @@ export default function BPSPro() {
                 return (
                 <div>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 md:mb-8">
-                    <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
                       {activeSubItem.name}
                       <Edit2 className="w-4 h-4 text-slate-400" />
                     </h2>
@@ -1877,12 +1877,12 @@ export default function BPSPro() {
                   )}
 
                   <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 text-sm md:text-base">
-                    <div><span className="font-medium">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
-                    <div><span className="font-medium">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
-                    <div><span className="font-medium">Next due by:</span> {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
-                    <div><span className="font-medium">Assigned to:</span> {isSetUp ? <span className="text-slate-700">{setup.assignedTo || 'Unassigned'}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
+                    <div><span className="font-medium text-slate-900">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
+                    <div><span className="font-medium text-slate-900">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
+                    <div><span className="font-medium text-slate-900">Next due by:</span> {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
+                    <div><span className="font-medium text-slate-900">Assigned to:</span> {isSetUp ? <span className="text-slate-700">{setup.assignedTo || 'Unassigned'}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">Auto-chase:</span>
+                      <span className="font-medium text-slate-900">Auto-chase:</span>
                       {isSetUp ? <span className="text-slate-700">{setup.autoChase}</span> : <span className="text-slate-500">[set-up required]</span>}
                       <Info className="w-4 h-4 text-slate-400" />
                     </div>
@@ -1920,7 +1920,7 @@ export default function BPSPro() {
 
                   <div className="border-t pt-4 md:pt-6">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-                      <h3 className="text-base md:text-lg font-semibold">Meter readings</h3>
+                      <h3 className="text-base md:text-lg font-semibold text-slate-900">Meter readings</h3>
                       <button 
                         onClick={() => {
                           setCurrentSetupKey(`meter-${activeSubItem.id}`);
@@ -1943,7 +1943,7 @@ export default function BPSPro() {
                           {readings.map((r, idx) => (
                             <div key={idx} className="flex items-center justify-between bg-slate-50 p-3 rounded gap-3">
                               <div className="flex-1 min-w-0">
-                                <div className="font-medium break-words">{r.reading}</div>
+                                <div className="font-medium text-slate-900 break-words">{r.reading}</div>
                                 <div className="text-xs text-slate-600">{new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                                 {r.notes && <div className="text-xs text-slate-500 break-words">{r.notes}</div>}
                               </div>
@@ -1998,10 +1998,10 @@ export default function BPSPro() {
                   </div>
 
                   <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 text-sm md:text-base">
-                    <div><span className="font-medium">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
-                    <div><span className="font-medium">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
+                    <div><span className="font-medium text-slate-900">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
+                    <div><span className="font-medium text-slate-900">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium">Next due by:</span>
+                      <span className="font-medium text-slate-900">Next due by:</span>
                       {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}
                       <button 
                         onClick={() => alert('Refreshed insurance status')}
@@ -2044,7 +2044,7 @@ export default function BPSPro() {
                   {/* File Upload Section */}
                   <div className="mt-6 md:mt-8 border-t border-slate-200 pt-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-base md:text-lg font-semibold">Documents</h4>
+                      <h4 className="text-base md:text-lg font-semibold text-slate-900">Documents</h4>
                       <button
                         onClick={() => handleFileUpload('insurance', activeSubItem.id)}
                         disabled={uploadingFile}
@@ -2123,7 +2123,7 @@ export default function BPSPro() {
 
                   <div className="mb-8">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-                      <h3 className="font-semibold">Subtasks</h3>
+                      <h3 className="font-semibold text-slate-900">Subtasks</h3>
                       <button 
                         onClick={() => alert('Add custom subtasks feature coming soon')}
                         className="bps-blue-text text-sm hover:underline"
@@ -2155,12 +2155,12 @@ export default function BPSPro() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold mb-2">Details</h3>
+                    <h3 className="font-semibold text-slate-900 mb-2">Details</h3>
                     <div className="mb-4 text-sm md:text-base">
-                      <span className="font-medium">Due date:</span> <span className="text-slate-600">21st Jan 2026</span>
+                      <span className="font-medium text-slate-900">Due date:</span> <span className="text-slate-600">21st Jan 2026</span>
                     </div>
                     <div>
-                      <h4 className="font-medium mb-2">Notes</h4>
+                      <h4 className="font-medium text-slate-900 mb-2">Notes</h4>
                       <textarea 
                         id="claim-notes"
                         className="w-full border rounded-lg p-3 text-sm" 
@@ -2221,9 +2221,9 @@ export default function BPSPro() {
                   </div>
 
                   <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 text-sm md:text-base">
-                    <div><span className="font-medium">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
-                    <div><span className="font-medium">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
-                    <div><span className="font-medium">Next due by:</span> {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
+                    <div><span className="font-medium text-slate-900">Frequency:</span> {isSetUp ? <span className="text-slate-700">{setup.frequency}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
+                    <div><span className="font-medium text-slate-900">Last completed:</span> {isSetUp && setup.lastCompleted ? <span className="text-slate-700">{new Date(setup.lastCompleted).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">{isSetUp ? 'Not completed yet' : '[set-up required]'}</span>}</div>
+                    <div><span className="font-medium text-slate-900">Next due by:</span> {isSetUp ? <span className="text-slate-700">{new Date(setup.nextDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> : <span className="text-slate-500">[set-up required]</span>}</div>
                   </div>
 
                   <div className={`${isSetUp ? '' : 'border-2 border-red-300'} rounded-lg ${isSetUp ? '' : 'p-4 md:p-6'} inline-block`}>
@@ -2259,7 +2259,7 @@ export default function BPSPro() {
                   {/* File Upload Section */}
                   <div className="mt-6 md:mt-8 border-t border-slate-200 pt-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-base md:text-lg font-semibold">Documents</h4>
+                      <h4 className="text-base md:text-lg font-semibold text-slate-900">Documents</h4>
                       <button
                         onClick={() => handleFileUpload('documents', activeSubItem.id)}
                         disabled={uploadingFile}
@@ -2356,7 +2356,7 @@ export default function BPSPro() {
                   Add item
                 </button>
               </div>
-              <h3 className="font-medium mb-4">Assets</h3>
+              <h3 className="font-medium text-slate-900 mb-4">Assets</h3>
               <div className="text-slate-500">None</div>
             </div>
           )}
@@ -2364,7 +2364,7 @@ export default function BPSPro() {
           {/* NOTES TAB */}
           {activeTab === 'notes' && (
             <div>
-              <h2 className="text-xl md:text-2xl font-bold mb-6">Notes</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">Notes</h2>
               <textarea 
                 id={`notes-${activeSubItem?.id}`}
                 rows="10"
@@ -2401,7 +2401,7 @@ export default function BPSPro() {
           {/* SETTINGS TAB */}
           {activeTab === 'settings' && (
             <div>
-              <h2 className="text-xl md:text-2xl font-bold mb-6">Settings</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">Settings</h2>
               <div className="space-y-6">
                 <div>
                   <button 
@@ -2421,7 +2421,7 @@ export default function BPSPro() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-3">Contractor auto-chase</h3>
+                  <h3 className="font-semibold text-slate-900 mb-3">Contractor auto-chase</h3>
                   <p className="text-sm text-slate-600 mb-4">
                     Automated email chasers sent to the contractor/ supplier for upcoming or overdue actions. 
                     You'll be CC'd to each email. If they reply, it'll be sent directly to to your email address.
@@ -2429,7 +2429,7 @@ export default function BPSPro() {
                   
                   <div className="space-y-3">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2 gap-2">
-                      <span className="text-sm">- {activeSubItem?.name} contract renewal</span>
+                      <span className="text-sm text-slate-900">- {activeSubItem?.name} contract renewal</span>
                       <button 
                         onClick={() => alert('Add contract first - feature coming soon')}
                         className="text-red-500 text-sm hover:underline"
@@ -2443,7 +2443,7 @@ export default function BPSPro() {
                 {activeSection === 'insurance' && (
                   <div className="border-t pt-6">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="font-semibold">Settings</span>
+                      <span className="font-semibold text-slate-900">Settings</span>
                       <ChevronDown className="w-4 h-4" />
                     </div>
                     <div className="space-y-2">
@@ -2566,7 +2566,7 @@ export default function BPSPro() {
                   </div>
                   {unit.residentName && (
                     <div className="border-t pt-3 mt-3">
-                      <p className="text-sm font-medium">{unit.residentName}</p>
+                      <p className="text-sm font-medium text-slate-900">{unit.residentName}</p>
                       <p className="text-xs text-slate-600">{unit.isOwner ? 'Owner' : 'Tenant'}</p>
                       {unit.residentEmail && <p className="text-xs text-slate-500 break-words">{unit.residentEmail}</p>}
                       {unit.residentPhone && <p className="text-xs text-slate-500">{unit.residentPhone}</p>}
@@ -2678,7 +2678,7 @@ export default function BPSPro() {
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className="font-medium truncate">{item.subject}</h3>
+                        <h3 className="font-medium text-slate-900 truncate">{item.subject}</h3>
                         <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
                           item.direction === 'Incoming' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
                         }`}>
@@ -2777,7 +2777,7 @@ export default function BPSPro() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className="font-medium truncate">{job.title}</h3>
+                        <h3 className="font-medium text-slate-900 truncate">{job.title}</h3>
                         <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
                           job.status === 'Complete' ? 'bg-green-100 text-green-700' :
                           job.status === 'In progress' ? 'bg-blue-100 text-blue-700' :
@@ -2841,11 +2841,11 @@ export default function BPSPro() {
     if (activeSection === 'portal') {
       return (
         <div className="p-4 md:p-8">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">Portal</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">Portal</h2>
           <div className="bg-white border rounded-lg p-8 md:p-12 max-w-2xl mx-auto">
             <div className="text-center">
               <DoorOpen className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 text-blue-500" />
-              <h3 className="text-xl md:text-2xl font-bold mb-4">Resident Portal</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-4">Resident Portal</h3>
               <p className="text-slate-600 mb-4">Access the resident-facing portal at:</p>
               <a 
                 href="https://myblockonline.co.uk" 
@@ -2887,7 +2887,7 @@ export default function BPSPro() {
     if (activeSection === 'hs' && !activeSubItem) {
       return (
         <div className="p-4 md:p-8">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">H&S</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">H&S</h2>
           
           {/* Desktop: show instruction, Mobile: show list */}
           <div className="hidden lg:block">
@@ -2908,7 +2908,7 @@ export default function BPSPro() {
                   className="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bps-blue-border hover:shadow-md transition-all text-left"
                 >
                   <FileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                  <span className="font-medium">{item.name}</span>
+                  <span className="font-medium text-slate-900">{item.name}</span>
                 </button>
               ))}
             </div>
@@ -2921,7 +2921,7 @@ export default function BPSPro() {
     if (activeSection === 'insurance' && !activeSubItem) {
       return (
         <div className="p-4 md:p-8">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">Insurance</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">Insurance</h2>
           
           {/* Desktop: show instruction, Mobile: show list */}
           <div className="hidden lg:block">
@@ -2933,7 +2933,7 @@ export default function BPSPro() {
             <p className="text-sm text-slate-600 mb-4">Select a category:</p>
             <div className="space-y-3">
               <div>
-                <h3 className="text-sm font-medium uppercase tracking-wide mb-2">Policy Documents</h3>
+                <h3 className="text-sm font-medium text-slate-900 uppercase tracking-wide mb-2">Policy Documents</h3>
                 <div className="space-y-2">
                   {insuranceCategories.policy.map(item => (
                     <button
@@ -2946,13 +2946,13 @@ export default function BPSPro() {
                       className="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bps-blue-border hover:shadow-md transition-all text-left"
                     >
                       <FileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                      <span className="font-medium">{item.name}</span>
+                      <span className="font-medium text-slate-900">{item.name}</span>
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <h3 className="text-sm font-medium uppercase tracking-wide mb-2">Other</h3>
+                <h3 className="text-sm font-medium text-slate-900 uppercase tracking-wide mb-2">Other</h3>
                 <div className="space-y-2">
                   {insuranceCategories.other.map(item => (
                     <button
@@ -2965,7 +2965,7 @@ export default function BPSPro() {
                       className="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bps-blue-border hover:shadow-md transition-all text-left"
                     >
                       <FileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                      <span className="font-medium">{item.name}</span>
+                      <span className="font-medium text-slate-900">{item.name}</span>
                     </button>
                   ))}
                 </div>
@@ -2980,7 +2980,7 @@ export default function BPSPro() {
     if (activeSection === 'utilities' && !activeSubItem) {
       return (
         <div className="p-4 md:p-8">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">Utilities</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">Utilities</h2>
           
           {/* Desktop: show instruction, Mobile: show list */}
           <div className="hidden lg:block">
@@ -3001,7 +3001,7 @@ export default function BPSPro() {
                   className="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bps-blue-border hover:shadow-md transition-all text-left"
                 >
                   <Zap className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                  <span className="font-medium">{item.fullName}</span>
+                  <span className="font-medium text-slate-900">{item.fullName}</span>
                 </button>
               ))}
             </div>
@@ -3014,7 +3014,7 @@ export default function BPSPro() {
     if (activeSection === 'documents' && !activeSubItem) {
       return (
         <div className="p-4 md:p-8">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">Documents</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">Documents</h2>
           
           {/* Desktop: show instruction, Mobile: show list */}
           <div className="hidden lg:block">
@@ -3035,7 +3035,7 @@ export default function BPSPro() {
                   className="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bps-blue-border hover:shadow-md transition-all text-left"
                 >
                   <FileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                  <span className="font-medium">{item.name}</span>
+                  <span className="font-medium text-slate-900">{item.name}</span>
                 </button>
               ))}
             </div>
@@ -3048,7 +3048,7 @@ export default function BPSPro() {
       <div className="flex items-center justify-center h-full text-slate-500 p-4">
         <div className="text-center">
           <FileText className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-          <p className="text-sm md:text-base">Select an item from the left</p>
+          <p className="text-sm md:text-base text-slate-900">Select an item from the left</p>
         </div>
       </div>
     );
@@ -3130,7 +3130,7 @@ export default function BPSPro() {
               onClick={() => setShowHelpSection(!showHelpSection)}
               className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded transition-colors"
             >
-              <span className="font-medium">Help & Support</span>
+              <span className="font-medium text-slate-900">Help & Support</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showHelpSection ? 'rotate-180' : ''}`} />
             </button>
             
@@ -3227,7 +3227,7 @@ export default function BPSPro() {
                     className="flex items-center justify-between w-full px-3 py-2.5 rounded text-sm hover:bg-white/10"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-xs">📚</span>
+                      <span className="text-xs text-slate-900">📚</span>
                       <span>Module 1</span>
                     </div>
                     <ChevronDown className={`w-4 h-4 transition-transform ${showModule1 ? 'rotate-180' : ''}`} />
@@ -3251,8 +3251,8 @@ export default function BPSPro() {
                           }}
                           className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm hover:bg-white/10 text-left"
                         >
-                          <span className="text-xs">🎥</span>
-                          <span className="text-xs">{video}</span>
+                          <span className="text-xs text-slate-900">🎥</span>
+                          <span className="text-xs text-slate-900">{video}</span>
                         </button>
                       ))}
                     </div>
@@ -3486,7 +3486,7 @@ export default function BPSPro() {
               return (
                 <React.Fragment key={`${item.category}-${item.id}`}>
                   {showCategory && (
-                    <div className="text-xs uppercase mb-2 mt-4 tracking-wide">{item.category}</div>
+                    <div className="text-xs uppercase text-slate-600 mb-2 mt-4 tracking-wide">{item.category}</div>
                   )}
                   <button
                     onClick={() => {
@@ -3626,7 +3626,7 @@ export default function BPSPro() {
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Finish set-up</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Frequency *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Frequency *</label>
                 <select 
                   value={setupForm.frequency}
                   onChange={(e) => setSetupForm({...setupForm, frequency: e.target.value})}
@@ -3640,7 +3640,7 @@ export default function BPSPro() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Last completed</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Last completed</label>
                 <input 
                   value={setupForm.lastCompleted}
                   onChange={(e) => setSetupForm({...setupForm, lastCompleted: e.target.value})}
@@ -3649,7 +3649,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Next due by *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Next due by *</label>
                 <input 
                   value={setupForm.nextDue}
                   onChange={(e) => setSetupForm({...setupForm, nextDue: e.target.value})}
@@ -3658,7 +3658,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Assigned to</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Assigned to</label>
                 <input 
                   value={setupForm.assignedTo}
                   onChange={(e) => setSetupForm({...setupForm, assignedTo: e.target.value})}
@@ -3668,7 +3668,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Auto-chase</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Auto-chase</label>
                 <select 
                   value={setupForm.autoChase}
                   onChange={(e) => setSetupForm({...setupForm, autoChase: e.target.value})}
@@ -3755,7 +3755,7 @@ export default function BPSPro() {
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Add new block</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Block name *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Block name *</label>
                 <input 
                   value={newBlockForm.name}
                   onChange={(e) => setNewBlockForm({...newBlockForm, name: e.target.value})}
@@ -3765,7 +3765,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Short name (for sidebar) *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Short name (for sidebar) *</label>
                 <input 
                   value={newBlockForm.shortName}
                   onChange={(e) => setNewBlockForm({...newBlockForm, shortName: e.target.value})}
@@ -3775,7 +3775,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Address *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Address *</label>
                 <input 
                   value={newBlockForm.address}
                   onChange={(e) => setNewBlockForm({...newBlockForm, address: e.target.value})}
@@ -3785,7 +3785,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Height category</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Height category</label>
                 <select 
                   value={newBlockForm.height}
                   onChange={(e) => setNewBlockForm({...newBlockForm, height: e.target.value})}
@@ -3876,7 +3876,7 @@ export default function BPSPro() {
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">New task</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Task title *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Task title *</label>
                 <input 
                   value={newTaskForm.title}
                   onChange={(e) => setNewTaskForm({...newTaskForm, title: e.target.value})}
@@ -3886,7 +3886,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Description</label>
                 <textarea 
                   value={newTaskForm.description}
                   onChange={(e) => setNewTaskForm({...newTaskForm, description: e.target.value})}
@@ -3896,7 +3896,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Due date</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Due date</label>
                 <input 
                   value={newTaskForm.dueDate}
                   onChange={(e) => setNewTaskForm({...newTaskForm, dueDate: e.target.value})}
@@ -3905,7 +3905,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Priority</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Priority</label>
                 <select 
                   value={newTaskForm.priority}
                   onChange={(e) => setNewTaskForm({...newTaskForm, priority: e.target.value})}
@@ -3917,7 +3917,7 @@ export default function BPSPro() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Category</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Category</label>
                 <select 
                   value={newTaskForm.category}
                   onChange={(e) => setNewTaskForm({...newTaskForm, category: e.target.value})}
@@ -4004,7 +4004,7 @@ export default function BPSPro() {
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Add Responsible Person</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Name *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Name *</label>
                 <input 
                   value={rpForm.name}
                   onChange={(e) => setRpForm({...rpForm, name: e.target.value})}
@@ -4014,7 +4014,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Role</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Role</label>
                 <input 
                   value={rpForm.role}
                   onChange={(e) => setRpForm({...rpForm, role: e.target.value})}
@@ -4024,7 +4024,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Email</label>
                 <input 
                   value={rpForm.email}
                   onChange={(e) => setRpForm({...rpForm, email: e.target.value})}
@@ -4034,7 +4034,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Phone</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Phone</label>
                 <input 
                   value={rpForm.phone}
                   onChange={(e) => setRpForm({...rpForm, phone: e.target.value})}
@@ -4089,7 +4089,7 @@ export default function BPSPro() {
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Add meter reading</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Date *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Date *</label>
                 <input 
                   value={meterReadingForm.date}
                   onChange={(e) => setMeterReadingForm({...meterReadingForm, date: e.target.value})}
@@ -4098,7 +4098,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Reading *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Reading *</label>
                 <input 
                   value={meterReadingForm.reading}
                   onChange={(e) => setMeterReadingForm({...meterReadingForm, reading: e.target.value})}
@@ -4108,7 +4108,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Notes</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Notes</label>
                 <textarea 
                   value={meterReadingForm.notes}
                   onChange={(e) => setMeterReadingForm({...meterReadingForm, notes: e.target.value})}
@@ -4168,7 +4168,7 @@ export default function BPSPro() {
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">New issue or complaint</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Title *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Title *</label>
                 <input 
                   value={issueForm.title}
                   onChange={(e) => setIssueForm({...issueForm, title: e.target.value})}
@@ -4178,7 +4178,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Location</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Location</label>
                 <input 
                   value={issueForm.location}
                   onChange={(e) => setIssueForm({...issueForm, location: e.target.value})}
@@ -4188,7 +4188,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Description</label>
                 <textarea 
                   value={issueForm.description}
                   onChange={(e) => setIssueForm({...issueForm, description: e.target.value})}
@@ -4198,7 +4198,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Priority</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Priority</label>
                 <select 
                   value={issueForm.priority}
                   onChange={(e) => setIssueForm({...issueForm, priority: e.target.value})}
@@ -4261,7 +4261,7 @@ export default function BPSPro() {
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Edit block details</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Block name *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Block name *</label>
                 <input 
                   value={editBlockForm.name}
                   onChange={(e) => setEditBlockForm({...editBlockForm, name: e.target.value})}
@@ -4270,7 +4270,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Short name (sidebar/header) *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Short name (sidebar/header) *</label>
                 <input 
                   value={editBlockForm.shortName}
                   onChange={(e) => setEditBlockForm({...editBlockForm, shortName: e.target.value})}
@@ -4279,7 +4279,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Address *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Address *</label>
                 <input 
                   value={editBlockForm.address}
                   onChange={(e) => setEditBlockForm({...editBlockForm, address: e.target.value})}
@@ -4288,7 +4288,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Height category</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Height category</label>
                 <select 
                   value={editBlockForm.height}
                   onChange={(e) => setEditBlockForm({...editBlockForm, height: e.target.value})}
@@ -4338,7 +4338,7 @@ export default function BPSPro() {
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Edit managing agent</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Managing agent name *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Managing agent name *</label>
                 <input 
                   value={editAgentForm.name}
                   onChange={(e) => setEditAgentForm({...editAgentForm, name: e.target.value})}
@@ -4348,7 +4348,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Address *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Address *</label>
                 <textarea 
                   value={editAgentForm.address}
                   onChange={(e) => setEditAgentForm({...editAgentForm, address: e.target.value})}
@@ -4358,7 +4358,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Property manager *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Property manager *</label>
                 <input 
                   value={editAgentForm.manager}
                   onChange={(e) => setEditAgentForm({...editAgentForm, manager: e.target.value})}
@@ -4368,7 +4368,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Email *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Email *</label>
                 <input 
                   value={editAgentForm.email}
                   onChange={(e) => setEditAgentForm({...editAgentForm, email: e.target.value})}
@@ -4416,7 +4416,7 @@ export default function BPSPro() {
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">{jobForm.id ? 'Edit job' : 'New job'}</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Job title *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Job title *</label>
                 <input 
                   value={jobForm.title}
                   onChange={(e) => setJobForm({...jobForm, title: e.target.value})}
@@ -4426,7 +4426,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Type</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Type</label>
                 <select 
                   value={jobForm.type}
                   onChange={(e) => setJobForm({...jobForm, type: e.target.value})}
@@ -4441,7 +4441,7 @@ export default function BPSPro() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Description</label>
                 <textarea 
                   value={jobForm.description}
                   onChange={(e) => setJobForm({...jobForm, description: e.target.value})}
@@ -4451,7 +4451,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Location</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Location</label>
                 <input 
                   value={jobForm.location}
                   onChange={(e) => setJobForm({...jobForm, location: e.target.value})}
@@ -4461,7 +4461,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Contractor</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Contractor</label>
                 <input 
                   value={jobForm.contractor}
                   onChange={(e) => setJobForm({...jobForm, contractor: e.target.value})}
@@ -4471,7 +4471,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Cost (£)</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Cost (£)</label>
                 <input 
                   value={jobForm.cost}
                   onChange={(e) => setJobForm({...jobForm, cost: e.target.value})}
@@ -4482,7 +4482,7 @@ export default function BPSPro() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Start date</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Start date</label>
                   <input 
                     value={jobForm.startDate}
                     onChange={(e) => setJobForm({...jobForm, startDate: e.target.value})}
@@ -4491,7 +4491,7 @@ export default function BPSPro() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Completion date</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Completion date</label>
                   <input 
                     value={jobForm.completionDate}
                     onChange={(e) => setJobForm({...jobForm, completionDate: e.target.value})}
@@ -4501,7 +4501,7 @@ export default function BPSPro() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Status</label>
                 <select 
                   value={jobForm.status}
                   onChange={(e) => setJobForm({...jobForm, status: e.target.value})}
@@ -4516,7 +4516,7 @@ export default function BPSPro() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Notes</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Notes</label>
                 <textarea 
                   value={jobForm.notes}
                   onChange={(e) => setJobForm({...jobForm, notes: e.target.value})}
@@ -4610,7 +4610,7 @@ export default function BPSPro() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Type *</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Type *</label>
                   <select 
                     value={unitForm.type}
                     onChange={(e) => setUnitForm({...unitForm, type: e.target.value})}
@@ -4623,7 +4623,7 @@ export default function BPSPro() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Unit number *</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Unit number *</label>
                   <input 
                     value={unitForm.number}
                     onChange={(e) => setUnitForm({...unitForm, number: e.target.value})}
@@ -4635,7 +4635,7 @@ export default function BPSPro() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Floor</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Floor</label>
                   <input 
                     value={unitForm.floor}
                     onChange={(e) => setUnitForm({...unitForm, floor: e.target.value})}
@@ -4645,7 +4645,7 @@ export default function BPSPro() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Bedrooms</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Bedrooms</label>
                   <input 
                     value={unitForm.bedrooms}
                     onChange={(e) => setUnitForm({...unitForm, bedrooms: e.target.value})}
@@ -4656,10 +4656,10 @@ export default function BPSPro() {
                 </div>
               </div>
               <div className="border-t pt-4">
-                <h4 className="font-medium mb-3">Resident information</h4>
+                <h4 className="font-medium text-slate-900 mb-3">Resident information</h4>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Name</label>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Name</label>
                     <input 
                       value={unitForm.residentName}
                       onChange={(e) => setUnitForm({...unitForm, residentName: e.target.value})}
@@ -4669,7 +4669,7 @@ export default function BPSPro() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Email</label>
                     <input 
                       value={unitForm.residentEmail}
                       onChange={(e) => setUnitForm({...unitForm, residentEmail: e.target.value})}
@@ -4679,7 +4679,7 @@ export default function BPSPro() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Phone</label>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Phone</label>
                     <input 
                       value={unitForm.residentPhone}
                       onChange={(e) => setUnitForm({...unitForm, residentPhone: e.target.value})}
@@ -4689,7 +4689,7 @@ export default function BPSPro() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Move-in date</label>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Move-in date</label>
                     <input 
                       value={unitForm.moveInDate}
                       onChange={(e) => setUnitForm({...unitForm, moveInDate: e.target.value})}
@@ -4704,12 +4704,12 @@ export default function BPSPro() {
                       onChange={(e) => setUnitForm({...unitForm, isOwner: e.target.checked})}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm">Owner (unchecked = tenant)</span>
+                    <span className="text-sm text-slate-900">Owner (unchecked = tenant)</span>
                   </label>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Notes</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Notes</label>
                 <textarea 
                   value={unitForm.notes}
                   onChange={(e) => setUnitForm({...unitForm, notes: e.target.value})}
@@ -4857,7 +4857,7 @@ export default function BPSPro() {
             
             {bulkImportPreview.length > 0 && (
               <div className="mb-6">
-                <h4 className="font-medium mb-2">Preview (first 5 rows)</h4>
+                <h4 className="font-medium text-slate-900 mb-2">Preview (first 5 rows)</h4>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm border">
                     <thead className="bg-slate-50">
@@ -4946,7 +4946,7 @@ export default function BPSPro() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Type</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Type</label>
                   <select 
                     value={correspondenceForm.type}
                     onChange={(e) => setCorrespondenceForm({...correspondenceForm, type: e.target.value})}
@@ -4959,7 +4959,7 @@ export default function BPSPro() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Direction</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Direction</label>
                   <select 
                     value={correspondenceForm.direction}
                     onChange={(e) => setCorrespondenceForm({...correspondenceForm, direction: e.target.value})}
@@ -4971,7 +4971,7 @@ export default function BPSPro() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Subject *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Subject *</label>
                 <input 
                   value={correspondenceForm.subject}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, subject: e.target.value})}
@@ -4982,7 +4982,7 @@ export default function BPSPro() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Recipient name *</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Recipient name *</label>
                   <input 
                     value={correspondenceForm.recipientName}
                     onChange={(e) => setCorrespondenceForm({...correspondenceForm, recipientName: e.target.value})}
@@ -4992,7 +4992,7 @@ export default function BPSPro() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Unit number</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Unit number</label>
                   <input 
                     value={correspondenceForm.unitNumber}
                     onChange={(e) => setCorrespondenceForm({...correspondenceForm, unitNumber: e.target.value})}
@@ -5003,7 +5003,7 @@ export default function BPSPro() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Email</label>
                 <input 
                   value={correspondenceForm.recipientEmail}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, recipientEmail: e.target.value})}
@@ -5013,7 +5013,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Date</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Date</label>
                 <input 
                   value={correspondenceForm.date}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, date: e.target.value})}
@@ -5022,7 +5022,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Content *</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Content *</label>
                 <textarea 
                   value={correspondenceForm.content}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, content: e.target.value})}
@@ -5032,7 +5032,7 @@ export default function BPSPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Status</label>
                 <select 
                   value={correspondenceForm.status}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, status: e.target.value})}
@@ -5046,7 +5046,7 @@ export default function BPSPro() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Notes</label>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Notes</label>
                 <textarea 
                   value={correspondenceForm.notes}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, notes: e.target.value})}
