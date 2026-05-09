@@ -3693,7 +3693,7 @@ export default function BPSPro() {
                     autoChase: 'Disabled'
                   });
                 }} 
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -3808,7 +3808,7 @@ export default function BPSPro() {
                     height: 'Under 11m'
                   });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -3945,7 +3945,7 @@ export default function BPSPro() {
                     description: ''
                   });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -4050,7 +4050,7 @@ export default function BPSPro() {
                   setShowModal(false);
                   setRpForm({ name: '', role: '', email: '', phone: '' });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -4124,7 +4124,7 @@ export default function BPSPro() {
                   setShowModal(false);
                   setMeterReadingForm({ date: '', reading: '', notes: '' });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -4216,7 +4216,7 @@ export default function BPSPro() {
                   setShowModal(false);
                   setIssueForm({ title: '', description: '', priority: 'Medium', location: '' });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -4303,7 +4303,7 @@ export default function BPSPro() {
             <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button 
                 onClick={() => setShowModal(false)}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -4381,7 +4381,7 @@ export default function BPSPro() {
             <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button 
                 onClick={() => setShowModal(false)}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -4543,7 +4543,7 @@ export default function BPSPro() {
                     notes: ''
                   });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -4736,7 +4736,7 @@ export default function BPSPro() {
                     notes: ''
                   });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -4893,7 +4893,7 @@ export default function BPSPro() {
                   setBulkImportError('');
                   setBulkImportFileName('');
                 }}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
@@ -5073,7 +5073,7 @@ export default function BPSPro() {
                     notes: ''
                   });
                 }}
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 order-2 sm:order-1"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 hover:bg-slate-50 active:bg-red-500 active:text-white active:border-red-500 order-2 sm:order-1"
               >
                 Cancel
               </button>
