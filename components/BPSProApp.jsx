@@ -3630,7 +3630,7 @@ export default function BPSPro() {
                 <select 
                   value={setupForm.frequency}
                   onChange={(e) => setSetupForm({...setupForm, frequency: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                 >
                   <option>Annual</option>
                   <option>6-Monthly</option>
@@ -3645,7 +3645,7 @@ export default function BPSPro() {
                   value={setupForm.lastCompleted}
                   onChange={(e) => setSetupForm({...setupForm, lastCompleted: e.target.value})}
                   type="date" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                 />
               </div>
               <div>
@@ -3654,7 +3654,7 @@ export default function BPSPro() {
                   value={setupForm.nextDue}
                   onChange={(e) => setSetupForm({...setupForm, nextDue: e.target.value})}
                   type="date" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                 />
               </div>
               <div>
@@ -3663,7 +3663,7 @@ export default function BPSPro() {
                   value={setupForm.assignedTo}
                   onChange={(e) => setSetupForm({...setupForm, assignedTo: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Name of contractor or person" 
                 />
               </div>
@@ -3672,7 +3672,7 @@ export default function BPSPro() {
                 <select 
                   value={setupForm.autoChase}
                   onChange={(e) => setSetupForm({...setupForm, autoChase: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                 >
                   <option>Disabled</option>
                   <option>7 days before</option>
@@ -3760,7 +3760,7 @@ export default function BPSPro() {
                   value={newBlockForm.name}
                   onChange={(e) => setNewBlockForm({...newBlockForm, name: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., Riverside Apartments" 
                 />
               </div>
@@ -3770,7 +3770,7 @@ export default function BPSPro() {
                   value={newBlockForm.shortName}
                   onChange={(e) => setNewBlockForm({...newBlockForm, shortName: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., Riverside Apt" 
                 />
               </div>
@@ -3780,7 +3780,7 @@ export default function BPSPro() {
                   value={newBlockForm.address}
                   onChange={(e) => setNewBlockForm({...newBlockForm, address: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Full address" 
                 />
               </div>
@@ -3789,7 +3789,7 @@ export default function BPSPro() {
                 <select 
                   value={newBlockForm.height}
                   onChange={(e) => setNewBlockForm({...newBlockForm, height: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                 >
                   <option>Under 11m</option>
                   <option>11m - 18m</option>
@@ -3881,7 +3881,7 @@ export default function BPSPro() {
                   value={newTaskForm.title}
                   onChange={(e) => setNewTaskForm({...newTaskForm, title: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., Schedule fire alarm test" 
                 />
               </div>
@@ -3891,7 +3891,7 @@ export default function BPSPro() {
                   value={newTaskForm.description}
                   onChange={(e) => setNewTaskForm({...newTaskForm, description: e.target.value})}
                   rows="3"
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Add details about this task..." 
                 />
               </div>
@@ -3901,7 +3901,7 @@ export default function BPSPro() {
                   value={newTaskForm.dueDate}
                   onChange={(e) => setNewTaskForm({...newTaskForm, dueDate: e.target.value})}
                   type="date" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                 />
               </div>
               <div>
@@ -3909,7 +3909,7 @@ export default function BPSPro() {
                 <select 
                   value={newTaskForm.priority}
                   onChange={(e) => setNewTaskForm({...newTaskForm, priority: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                 >
                   <option>Low</option>
                   <option>Medium</option>
@@ -3921,7 +3921,7 @@ export default function BPSPro() {
                 <select 
                   value={newTaskForm.category}
                   onChange={(e) => setNewTaskForm({...newTaskForm, category: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                 >
                   <option>General</option>
                   <option>Documents</option>
@@ -4009,7 +4009,7 @@ export default function BPSPro() {
                   value={rpForm.name}
                   onChange={(e) => setRpForm({...rpForm, name: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Full name" 
                 />
               </div>
@@ -4019,7 +4019,7 @@ export default function BPSPro() {
                   value={rpForm.role}
                   onChange={(e) => setRpForm({...rpForm, role: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., Property Manager, Director" 
                 />
               </div>
@@ -4029,7 +4029,7 @@ export default function BPSPro() {
                   value={rpForm.email}
                   onChange={(e) => setRpForm({...rpForm, email: e.target.value})}
                   type="email" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="email@example.com" 
                 />
               </div>
@@ -4039,7 +4039,7 @@ export default function BPSPro() {
                   value={rpForm.phone}
                   onChange={(e) => setRpForm({...rpForm, phone: e.target.value})}
                   type="tel" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="0800 000 0000" 
                 />
               </div>
@@ -4094,7 +4094,7 @@ export default function BPSPro() {
                   value={meterReadingForm.date}
                   onChange={(e) => setMeterReadingForm({...meterReadingForm, date: e.target.value})}
                   type="date" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                 />
               </div>
               <div>
@@ -4103,7 +4103,7 @@ export default function BPSPro() {
                   value={meterReadingForm.reading}
                   onChange={(e) => setMeterReadingForm({...meterReadingForm, reading: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., 12345 kWh" 
                 />
               </div>
@@ -4113,7 +4113,7 @@ export default function BPSPro() {
                   value={meterReadingForm.notes}
                   onChange={(e) => setMeterReadingForm({...meterReadingForm, notes: e.target.value})}
                   rows="2"
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Optional notes" 
                 />
               </div>
@@ -4173,7 +4173,7 @@ export default function BPSPro() {
                   value={issueForm.title}
                   onChange={(e) => setIssueForm({...issueForm, title: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., Broken communal door" 
                 />
               </div>
@@ -4183,7 +4183,7 @@ export default function BPSPro() {
                   value={issueForm.location}
                   onChange={(e) => setIssueForm({...issueForm, location: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., Ground floor lobby, Flat 3" 
                 />
               </div>
@@ -4193,7 +4193,7 @@ export default function BPSPro() {
                   value={issueForm.description}
                   onChange={(e) => setIssueForm({...issueForm, description: e.target.value})}
                   rows="3"
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Describe the issue..." 
                 />
               </div>
@@ -4202,7 +4202,7 @@ export default function BPSPro() {
                 <select 
                   value={issueForm.priority}
                   onChange={(e) => setIssueForm({...issueForm, priority: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                 >
                   <option>Low</option>
                   <option>Medium</option>
@@ -4266,7 +4266,7 @@ export default function BPSPro() {
                   value={editBlockForm.name}
                   onChange={(e) => setEditBlockForm({...editBlockForm, name: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                 />
               </div>
               <div>
@@ -4275,7 +4275,7 @@ export default function BPSPro() {
                   value={editBlockForm.shortName}
                   onChange={(e) => setEditBlockForm({...editBlockForm, shortName: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                 />
               </div>
               <div>
@@ -4284,7 +4284,7 @@ export default function BPSPro() {
                   value={editBlockForm.address}
                   onChange={(e) => setEditBlockForm({...editBlockForm, address: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                 />
               </div>
               <div>
@@ -4292,7 +4292,7 @@ export default function BPSPro() {
                 <select 
                   value={editBlockForm.height}
                   onChange={(e) => setEditBlockForm({...editBlockForm, height: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                 >
                   <option>Under 11m</option>
                   <option>11m - 18m</option>
@@ -4343,7 +4343,7 @@ export default function BPSPro() {
                   value={editAgentForm.name}
                   onChange={(e) => setEditAgentForm({...editAgentForm, name: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., Block Property Solutions"
                 />
               </div>
@@ -4353,7 +4353,7 @@ export default function BPSPro() {
                   value={editAgentForm.address}
                   onChange={(e) => setEditAgentForm({...editAgentForm, address: e.target.value})}
                   rows="2"
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Full business address"
                 />
               </div>
@@ -4363,7 +4363,7 @@ export default function BPSPro() {
                   value={editAgentForm.manager}
                   onChange={(e) => setEditAgentForm({...editAgentForm, manager: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Manager name"
                 />
               </div>
@@ -4373,7 +4373,7 @@ export default function BPSPro() {
                   value={editAgentForm.email}
                   onChange={(e) => setEditAgentForm({...editAgentForm, email: e.target.value})}
                   type="email" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="manager@example.com"
                 />
               </div>
@@ -4421,7 +4421,7 @@ export default function BPSPro() {
                   value={jobForm.title}
                   onChange={(e) => setJobForm({...jobForm, title: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., Repair communal door"
                 />
               </div>
@@ -4430,7 +4430,7 @@ export default function BPSPro() {
                 <select 
                   value={jobForm.type}
                   onChange={(e) => setJobForm({...jobForm, type: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                 >
                   <option>Maintenance</option>
                   <option>Repair</option>
@@ -4446,7 +4446,7 @@ export default function BPSPro() {
                   value={jobForm.description}
                   onChange={(e) => setJobForm({...jobForm, description: e.target.value})}
                   rows="3"
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Describe the work required..."
                 />
               </div>
@@ -4456,7 +4456,7 @@ export default function BPSPro() {
                   value={jobForm.location}
                   onChange={(e) => setJobForm({...jobForm, location: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., Ground floor lobby"
                 />
               </div>
@@ -4466,7 +4466,7 @@ export default function BPSPro() {
                   value={jobForm.contractor}
                   onChange={(e) => setJobForm({...jobForm, contractor: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Contractor name"
                 />
               </div>
@@ -4476,7 +4476,7 @@ export default function BPSPro() {
                   value={jobForm.cost}
                   onChange={(e) => setJobForm({...jobForm, cost: e.target.value})}
                   type="number" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="0.00"
                 />
               </div>
@@ -4487,7 +4487,7 @@ export default function BPSPro() {
                     value={jobForm.startDate}
                     onChange={(e) => setJobForm({...jobForm, startDate: e.target.value})}
                     type="date" 
-                    className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   />
                 </div>
                 <div>
@@ -4496,7 +4496,7 @@ export default function BPSPro() {
                     value={jobForm.completionDate}
                     onChange={(e) => setJobForm({...jobForm, completionDate: e.target.value})}
                     type="date" 
-                    className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   />
                 </div>
               </div>
@@ -4505,7 +4505,7 @@ export default function BPSPro() {
                 <select 
                   value={jobForm.status}
                   onChange={(e) => setJobForm({...jobForm, status: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                 >
                   <option>Quote requested</option>
                   <option>Quote received</option>
@@ -4521,7 +4521,7 @@ export default function BPSPro() {
                   value={jobForm.notes}
                   onChange={(e) => setJobForm({...jobForm, notes: e.target.value})}
                   rows="2"
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Additional notes..."
                 />
               </div>
@@ -4614,7 +4614,7 @@ export default function BPSPro() {
                   <select 
                     value={unitForm.type}
                     onChange={(e) => setUnitForm({...unitForm, type: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                   >
                     <option>Flat</option>
                     <option>House</option>
@@ -4628,7 +4628,7 @@ export default function BPSPro() {
                     value={unitForm.number}
                     onChange={(e) => setUnitForm({...unitForm, number: e.target.value})}
                     type="text" 
-                    className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                     placeholder="e.g., 1A"
                   />
                 </div>
@@ -4640,7 +4640,7 @@ export default function BPSPro() {
                     value={unitForm.floor}
                     onChange={(e) => setUnitForm({...unitForm, floor: e.target.value})}
                     type="text" 
-                    className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                     placeholder="e.g., 1, G"
                   />
                 </div>
@@ -4650,7 +4650,7 @@ export default function BPSPro() {
                     value={unitForm.bedrooms}
                     onChange={(e) => setUnitForm({...unitForm, bedrooms: e.target.value})}
                     type="number" 
-                    className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                     placeholder="0"
                   />
                 </div>
@@ -4664,7 +4664,7 @@ export default function BPSPro() {
                       value={unitForm.residentName}
                       onChange={(e) => setUnitForm({...unitForm, residentName: e.target.value})}
                       type="text" 
-                      className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                      className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                       placeholder="Resident name"
                     />
                   </div>
@@ -4674,7 +4674,7 @@ export default function BPSPro() {
                       value={unitForm.residentEmail}
                       onChange={(e) => setUnitForm({...unitForm, residentEmail: e.target.value})}
                       type="email" 
-                      className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                      className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                       placeholder="email@example.com"
                     />
                   </div>
@@ -4684,7 +4684,7 @@ export default function BPSPro() {
                       value={unitForm.residentPhone}
                       onChange={(e) => setUnitForm({...unitForm, residentPhone: e.target.value})}
                       type="tel" 
-                      className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                      className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                       placeholder="Phone number"
                     />
                   </div>
@@ -4694,7 +4694,7 @@ export default function BPSPro() {
                       value={unitForm.moveInDate}
                       onChange={(e) => setUnitForm({...unitForm, moveInDate: e.target.value})}
                       type="date" 
-                      className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                      className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                     />
                   </div>
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -4714,7 +4714,7 @@ export default function BPSPro() {
                   value={unitForm.notes}
                   onChange={(e) => setUnitForm({...unitForm, notes: e.target.value})}
                   rows="2"
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Additional notes..."
                 />
               </div>
@@ -4845,7 +4845,7 @@ export default function BPSPro() {
                   };
                   reader.readAsText(file);
                 }}
-                className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
               />
               {bulkImportFileName && (
                 <p className="text-sm text-slate-600 mt-2">Selected: {bulkImportFileName}</p>
@@ -4950,7 +4950,7 @@ export default function BPSPro() {
                   <select 
                     value={correspondenceForm.type}
                     onChange={(e) => setCorrespondenceForm({...correspondenceForm, type: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                   >
                     <option>Email</option>
                     <option>Letter</option>
@@ -4963,7 +4963,7 @@ export default function BPSPro() {
                   <select 
                     value={correspondenceForm.direction}
                     onChange={(e) => setCorrespondenceForm({...correspondenceForm, direction: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                   >
                     <option>Outgoing</option>
                     <option>Incoming</option>
@@ -4976,7 +4976,7 @@ export default function BPSPro() {
                   value={correspondenceForm.subject}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, subject: e.target.value})}
                   type="text" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="e.g., Noise complaint - Unit 3A"
                 />
               </div>
@@ -4987,7 +4987,7 @@ export default function BPSPro() {
                     value={correspondenceForm.recipientName}
                     onChange={(e) => setCorrespondenceForm({...correspondenceForm, recipientName: e.target.value})}
                     type="text" 
-                    className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                     placeholder="Name"
                   />
                 </div>
@@ -4997,7 +4997,7 @@ export default function BPSPro() {
                     value={correspondenceForm.unitNumber}
                     onChange={(e) => setCorrespondenceForm({...correspondenceForm, unitNumber: e.target.value})}
                     type="text" 
-                    className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                    className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                     placeholder="e.g., 3A"
                   />
                 </div>
@@ -5008,7 +5008,7 @@ export default function BPSPro() {
                   value={correspondenceForm.recipientEmail}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, recipientEmail: e.target.value})}
                   type="email" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="email@example.com"
                 />
               </div>
@@ -5018,7 +5018,7 @@ export default function BPSPro() {
                   value={correspondenceForm.date}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, date: e.target.value})}
                   type="date" 
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                 />
               </div>
               <div>
@@ -5027,7 +5027,7 @@ export default function BPSPro() {
                   value={correspondenceForm.content}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, content: e.target.value})}
                   rows="4"
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Message content..."
                 />
               </div>
@@ -5036,7 +5036,7 @@ export default function BPSPro() {
                 <select 
                   value={correspondenceForm.status}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, status: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500"
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
                 >
                   <option>Draft</option>
                   <option>Sent</option>
@@ -5051,7 +5051,7 @@ export default function BPSPro() {
                   value={correspondenceForm.notes}
                   onChange={(e) => setCorrespondenceForm({...correspondenceForm, notes: e.target.value})}
                   rows="2"
-                  className="w-full border rounded-lg px-3 py-2.5 text-sm placeholder:text-slate-500" 
+                  className="w-full border rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500" 
                   placeholder="Internal notes..."
                 />
               </div>
