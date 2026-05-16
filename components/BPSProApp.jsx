@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap } from 'lucide-react';
 
 export default function BPSPro() {
@@ -138,6 +138,15 @@ export default function BPSPro() {
     const issueCount = currentBlockData.issues?.length || 0;
     return taskCount + issueCount;
   };
+
+  // Memoized calculation of total tasks across all blocks (performance optimization)
+  const totalTasksAllBlocks = useMemo(() => {
+    return blocks.reduce((sum, block) => {
+      const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
+      const taskCount = (currentBlockData.tasks?.length || 0) + (currentBlockData.issues?.length || 0);
+      return sum + taskCount;
+    }, 0);
+  }, [blocks, blockData]);
 
   const hasOverdueTasks = (blockId) => {
     const currentBlockData = blockData[blockId] || { tasks: [] };
@@ -626,16 +635,11 @@ export default function BPSPro() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
               <div className="flex items-center gap-3">
                 <h2 className="text-xl md:text-2xl font-bold text-slate-900">All blocks</h2>
-                {(() => {
-                  const totalTasks = blocks.reduce((sum, block) => {
-                    const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
-                    const taskCount = (currentBlockData.tasks?.length || 0) + (currentBlockData.issues?.length || 0);
-                    return sum + taskCount;
-                  }, 0);
-                  return totalTasks > 0 ? (
-                    <span className="bg-red-500 text-white text-sm px-2.5 py-1 rounded-full font-medium">{totalTasks}</span>
-                  ) : null;
-                })()}
+                {totalTasksAllBlocks > 0 && (
+                  <span className="bg-red-500 text-white text-sm px-2.5 py-1 rounded-full font-medium">
+                    {totalTasksAllBlocks}
+                  </span>
+                )}
               </div>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 <button 
@@ -3071,7 +3075,14 @@ export default function BPSPro() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen bg-slate-50 text-slate-600">Loading...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-slate-50">
+        <div className="mb-4">
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
+        <p className="text-slate-600 font-medium">Loading BPS Pro...</p>
+      </div>
+    );
   }
 
   const currentBlock = blocks.find(b => b.id === selectedBlock);
@@ -3442,16 +3453,11 @@ export default function BPSPro() {
           <div className="border-t border-slate-700 p-3">
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs text-white">All blocks</div>
-              {(() => {
-                const totalTasks = blocks.reduce((sum, block) => {
-                  const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
-                  const taskCount = (currentBlockData.tasks?.length || 0) + (currentBlockData.issues?.length || 0);
-                  return sum + taskCount;
-                }, 0);
-                return totalTasks > 0 ? (
-                  <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{totalTasks}</span>
-                ) : null;
-              })()}
+              {totalTasksAllBlocks > 0 && (
+                <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                  {totalTasksAllBlocks}
+                </span>
+              )}
             </div>
             <button 
               onClick={() => {
