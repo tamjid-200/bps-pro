@@ -133,8 +133,10 @@ export default function BPSPro() {
 
   // Helper functions for task counting and status
   const getTotalTasksForBlock = (blockId) => {
-    const currentBlockData = blockData[blockId] || { tasks: [] };
-    return currentBlockData.tasks?.length || 0;
+    const currentBlockData = blockData[blockId] || { tasks: [], issues: [] };
+    const taskCount = currentBlockData.tasks?.length || 0;
+    const issueCount = currentBlockData.issues?.length || 0;
+    return taskCount + issueCount;
   };
 
   const hasOverdueTasks = (blockId) => {
@@ -186,7 +188,9 @@ export default function BPSPro() {
       case 'correspondence':
         return (currentBlockData.correspondence || []).length;
       case 'all-tasks':
-        return (currentBlockData.tasks || []).length;
+        const taskCount = (currentBlockData.tasks || []).length;
+        const issueCount = (currentBlockData.issues || []).length;
+        return taskCount + issueCount;
       default:
         return 0;
     }
@@ -657,8 +661,8 @@ export default function BPSPro() {
                 </div>
               ) : (
                 blocks.map(block => {
-                const currentBlockData = blockData[block.id] || { tasks: [] };
-                const taskCount = currentBlockData.tasks?.length || 0;
+                const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
+                const taskCount = (currentBlockData.tasks?.length || 0) + (currentBlockData.issues?.length || 0);
                 
                 return (
                   <div
@@ -3438,8 +3442,8 @@ export default function BPSPro() {
                 <span className="truncate">{currentBlock?.shortName}</span>
               </div>
               {(() => {
-                const currentBlockData = blockData[selectedBlock] || { tasks: [] };
-                const taskCount = currentBlockData.tasks?.length || 0;
+                const currentBlockData = blockData[selectedBlock] || { tasks: [], issues: [] };
+                const taskCount = (currentBlockData.tasks?.length || 0) + (currentBlockData.issues?.length || 0);
                 return taskCount > 0 ? (
                   <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0">{taskCount}</span>
                 ) : (
