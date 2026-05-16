@@ -624,7 +624,19 @@ export default function BPSPro() {
         <div className="p-4 md:p-8">
           <div className="max-w-6xl">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-              <h2 className="text-xl md:text-2xl font-bold text-slate-900">All blocks</h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900">All blocks</h2>
+                {(() => {
+                  const totalTasks = blocks.reduce((sum, block) => {
+                    const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
+                    const taskCount = (currentBlockData.tasks?.length || 0) + (currentBlockData.issues?.length || 0);
+                    return sum + taskCount;
+                  }, 0);
+                  return totalTasks > 0 ? (
+                    <span className="bg-red-500 text-white text-sm px-2.5 py-1 rounded-full font-medium">{totalTasks}</span>
+                  ) : null;
+                })()}
+              </div>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 <button 
                   onClick={async () => {
@@ -3428,7 +3440,19 @@ export default function BPSPro() {
 
         {!showAllBlocks && selectedBlock && (
           <div className="border-t border-slate-700 p-3">
-            <div className="text-xs text-white mb-2">All blocks</div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-xs text-white">All blocks</div>
+              {(() => {
+                const totalTasks = blocks.reduce((sum, block) => {
+                  const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
+                  const taskCount = (currentBlockData.tasks?.length || 0) + (currentBlockData.issues?.length || 0);
+                  return sum + taskCount;
+                }, 0);
+                return totalTasks > 0 ? (
+                  <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{totalTasks}</span>
+                ) : null;
+              })()}
+            </div>
             <button 
               onClick={() => {
                 setShowAllBlocks(true);
