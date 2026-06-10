@@ -131,6 +131,10 @@ export default function BPSPro() {
   // Custom modal state
   const [customModal, setCustomModal] = useState({ show: false, title: '', message: '' });
 
+  // Backup system state
+  const [backups, setBackups] = useState([]);
+  const [showBackupPanel, setShowBackupPanel] = useState(false);
+
   // Helper functions for task counting and status
   const getTotalTasksForBlock = (blockId) => {
     const currentBlockData = blockData[blockId] || { tasks: [], issues: [] };
@@ -211,6 +215,129 @@ export default function BPSPro() {
     const count = getNavCount(sectionId);
     return count === 0;
   };
+
+  // ============ BACKUP SYSTEM FUNCTIONS ============
+
+  // Save backup to Supabase
+  const saveBackupToSupabase = async (backupName = null) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const backupData = {
+        blocks: blocks,
+        blockData: blockData,
+        timestamp: new Date().toISOString()
+      };
+
+      const name = backupName || `Auto Backup - ${new Date().toLocaleString()}`;
+
+      const { error } = await supabase
+        .from('backups')
+        .insert({
+          user_id: user.id,
+          backup_data: backupData,
+          backup_name: name
+        });
+
+      if (error) {
+        console.error('Backup error:', error);
+      } else {
+        console.log('✅ Backup saved successfully');
+        loadBackups();
+      }
+    } catch (error) {
+      console.error('Backup error:', error);
+    }
+  };
+
+  // Load all backups
+  const loadBackups = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('backups')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Load backups error:', error);
+      } else {
+        setBackups(data || []);
+      }
+    } catch (error) {
+      console.error('Load backups error:', error);
+    }
+  };
+
+  // Restore from backup
+  const restoreFromBackup = async (backupId) => {
+    if (!confirm('⚠️ This will replace ALL current data with the backup. Are you sure?')) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('backups')
+        .select('backup_data')
+        .eq('id', backupId)
+        .single();
+
+      if (error) {
+        console.error('Restore error:', error);
+        alert('Failed to restore backup');
+        return;
+      }
+
+      const restoredData = data.backup_data;
+      
+      // Update state
+      setBlocks(restoredData.blocks);
+      setBlockData(restoredData.blockData);
+      
+      // Save to localStorage
+      await window.storage.set('bps_pro_blocks', JSON.stringify(restoredData.blocks));
+      await window.storage.set('bps_pro_block_data', JSON.stringify(restoredData.blockData));
+      
+      alert('✅ Data restored successfully!');
+      setShowBackupPanel(false);
+    } catch (error) {
+      console.error('Restore error:', error);
+      alert('Failed to restore backup');
+    }
+  };
+
+  // Delete old backups (keep only last 7)
+  const cleanupOldBackups = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: allBackups } = await supabase
+        .from('backups')
+        .select('id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (allBackups && allBackups.length > 7) {
+        const backupsToDelete = allBackups.slice(7).map(b => b.id);
+        
+        await supabase
+          .from('backups')
+          .delete()
+          .in('id', backupsToDelete);
+
+        console.log('✅ Cleaned up old backups');
+      }
+    } catch (error) {
+      console.error('Cleanup error:', error);
+    }
+  };
+
+  // ============ END BACKUP SYSTEM FUNCTIONS ============
 
   // File upload and management functions
   const handleFileUpload = async (section, subSection = null) => {
@@ -607,6 +734,21 @@ export default function BPSPro() {
       document.body.style.width = '';
     };
   }, [showMainNav]);
+
+  // Automatic backup system - runs every 12 hours
+  useEffect(() => {
+    // Load backups on mount
+    loadBackups();
+
+    // Set up automatic backup every 12 hours
+    const backupInterval = setInterval(() => {
+      console.log('🔄 Running automatic 12-hour backup...');
+      saveBackupToSupabase(`Auto Backup - ${new Date().toLocaleString()}`);
+      cleanupOldBackups();
+    }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds
+
+    return () => clearInterval(backupInterval);
+  }, [blocks, blockData]);
 
   const renderSubNav = () => {
     if (activeSection === 'hs') return hsItems;
@@ -3609,6 +3751,18 @@ export default function BPSPro() {
           <div className="hidden md:flex items-center gap-4 text-sm text-slate-600">
             <button 
               onClick={() => {
+                setShowBackupPanel(!showBackupPanel);
+                if (!showBackupPanel) {
+                  loadBackups();
+                }
+              }}
+              className="hover-bps-text flex items-center gap-1"
+              title="View and manage backups"
+            >
+              💾 Backups
+            </button>
+            <button 
+              onClick={() => {
                 setInfoModalContent({
                   title: 'Presentation Mode',
                   message: 'Coming Soon'
@@ -5264,6 +5418,78 @@ export default function BPSPro() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* BACKUP PANEL MODAL */}
+      {showBackupPanel && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-slate-900">💾 Data Backups</h2>
+              <button
+                onClick={() => setShowBackupPanel(false)}
+                className="text-slate-500 hover:text-slate-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Backup Now Button */}
+            <button
+              onClick={() => {
+                saveBackupToSupabase();
+                alert('✅ Backup created successfully!');
+              }}
+              className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg mb-4 hover:bg-blue-700 font-medium transition-colors"
+            >
+              💾 Backup Now
+            </button>
+
+            {/* Backups List */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-slate-700 mb-3">Recent Backups (Latest 7 kept):</h3>
+              {backups.length === 0 ? (
+                <p className="text-slate-500 text-center py-8">No backups yet. Click "Backup Now" to create one.</p>
+              ) : (
+                backups.map((backup, index) => (
+                  <div
+                    key={backup.id}
+                    className="border border-slate-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-900">
+                        #{backups.length - index} - {backup.backup_name}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        {new Date(backup.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => restoreFromBackup(backup.id)}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium text-sm transition-colors whitespace-nowrap"
+                    >
+                      Restore
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-900">
+                <strong>ℹ️ About Backups:</strong>
+              </p>
+              <ul className="text-sm text-blue-800 mt-2 space-y-1">
+                <li>✅ Automatic backups run every 12 hours</li>
+                <li>✅ Last 7 backups are kept (older ones deleted)</li>
+                <li>✅ Each backup contains all blocks, tasks, documents & insurance data</li>
+                <li>✅ You can manually backup anytime by clicking "Backup Now"</li>
+                <li>⚠️ Restoring a backup will replace ALL current data</li>
+              </ul>
             </div>
           </div>
         </div>
