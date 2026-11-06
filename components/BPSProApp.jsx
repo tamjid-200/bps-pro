@@ -1,4 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { supabase } from '../lib/supabase';
+import AIChat from './AIChat';
+import ToastStack from './ToastStack';
+import { computeAlerts } from '../lib/bps-context';
+import { analyzeInsuranceFile } from '../lib/ai-client';
 import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap } from 'lucide-react';
 
 export default function BPSPro() {
@@ -144,6 +149,9 @@ export default function BPSPro() {
   };
 
   // Memoized calculation of total tasks across all blocks (performance optimization)
+  // Deadline and insurance alerts (pop-up toasts)
+  const alerts = useMemo(() => computeAlerts(blocks, blockData), [blocks, blockData]);
+
   const totalTasksAllBlocks = useMemo(() => {
     return blocks.reduce((sum, block) => {
       const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
@@ -396,6 +404,27 @@ export default function BPSPro() {
           ...blockData,
           [selectedBlock]: updatedData
         }));
+
+        // Read insurance documents with AI to find cover dates
+        if (sectionKey.startsWith('insurance-')) {
+          const newFiles = sectionFiles.slice(-files.length);
+          const covers = { ...(updatedData.insuranceCover || {}) };
+          for (const f of newFiles) {
+            if (!['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(f.type)) continue;
+            try {
+              covers[sectionKey] = await analyzeInsuranceFile(f);
+            } catch (err) {
+              console.error('Insurance read failed:', err);
+              alert(`Could not read "${f.name}" automatically: ${err.message}`);
+            }
+          }
+          const withCovers = { ...updatedData, insuranceCover: covers };
+          setBlockData(prev => ({ ...prev, [selectedBlock]: withCovers }));
+          await window.storage.set('bps_pro_block_data', JSON.stringify({
+            ...blockData,
+            [selectedBlock]: withCovers
+          }));
+        }
         
       } catch (error) {
         console.error('File upload error:', error);
@@ -5494,6 +5523,9 @@ export default function BPSPro() {
           </div>
         </div>
       )}
+
+      <ToastStack alerts={alerts} />
+      <AIChat blocks={blocks} blockData={blockData} hidden={showModal || showInfoModal || showTrainingModal} />
       
     </div>
   );
