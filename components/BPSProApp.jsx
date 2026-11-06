@@ -4,7 +4,7 @@ import AIChat from './AIChat';
 import ToastStack from './ToastStack';
 import { computeAlerts } from '../lib/bps-context';
 import { analyzeInsuranceFile } from '../lib/ai-client';
-import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap } from 'lucide-react';
+import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap, Eye } from 'lucide-react';
 
 export default function BPSPro() {
   const [blocks, setBlocks] = useState([]);
@@ -477,6 +477,22 @@ export default function BPSPro() {
     link.click();
   };
   
+  // Preview: open the file in a new tab (works for PDFs, images and other browser-viewable files)
+  const handleFilePreview = (fileData) => {
+    try {
+      const [header, b64] = String(fileData.data).split(',');
+      const mime = (header.match(/data:(.*?);base64/) || [])[1] || fileData.type || 'application/octet-stream';
+      const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      const url = URL.createObjectURL(new Blob([bytes], { type: mime }));
+      const win = window.open(url, '_blank');
+      if (!win) alert('Please allow pop-ups for this site to preview files.');
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (err) {
+      console.error('Preview failed:', err);
+      alert('This file cannot be previewed here. Use Download instead.');
+    }
+  };
+
   const getUploadedFiles = (section, subSection = null) => {
     if (!selectedBlock || !blockData[selectedBlock]) return [];
     const uploadedFiles = blockData[selectedBlock].uploadedFiles || {};
@@ -2020,6 +2036,13 @@ export default function BPSPro() {
                               </div>
                               <div className="flex items-center gap-2 flex-shrink-0">
                                 <button
+                                  onClick={() => handleFilePreview(file)}
+                                  className="p-2 hover:bg-slate-200 rounded text-slate-600 transition-colors"
+                                  title="Preview"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                                <button
                                   onClick={() => handleFileDownload(file)}
                                   className="p-2 hover:bg-slate-200 rounded text-slate-600 transition-colors"
                                   title="Download"
@@ -2276,6 +2299,13 @@ export default function BPSPro() {
                               </div>
                               <div className="flex items-center gap-2 flex-shrink-0">
                                 <button
+                                  onClick={() => handleFilePreview(file)}
+                                  className="p-2 hover:bg-slate-200 rounded text-slate-600 transition-colors"
+                                  title="Preview"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                                <button
                                   onClick={() => handleFileDownload(file)}
                                   className="p-2 hover:bg-slate-200 rounded text-slate-600 transition-colors"
                                   title="Download"
@@ -2490,6 +2520,13 @@ export default function BPSPro() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 flex-shrink-0">
+                                <button
+                                  onClick={() => handleFilePreview(file)}
+                                  className="p-2 hover:bg-slate-200 rounded text-slate-600 transition-colors"
+                                  title="Preview"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
                                 <button
                                   onClick={() => handleFileDownload(file)}
                                   className="p-2 hover:bg-slate-200 rounded text-slate-600 transition-colors"
