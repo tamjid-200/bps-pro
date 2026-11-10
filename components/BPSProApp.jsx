@@ -139,6 +139,7 @@ export default function BPSPro() {
   // Backup system state
   const [backups, setBackups] = useState([]);
   const [showBackupPanel, setShowBackupPanel] = useState(false);
+  const [autoBackups, setAutoBackups] = useState([]);
 
   // Helper functions for task counting and status
   const getTotalTasksForBlock = (blockId) => {
@@ -276,12 +277,29 @@ export default function BPSPro() {
       } else {
         setBackups(data || []);
       }
+
+      // Automatic 6-hour snapshots (only this user's data is returned)
+      const { data: autoList, error: autoErr } = await supabase.rpc('list_auto_backups');
+      if (autoErr) console.error('Load auto backups error:', autoErr);
+      else setAutoBackups(autoList || []);
     } catch (error) {
       console.error('Load backups error:', error);
     }
   };
 
   // Restore from backup
+  const restoreAutoBackup = async (snapshotId, createdAt) => {
+    if (!confirm(`Restore your data from the backup taken ${new Date(createdAt).toLocaleString('en-GB')}? This replaces your current blocks and data.`)) return;
+    const { error } = await supabase.rpc('restore_auto_backup', { p_id: snapshotId });
+    if (error) {
+      console.error('Restore error:', error);
+      alert('Restore failed: ' + error.message);
+      return;
+    }
+    alert('Restored. The page will now reload.');
+    window.location.reload();
+  };
+
   const restoreFromBackup = async (backupId) => {
     if (!confirm('⚠️ This will replace ALL current data with the backup. Are you sure?')) {
       return;
@@ -5513,6 +5531,29 @@ export default function BPSPro() {
             >
               💾 Backup Now
             </button>
+
+            {/* Automatic 6-hour backups (kept in the database) */}
+            <div className="space-y-2 mb-6">
+              <h3 className="text-sm font-semibold text-slate-700 mb-3">Automatic backups every 6 hours (latest 8 kept):</h3>
+              {autoBackups.length === 0 ? (
+                <p className="text-slate-500 text-sm">No automatic backups yet. The first one runs at the next 6-hour mark.</p>
+              ) : (
+                autoBackups.map((b) => (
+                  <div key={b.id} className="border border-slate-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-slate-50 transition-colors">
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-900">{new Date(b.created_at).toLocaleString('en-GB')}</p>
+                      <p className="text-sm text-slate-500">{b.block_count} block{b.block_count === 1 ? '' : 's'}</p>
+                    </div>
+                    <button
+                      onClick={() => restoreAutoBackup(b.id, b.created_at)}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium text-sm transition-colors whitespace-nowrap"
+                    >
+                      Restore
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
 
             {/* Backups List */}
             <div className="space-y-2">
