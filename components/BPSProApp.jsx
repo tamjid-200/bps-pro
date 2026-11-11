@@ -48,6 +48,7 @@ export default function BPSPro() {
     category: 'General',
     description: ''
   });
+  const [editingTaskId, setEditingTaskId] = useState(null);
   const [taskFilter, setTaskFilter] = useState('all');
   const [taskSearch, setTaskSearch] = useState('');
   const [setupForm, setSetupForm] = useState({
@@ -1072,6 +1073,7 @@ export default function BPSPro() {
             <h2 className="text-xl md:text-2xl font-bold text-slate-900">All tasks</h2>
             <button 
               onClick={() => {
+                setEditingTaskId(null);
                 setModalType('add-task');
                 setShowModal(true);
               }}
@@ -1369,6 +1371,24 @@ export default function BPSPro() {
                         </span>
                       </div>
                     </div>
+                    <button
+                      onClick={() => {
+                        setEditingTaskId(task.id);
+                        setNewTaskForm({
+                          title: task.title || '',
+                          dueDate: task.dueDate || '',
+                          priority: task.priority || 'Medium',
+                          category: task.category || 'General',
+                          description: task.description || ''
+                        });
+                        setModalType('add-task');
+                        setShowModal(true);
+                      }}
+                      className="text-slate-500 hover:bg-slate-100 p-2 rounded flex-shrink-0"
+                      title="Edit task"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={async () => {
                         if (confirm('Delete this task?')) {
@@ -4145,7 +4165,7 @@ export default function BPSPro() {
       {showModal && modalType === 'add-task' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">New task</h3>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">{editingTaskId ? 'Edit task' : 'New task'}</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-900 mb-1">Task title *</label>
@@ -4227,6 +4247,25 @@ export default function BPSPro() {
                     alert('Please enter a task title');
                     return;
                   }
+
+                  if (editingTaskId) {
+                    const cbd = blockData[selectedBlock] || { tasks: [] };
+                    const updatedBlockData = {
+                      ...blockData,
+                      [selectedBlock]: {
+                        ...cbd,
+                        tasks: (cbd.tasks || []).map(t =>
+                          t.id === editingTaskId ? { ...t, ...newTaskForm } : t
+                        )
+                      }
+                    };
+                    setBlockData(updatedBlockData);
+                    await window.storage.set('bps_pro_block_data', JSON.stringify(updatedBlockData));
+                    setEditingTaskId(null);
+                    setShowModal(false);
+                    setNewTaskForm({ title: '', dueDate: '', priority: 'Medium', category: 'General', description: '' });
+                    return;
+                  }
                   
                   const newTask = {
                     id: String(Date.now()),
@@ -4262,7 +4301,7 @@ export default function BPSPro() {
                 }}
                 className="flex-1 bps-blue rounded-lg px-4 py-2.5 text-sm order-1 sm:order-2"
               >
-                Add task
+                {editingTaskId ? 'Save changes' : 'Add task'}
               </button>
             </div>
           </div>
