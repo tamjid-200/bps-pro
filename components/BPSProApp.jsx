@@ -4,6 +4,8 @@ import AIChat from './AIChat';
 import ToastStack from './ToastStack';
 import { computeAlerts } from '../lib/bps-context';
 import { analyzeInsuranceFile } from '../lib/ai-client';
+import { fetchPlannerStatus } from '../lib/planner-client';
+import PlannerStatus from './PlannerStatus';
 import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap, Eye } from 'lucide-react';
 
 export default function BPSPro() {
@@ -19,6 +21,7 @@ export default function BPSPro() {
   const [loading, setLoading] = useState(true);
   const [showAllBlocks, setShowAllBlocks] = useState(false);
   const [blockData, setBlockData] = useState({});
+  const [plannerStatus, setPlannerStatus] = useState({});
   
   // Mobile menu states
   const [showMainNav, setShowMainNav] = useState(false);
@@ -167,6 +170,14 @@ export default function BPSPro() {
   // Memoized calculation of total tasks across all blocks (performance optimization)
   // Deadline and insurance alerts (pop-up toasts)
   const alerts = useMemo(() => computeAlerts(blocks, blockData), [blocks, blockData]);
+
+  // Confirmation Statement status from Microsoft Planner, one request per load
+  useEffect(() => {
+    if (blocks.length === 0) return;
+    fetchPlannerStatus(blocks)
+      .then(setPlannerStatus)
+      .catch((err) => console.error('Planner status:', err));
+  }, [blocks]);
 
   const totalTasksAllBlocks = useMemo(() => {
     return blocks.reduce((sum, block) => {
@@ -960,6 +971,9 @@ export default function BPSPro() {
                           </div>
                         )
                       )}
+                    </div>
+                    <div className="mt-2">
+                      <PlannerStatus item={plannerStatus[block.id]} />
                     </div>
                     </button>
                   </div>
