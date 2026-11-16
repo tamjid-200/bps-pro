@@ -21,10 +21,13 @@ function daysUntil(dueDateTime: string | null, today: Date): number | null {
 
 function toItem(t: PlannerTask, today: Date) {
   const done = t.percentComplete === 100;
+  // Opens the exact task in Microsoft Planner
+  const url = `https://planner.cloud.microsoft/ui/web/plan/${t.planId}/view/grid/task/${t.id}?tid=${process.env.MS_TENANT_ID ?? ''}`;
   return {
     id: t.id,
     title: t.title,
     planTitle: t.planTitle,
+    url,
     dueDate: t.dueDateTime ? t.dueDateTime.slice(0, 10) : null,
     done,
     daysLeft: done ? null : daysUntil(t.dueDateTime, today),

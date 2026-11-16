@@ -1195,7 +1195,7 @@ export default function BPSPro() {
                 {(plannerItems[selectedBlock] || [])
                   .filter(t => !taskSearch || t.title.toLowerCase().includes(taskSearch.toLowerCase()))
                   .map(t => (
-                    <div key={t.id} className="flex items-center justify-between gap-3 border border-slate-200 rounded-lg px-4 py-3 bg-white">
+                    <a key={t.id} href={t.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between gap-3 border border-slate-200 rounded-lg px-4 py-3 bg-white hover:bg-slate-50">
                       <div className="min-w-0">
                         <p className={`text-sm font-medium truncate ${t.done ? 'text-slate-400 line-through' : 'text-slate-900'}`}>{t.title}</p>
                         <p className="text-xs text-slate-500">{t.planTitle}{t.dueDate ? ` · due ${t.dueDate}` : ' · no due date'}</p>
@@ -1205,7 +1205,7 @@ export default function BPSPro() {
                       }`}>
                         {t.done ? 'Done' : t.daysLeft === null ? 'No date' : t.daysLeft < 0 ? `${-t.daysLeft} day${-t.daysLeft === 1 ? '' : 's'} overdue` : `${t.daysLeft} day${t.daysLeft === 1 ? '' : 's'} left`}
                       </span>
-                    </div>
+                    </a>
                   ))}
               </div>
             </div>

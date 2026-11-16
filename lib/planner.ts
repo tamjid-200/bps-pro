@@ -10,6 +10,7 @@ export type PlannerTask = {
   dueDateTime: string | null;
   percentComplete: number;
   planTitle: string;
+  planId: string;
 };
 
 async function graphToken(): Promise<string> {
@@ -68,7 +69,7 @@ export async function getPlannerTasks(): Promise<PlannerTask[]> {
       });
       if (!res.ok) throw new Error(`Planner request failed (${res.status})`);
       const json = await res.json();
-      for (const t of json.value ?? []) tasks.push({ ...t, planTitle });
+      for (const t of json.value ?? []) tasks.push({ ...t, planTitle, planId });
       url = json['@odata.nextLink'] ?? null;
       pages++;
     }
