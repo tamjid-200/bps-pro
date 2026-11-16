@@ -98,6 +98,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    console.log('Planner match: blocks', (body.blocks ?? []).map((b) => b.name).join(' | '), '→ items for', Object.keys(items).length, 'block(s)');
     return NextResponse.json({ status, items });
   } catch (err) {
     console.error('Planner status failed:', err);

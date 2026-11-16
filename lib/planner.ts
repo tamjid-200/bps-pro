@@ -72,6 +72,7 @@ export async function getPlannerTasks(): Promise<PlannerTask[]> {
       url = json['@odata.nextLink'] ?? null;
       pages++;
     }
+    console.log(`Planner plan "${planTitle}" (${planId}): ${tasks.filter((t) => t.planTitle === planTitle).length} tasks`);
   }
   return tasks;
 }
