@@ -22,6 +22,7 @@ export default function BPSPro() {
   const [showAllBlocks, setShowAllBlocks] = useState(false);
   const [blockData, setBlockData] = useState({});
   const [plannerStatus, setPlannerStatus] = useState({});
+  const [plannerItems, setPlannerItems] = useState({});
   
   // Mobile menu states
   const [showMainNav, setShowMainNav] = useState(false);
@@ -177,7 +178,10 @@ export default function BPSPro() {
     if (blocks.length === 0) return;
     const check = () =>
       fetchPlannerStatus(blocks)
-        .then(setPlannerStatus)
+        .then(({ status, items }) => {
+          setPlannerStatus(status);
+          setPlannerItems(items);
+        })
         .catch((err) => console.error('Planner status:', err));
     check();
     const timer = setInterval(check, 6 * 60 * 60 * 1000);
@@ -1180,6 +1184,29 @@ export default function BPSPro() {
             </div>
           </div>
           
+          {taskFilter !== 'setup' && (plannerItems[selectedBlock] || []).length > 0 && (
+            <div className="mb-6">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">From Microsoft Planner</p>
+              <div className="space-y-2">
+                {(plannerItems[selectedBlock] || [])
+                  .filter(t => !taskSearch || t.title.toLowerCase().includes(taskSearch.toLowerCase()))
+                  .map(t => (
+                    <div key={t.id} className="flex items-center justify-between gap-3 border border-slate-200 rounded-lg px-4 py-3 bg-white">
+                      <div className="min-w-0">
+                        <p className={`text-sm font-medium truncate ${t.done ? 'text-slate-400 line-through' : 'text-slate-900'}`}>{t.title}</p>
+                        <p className="text-xs text-slate-500">{t.planTitle}{t.dueDate ? ` · due ${t.dueDate}` : ' · no due date'}</p>
+                      </div>
+                      <span className={`text-xs font-medium whitespace-nowrap ${
+                        t.done ? 'text-green-700' : t.daysLeft === null ? 'text-slate-500' : t.daysLeft < 0 ? 'text-red-600' : t.daysLeft <= 14 ? 'text-amber-600' : 'text-slate-600'
+                      }`}>
+                        {t.done ? 'Done' : t.daysLeft === null ? 'No date' : t.daysLeft < 0 ? `${-t.daysLeft} day${-t.daysLeft === 1 ? '' : 's'} overdue` : `${t.daysLeft} day${t.daysLeft === 1 ? '' : 's'} left`}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
           {taskFilter === 'setup' ? (
             setupRequiredCount === 0 ? (
               <div className="text-center py-12 text-slate-500">

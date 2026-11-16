@@ -1,4 +1,6 @@
-// Returns the Confirmation Statement status for each block, read from Planner.
+// Returns Planner data for each block:
+//   status: the Confirmation Statement line shown on the block card
+//   items:  every Planner task linked to the block, for the All tasks list
 // Body: { blocks: [{ id, name, shortName }] }
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '../../../lib/server-auth';
@@ -15,6 +17,18 @@ function daysUntil(dueDateTime: string | null, today: Date): number | null {
   const d = new Date(`${dueDateTime.slice(0, 10)}T00:00:00`);
   if (isNaN(d.getTime())) return null;
   return Math.round((d.getTime() - today.getTime()) / DAY_MS);
+}
+
+function toItem(t: PlannerTask, today: Date) {
+  const done = t.percentComplete === 100;
+  return {
+    id: t.id,
+    title: t.title,
+    planTitle: t.planTitle,
+    dueDate: t.dueDateTime ? t.dueDateTime.slice(0, 10) : null,
+    done,
+    daysLeft: done ? null : daysUntil(t.dueDateTime, today),
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -37,35 +51,46 @@ export async function POST(req: NextRequest) {
     today.setHours(0, 0, 0, 0);
 
     const status: Record<string, unknown> = {};
+    const items: Record<string, unknown[]> = {};
+
     for (const block of body.blocks ?? []) {
       const terms = [block.shortName, block.name]
         .filter((t): t is string => !!t && t.trim().length > 0)
         .map((t) => t.toLowerCase());
+      const hasTerm = (text: string) => {
+        const lower = (text || '').toLowerCase();
+        return terms.some((term) => lower.includes(term));
+      };
 
-      const matches = tasks.filter((t) => {
-        const title = (t.title || '').toLowerCase();
-        return terms.some((term) => title.includes(term));
-      });
-      if (matches.length === 0) continue;
+      // A task belongs to a block if its title or its plan's name mentions the block
+      const linked = tasks.filter((t) => hasTerm(t.title) || hasTerm(t.planTitle));
+      if (linked.length === 0) continue;
 
-      // Prefer an open task. Among open tasks, use the one due soonest.
-      const open = matches.filter((t) => t.percentComplete !== 100);
-      const pick =
-        (open.length ? open : matches).sort((a, b) => {
+      items[block.id] = linked
+        .map((t) => toItem(t, today))
+        .sort((a, b) => {
+          if (a.done !== b.done) return a.done ? 1 : -1;
+          const da = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+          const db = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+          return da - db;
+        });
+
+      // Card line: the soonest open Confirmation Statement task for this block
+      const confirmations = linked.filter((t) =>
+        (t.title || '').toLowerCase().includes('confirmation')
+      );
+      if (confirmations.length > 0) {
+        const open = confirmations.filter((t) => t.percentComplete !== 100);
+        const pick = (open.length ? open : confirmations).sort((a, b) => {
           const da = a.dueDateTime ? new Date(a.dueDateTime).getTime() : Infinity;
           const db = b.dueDateTime ? new Date(b.dueDateTime).getTime() : Infinity;
           return da - db;
         })[0];
-
-      status[block.id] = {
-        title: pick.title,
-        dueDate: pick.dueDateTime ? pick.dueDateTime.slice(0, 10) : null,
-        done: pick.percentComplete === 100,
-        daysLeft: pick.percentComplete === 100 ? null : daysUntil(pick.dueDateTime, today),
-      };
+        status[block.id] = toItem(pick, today);
+      }
     }
 
-    return NextResponse.json({ status });
+    return NextResponse.json({ status, items });
   } catch (err) {
     console.error('Planner status failed:', err);
     const message = err instanceof Error ? err.message : 'Planner is unavailable';

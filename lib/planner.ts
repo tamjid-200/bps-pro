@@ -9,6 +9,7 @@ export type PlannerTask = {
   title: string;
   dueDateTime: string | null;
   percentComplete: number;
+  planTitle: string;
 };
 
 async function graphToken(): Promise<string> {
@@ -48,6 +49,14 @@ export async function getPlannerTasks(): Promise<PlannerTask[]> {
   const tasks: PlannerTask[] = [];
 
   for (const planId of planIds) {
+    // The plan's name, e.g. "Granary Wharf", so tasks can be matched to a site
+    const planRes = await fetch(`${GRAPH}/planner/plans/${planId}?$select=title`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(8000),
+    });
+    const planJson = planRes.ok ? await planRes.json() : {};
+    const planTitle: string = planJson.title ?? '';
+
     let url: string | null =
       `${GRAPH}/planner/plans/${planId}/tasks?$select=id,title,dueDateTime,percentComplete`;
     let pages = 0;
@@ -59,7 +68,7 @@ export async function getPlannerTasks(): Promise<PlannerTask[]> {
       });
       if (!res.ok) throw new Error(`Planner request failed (${res.status})`);
       const json = await res.json();
-      tasks.push(...(json.value ?? []));
+      for (const t of json.value ?? []) tasks.push({ ...t, planTitle });
       url = json['@odata.nextLink'] ?? null;
       pages++;
     }
