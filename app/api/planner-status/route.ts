@@ -21,8 +21,13 @@ function daysUntil(dueDateTime: string | null, today: Date): number | null {
 
 function toItem(t: PlannerTask, today: Date) {
   const done = t.percentComplete === 100;
-  // Opens the exact task in Microsoft Planner
-  const url = `https://planner.cloud.microsoft/ui/web/plan/${t.planId}/view/grid/task/${t.id}?tid=${process.env.MS_TENANT_ID ?? ''}`;
+  // Teams link: opens the Teams/Planner app if installed, otherwise the web version
+  const tenant = process.env.MS_TENANT_ID ?? '';
+  const context = JSON.stringify({ subEntityId: `/v1/plan/${t.planId}/view/grid/task/${t.id}` });
+  const webUrl = 'https://tasks.teams.microsoft.com/teamsui/personalApp/alltasklists';
+  const url =
+    `https://teams.microsoft.com/l/entity/com.microsoft.teamspace.tab.planner/mytasks` +
+    `?tenantId=${tenant}&webUrl=${encodeURIComponent(webUrl)}&context=${encodeURIComponent(context)}`;
   return {
     id: t.id,
     title: t.title,
