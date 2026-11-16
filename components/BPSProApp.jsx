@@ -171,12 +171,17 @@ export default function BPSPro() {
   // Deadline and insurance alerts (pop-up toasts)
   const alerts = useMemo(() => computeAlerts(blocks, blockData), [blocks, blockData]);
 
-  // Confirmation Statement status from Microsoft Planner, one request per load
+  // Confirmation Statement status from Microsoft Planner.
+  // Checks when the page opens, then again every 6 hours while it stays open.
   useEffect(() => {
     if (blocks.length === 0) return;
-    fetchPlannerStatus(blocks)
-      .then(setPlannerStatus)
-      .catch((err) => console.error('Planner status:', err));
+    const check = () =>
+      fetchPlannerStatus(blocks)
+        .then(setPlannerStatus)
+        .catch((err) => console.error('Planner status:', err));
+    check();
+    const timer = setInterval(check, 6 * 60 * 60 * 1000);
+    return () => clearInterval(timer);
   }, [blocks]);
 
   const totalTasksAllBlocks = useMemo(() => {
