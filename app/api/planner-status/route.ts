@@ -63,7 +63,15 @@ export async function POST(req: NextRequest) {
       };
 
       // A task belongs to a block if its title or its plan's name mentions the block
-      const linked = tasks.filter((t) => hasTerm(t.title) || hasTerm(t.planTitle));
+      // The plan name matches if it sits inside the block name, or the block name
+      // sits inside it (so "Granary Wharf" matches "Granary Wharf, Mansfield" and back)
+      const planMatches = (planTitle: string) => {
+        const p = (planTitle || '').toLowerCase().trim();
+        if (!p) return false;
+        return terms.some((term) => term.includes(p) || p.includes(term));
+      };
+
+      const linked = tasks.filter((t) => hasTerm(t.title) || planMatches(t.planTitle));
       if (linked.length === 0) continue;
 
       items[block.id] = linked
