@@ -1,5 +1,5 @@
 // Server-only: reads Microsoft Planner tasks through Microsoft Graph.
-// Needs MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET and MS_PLANNER_PLAN_ID in Vercel.
+// Needs MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET and MS_PLANNER_PLAN_IDS in Vercel.
 
 const LOGIN = 'https://login.microsoftonline.com';
 const GRAPH = 'https://graph.microsoft.com/v1.0';
@@ -37,25 +37,32 @@ async function graphToken(): Promise<string> {
   return json.access_token as string;
 }
 
-// Reads every task in the plan, following Graph's paging links.
+// Reads every task from each plan listed in MS_PLANNER_PLAN_IDS
+// (comma-separated). Falls back to MS_PLANNER_PLAN_ID if that is the only one set.
 export async function getPlannerTasks(): Promise<PlannerTask[]> {
-  const planId = process.env.MS_PLANNER_PLAN_ID;
-  if (!planId) throw new Error('MS_PLANNER_PLAN_ID is missing in Vercel');
+  const raw = process.env.MS_PLANNER_PLAN_IDS || process.env.MS_PLANNER_PLAN_ID || '';
+  const planIds = raw.split(',').map((id) => id.trim()).filter(Boolean);
+  if (planIds.length === 0) throw new Error('MS_PLANNER_PLAN_IDS is missing in Vercel');
 
   const token = await graphToken();
   const tasks: PlannerTask[] = [];
-  let url: string | null =
-    `${GRAPH}/planner/plans/${planId}/tasks?$select=id,title,dueDateTime,percentComplete`;
 
-  while (url && tasks.length < 500) {
-    const res: Response = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) throw new Error(`Planner request failed (${res.status})`);
-    const json = await res.json();
-    tasks.push(...(json.value ?? []));
-    url = json['@odata.nextLink'] ?? null;
+  for (const planId of planIds) {
+    let url: string | null =
+      `${GRAPH}/planner/plans/${planId}/tasks?$select=id,title,dueDateTime,percentComplete`;
+    let pages = 0;
+
+    while (url && pages < 10) {
+      const res: Response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) throw new Error(`Planner request failed (${res.status})`);
+      const json = await res.json();
+      tasks.push(...(json.value ?? []));
+      url = json['@odata.nextLink'] ?? null;
+      pages++;
+    }
   }
   return tasks;
 }
