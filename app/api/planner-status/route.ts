@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       // sits inside it (so "Granary Wharf" matches "Granary Wharf, Mansfield" and back)
       const planMatches = (planTitle: string) => {
         const p = (planTitle || '').toLowerCase().trim();
-        if (!p) return false;
+        if (p.length < 4) return false; // ignore very short plan names
         return terms.some((term) => term.includes(p) || p.includes(term));
       };
 
