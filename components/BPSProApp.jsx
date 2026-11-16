@@ -149,6 +149,10 @@ export default function BPSPro() {
   // Badges only count open tasks that are overdue or due within 14 days.
   // Tasks with no due date, or due later than 14 days away, are not counted.
   const REMINDER_DAYS = 14;
+  // Open Microsoft Planner tasks for a block that are overdue or due within 14 days
+  const plannerDueCount = (blockId) =>
+    (plannerItems[blockId] || []).filter(t => !t.done && t.daysLeft !== null && t.daysLeft <= REMINDER_DAYS).length;
+
   const countDueTasks = (tasks = []) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -163,7 +167,7 @@ export default function BPSPro() {
   // Helper functions for task counting and status
   const getTotalTasksForBlock = (blockId) => {
     const currentBlockData = blockData[blockId] || { tasks: [], issues: [] };
-    const taskCount = countDueTasks(currentBlockData.tasks);
+    const taskCount = countDueTasks(currentBlockData.tasks) + plannerDueCount(blockId);
     const issueCount = currentBlockData.issues?.length || 0;
     return taskCount + issueCount;
   };
@@ -191,10 +195,10 @@ export default function BPSPro() {
   const totalTasksAllBlocks = useMemo(() => {
     return blocks.reduce((sum, block) => {
       const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
-      const taskCount = countDueTasks(currentBlockData.tasks) + (currentBlockData.issues?.length || 0);
+      const taskCount = countDueTasks(currentBlockData.tasks) + plannerDueCount(block.id) + (currentBlockData.issues?.length || 0);
       return sum + taskCount;
     }, 0);
-  }, [blocks, blockData]);
+  }, [blocks, blockData, plannerItems]);
 
   const hasOverdueTasks = (blockId) => {
     const currentBlockData = blockData[blockId] || { tasks: [] };
@@ -245,7 +249,7 @@ export default function BPSPro() {
       case 'correspondence':
         return (currentBlockData.correspondence || []).length;
       case 'all-tasks':
-        const taskCount = countDueTasks(currentBlockData.tasks);
+        const taskCount = countDueTasks(currentBlockData.tasks) + plannerDueCount(selectedBlock);
         const issueCount = (currentBlockData.issues || []).length;
         return taskCount + issueCount;
       default:
@@ -918,7 +922,7 @@ export default function BPSPro() {
               ) : (
                 blocks.map(block => {
                 const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
-                const taskCount = countDueTasks(currentBlockData.tasks) + (currentBlockData.issues?.length || 0);
+                const taskCount = countDueTasks(currentBlockData.tasks) + plannerDueCount(block.id) + (currentBlockData.issues?.length || 0);
                 
                 return (
                   <div
@@ -3779,7 +3783,7 @@ export default function BPSPro() {
               </div>
               {(() => {
                 const currentBlockData = blockData[selectedBlock] || { tasks: [], issues: [] };
-                const taskCount = countDueTasks(currentBlockData.tasks) + (currentBlockData.issues?.length || 0);
+                const taskCount = countDueTasks(currentBlockData.tasks) + plannerDueCount(selectedBlock) + (currentBlockData.issues?.length || 0);
                 return taskCount > 0 ? (
                   <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0">{taskCount}</span>
                 ) : (
