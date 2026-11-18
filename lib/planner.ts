@@ -1,7 +1,6 @@
-// Server-only: reads Microsoft Planner tasks for ONE signed-in BPS Pro user,
+// Server-only: reads the Microsoft Planner tasks ASSIGNED TO one signed-in BPS Pro user,
 // using that user's own Microsoft 365 connection (see microsoft-tokens.ts).
-// Microsoft only returns the plans that user can see, so each person sees
-// only their own Planner plans.
+// Each person only sees the tasks that are assigned to them in Planner.
 import { userMicrosoftToken } from './microsoft-tokens';
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
@@ -42,21 +41,31 @@ async function graphGetAll(url: string, token: string): Promise<any[]> {
   return out;
 }
 
-// Plans this user can see (their own plans plus plans shared with them)
-async function plansForUser(token: string): Promise<{ id: string; title: string }[]> {
-  return graphGetAll(`${GRAPH}/me/planner/plans?$select=id,title`, token);
-}
+// Plan names, so each task can show which plan (block) it belongs to.
+// Plans the user can see are read in one call; any others are read one by one.
+async function planTitles(planIds: string[], token: string): Promise<Map<string, string>> {
+  const titles = new Map<string, string>();
+  const plans = await graphGetAll(`${GRAPH}/me/planner/plans?$select=id,title`, token).catch(() => []);
+  plans.forEach((p) => titles.set(p.id, p.title ?? ''));
 
-async function tasksForPlan(plan: { id: string; title: string }, token: string): Promise<PlannerTask[]> {
-  try {
-    const raw = await graphGetAll(
-      `${GRAPH}/planner/plans/${plan.id}/tasks?$select=id,title,dueDateTime,percentComplete`,
-      token
-    );
-    return raw.map((t) => ({ ...t, planTitle: plan.title ?? '', planId: plan.id }));
-  } catch {
-    return []; // one plan that cannot be read should not stop the others
-  }
+  const missing = planIds.filter((id) => !titles.has(id));
+  const found = await Promise.all(
+    missing.map(async (id) => {
+      try {
+        const res = await fetch(`${GRAPH}/planner/plans/${id}?$select=id,title`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!res.ok) return [id, ''] as const;
+        const json = await res.json();
+        return [id, json.title ?? ''] as const;
+      } catch {
+        return [id, ''] as const;
+      }
+    })
+  );
+  found.forEach(([id, title]) => titles.set(id, title));
+  return titles;
 }
 
 export async function getPlannerTasksForUser(userId: string): Promise<PlannerResult> {
@@ -66,15 +75,19 @@ export async function getPlannerTasksForUser(userId: string): Promise<PlannerRes
   const auth = await userMicrosoftToken(userId);
   if (!auth.connected) return { connected: false, reason: auth.reason };
 
-  const plans = await plansForUser(auth.token);
+  // Tasks assigned to this person, across all plans
+  const raw = await graphGetAll(`${GRAPH}/me/planner/tasks`, auth.token);
+  const planIds = Array.from(new Set(raw.map((t) => t.planId as string).filter(Boolean)));
+  const titles = await planTitles(planIds, auth.token);
 
-  // Read the tasks in each plan, ten plans at a time, to stay inside the time limit
-  const tasks: PlannerTask[] = [];
-  for (let i = 0; i < plans.length; i += 10) {
-    const batch = plans.slice(i, i + 10);
-    const found = await Promise.all(batch.map((p) => tasksForPlan(p, auth.token)));
-    found.forEach((list) => tasks.push(...list));
-  }
+  const tasks: PlannerTask[] = raw.map((t) => ({
+    id: t.id,
+    title: t.title ?? '',
+    dueDateTime: t.dueDateTime ?? null,
+    percentComplete: t.percentComplete ?? 0,
+    planId: t.planId ?? '',
+    planTitle: titles.get(t.planId) ?? '',
+  }));
 
   cache.set(userId, { at: Date.now(), tasks });
   return { connected: true, tasks };
