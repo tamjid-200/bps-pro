@@ -25,6 +25,12 @@ export default function BPSPro() {
   const [plannerItems, setPlannerItems] = useState({});
   const [plannerConnected, setPlannerConnected] = useState(null); // null = not checked yet
   const [plannerNotice, setPlannerNotice] = useState('');
+  const [currentEmail, setCurrentEmail] = useState('');
+
+  // Shows which login is signed in (useful when testing with two users)
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentEmail(data?.user?.email || '')).catch(() => {});
+  }, []);
   
   // Mobile menu states
   const [showMainNav, setShowMainNav] = useState(false);
@@ -3500,6 +3506,9 @@ export default function BPSPro() {
           <div className="text-xs font-medium text-white mt-1 flex items-center gap-1">
             <span>👑</span> Admin
           </div>
+          {currentEmail && (
+            <div className="text-xs text-white/80 mt-1 break-all">{currentEmail}</div>
+          )}
           <button
             onClick={() => {
               // Clear auth state
