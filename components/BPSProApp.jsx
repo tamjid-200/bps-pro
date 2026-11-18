@@ -215,7 +215,7 @@ export default function BPSPro() {
   // Confirmation Statement status from Microsoft Planner, for this user's own plans.
   // Checks when the page opens, then again every 6 hours while it stays open.
   useEffect(() => {
-    if (blocks.length === 0) return;
+    // Runs even with no blocks yet, so the Connect Microsoft button always shows
     const check = () =>
       fetchPlannerStatus(blocks)
         .then(({ connected, status, items }) => {
