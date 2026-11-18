@@ -3519,9 +3519,11 @@ export default function BPSPro() {
             </button>
           </div>
           <div className="text-xs font-medium text-white">Block Property Solutions</div>
-          <div className="text-xs font-medium text-white mt-1 flex items-center gap-1">
-            <span>👑</span> Admin
-          </div>
+          {currentEmail.toLowerCase() === 'tamjid@blockpropertysolutions.co.uk' && (
+            <div className="text-xs font-medium text-white mt-1 flex items-center gap-1">
+              <span>👑</span> Admin
+            </div>
+          )}
           {currentEmail && (
             <div className="text-xs text-white/80 mt-1 break-all">{currentEmail}</div>
           )}
