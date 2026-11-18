@@ -1,9 +1,9 @@
-// Server-only: reads Microsoft Planner tasks through Microsoft Graph.
-// Reads every plan in the Microsoft 365 account automatically, so new plans
-// appear without changing any settings.
-// Needs MS_TENANT_ID, MS_CLIENT_ID and MS_CLIENT_SECRET in Vercel.
+// Server-only: reads Microsoft Planner tasks for ONE signed-in BPS Pro user,
+// using that user's own Microsoft 365 connection (see microsoft-tokens.ts).
+// Microsoft only returns the plans that user can see, so each person sees
+// only their own Planner plans.
+import { userMicrosoftToken } from './microsoft-tokens';
 
-const LOGIN = 'https://login.microsoftonline.com';
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 const CACHE_MS = 10 * 60 * 1000; // reuse results for 10 minutes
 
@@ -16,33 +16,12 @@ export type PlannerTask = {
   planId: string;
 };
 
-let cache: { at: number; tasks: PlannerTask[] } | null = null;
+export type PlannerResult =
+  | { connected: true; tasks: PlannerTask[] }
+  | { connected: false; reason: 'not_connected' | 'reconnect' };
 
-async function graphToken(): Promise<string> {
-  const tenant = process.env.MS_TENANT_ID;
-  const clientId = process.env.MS_CLIENT_ID;
-  const clientSecret = process.env.MS_CLIENT_SECRET;
-  if (!tenant || !clientId || !clientSecret) {
-    throw new Error('Microsoft settings are missing in Vercel');
-  }
-
-  const res = await fetch(`${LOGIN}/${tenant}/oauth2/v2.0/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      scope: 'https://graph.microsoft.com/.default',
-      grant_type: 'client_credentials',
-    }),
-    signal: AbortSignal.timeout(8000),
-  });
-  const json = await res.json();
-  if (!res.ok || !json.access_token) {
-    throw new Error(`Microsoft sign-in failed (${res.status})`);
-  }
-  return json.access_token as string;
-}
+// Results per BPS Pro user, so one person never gets another person's tasks
+const cache = new Map<string, { at: number; tasks: PlannerTask[] }>();
 
 // Reads every item from a Graph list, following the paging links
 async function graphGetAll(url: string, token: string): Promise<any[]> {
@@ -63,13 +42,9 @@ async function graphGetAll(url: string, token: string): Promise<any[]> {
   return out;
 }
 
-// Plans attached to one Microsoft 365 group. Groups without Planner return nothing.
-async function plansForGroup(groupId: string, token: string): Promise<{ id: string; title: string }[]> {
-  try {
-    return await graphGetAll(`${GRAPH}/groups/${groupId}/planner/plans?$select=id,title`, token);
-  } catch {
-    return [];
-  }
+// Plans this user can see (their own plans plus plans shared with them)
+async function plansForUser(token: string): Promise<{ id: string; title: string }[]> {
+  return graphGetAll(`${GRAPH}/me/planner/plans?$select=id,title`, token);
 }
 
 async function tasksForPlan(plan: { id: string; title: string }, token: string): Promise<PlannerTask[]> {
@@ -80,32 +55,27 @@ async function tasksForPlan(plan: { id: string; title: string }, token: string):
     );
     return raw.map((t) => ({ ...t, planTitle: plan.title ?? '', planId: plan.id }));
   } catch {
-    return [];
+    return []; // one plan that cannot be read should not stop the others
   }
 }
 
-export async function getPlannerTasks(): Promise<PlannerTask[]> {
-  if (cache && Date.now() - cache.at < CACHE_MS) return cache.tasks;
+export async function getPlannerTasksForUser(userId: string): Promise<PlannerResult> {
+  const hit = cache.get(userId);
+  if (hit && Date.now() - hit.at < CACHE_MS) return { connected: true, tasks: hit.tasks };
 
-  const token = await graphToken();
-  const groups = await graphGetAll(`${GRAPH}/groups?$select=id,displayName`, token);
+  const auth = await userMicrosoftToken(userId);
+  if (!auth.connected) return { connected: false, reason: auth.reason };
 
-  // Find every plan, ten groups at a time, to stay inside the time limit
-  const plans: { id: string; title: string }[] = [];
-  for (let i = 0; i < groups.length; i += 10) {
-    const batch = groups.slice(i, i + 10);
-    const found = await Promise.all(batch.map((g) => plansForGroup(g.id, token)));
-    found.forEach((list) => plans.push(...list));
-  }
+  const plans = await plansForUser(auth.token);
 
-  // Read the tasks in each plan, ten plans at a time
+  // Read the tasks in each plan, ten plans at a time, to stay inside the time limit
   const tasks: PlannerTask[] = [];
   for (let i = 0; i < plans.length; i += 10) {
     const batch = plans.slice(i, i + 10);
-    const found = await Promise.all(batch.map((p) => tasksForPlan(p, token)));
+    const found = await Promise.all(batch.map((p) => tasksForPlan(p, auth.token)));
     found.forEach((list) => tasks.push(...list));
   }
 
-  cache = { at: Date.now(), tasks };
-  return tasks;
+  cache.set(userId, { at: Date.now(), tasks });
+  return { connected: true, tasks };
 }

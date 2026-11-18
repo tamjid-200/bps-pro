@@ -4,7 +4,7 @@ import AIChat from './AIChat';
 import ToastStack from './ToastStack';
 import { computeAlerts } from '../lib/bps-context';
 import { analyzeInsuranceFile } from '../lib/ai-client';
-import { fetchPlannerStatus } from '../lib/planner-client';
+import { fetchPlannerStatus, connectMicrosoft, disconnectMicrosoft } from '../lib/planner-client';
 import PlannerStatus from './PlannerStatus';
 import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap, Eye } from 'lucide-react';
 
@@ -23,6 +23,8 @@ export default function BPSPro() {
   const [blockData, setBlockData] = useState({});
   const [plannerStatus, setPlannerStatus] = useState({});
   const [plannerItems, setPlannerItems] = useState({});
+  const [plannerConnected, setPlannerConnected] = useState(null); // null = not checked yet
+  const [plannerNotice, setPlannerNotice] = useState('');
   
   // Mobile menu states
   const [showMainNav, setShowMainNav] = useState(false);
@@ -176,13 +178,26 @@ export default function BPSPro() {
   // Deadline and insurance alerts (pop-up toasts)
   const alerts = useMemo(() => computeAlerts(blocks, blockData), [blocks, blockData]);
 
-  // Confirmation Statement status from Microsoft Planner.
+  // Shows a short message when Microsoft's sign-in page sends the user back to the app
+  useEffect(() => {
+    const result = new URLSearchParams(window.location.search).get('microsoft');
+    if (!result) return;
+    window.history.replaceState({}, '', window.location.pathname);
+    setPlannerNotice(
+      result === 'connected' ? 'Microsoft 365 connected. Your Planner tasks will load shortly.'
+        : result === 'denied' ? 'Microsoft sign-in was cancelled.'
+        : 'Could not connect Microsoft 365. Please try again.'
+    );
+  }, []);
+
+  // Confirmation Statement status from Microsoft Planner, for this user's own plans.
   // Checks when the page opens, then again every 6 hours while it stays open.
   useEffect(() => {
     if (blocks.length === 0) return;
     const check = () =>
       fetchPlannerStatus(blocks)
-        .then(({ status, items }) => {
+        .then(({ connected, status, items }) => {
+          setPlannerConnected(connected);
           setPlannerStatus(status);
           setPlannerItems(items);
         })
@@ -911,6 +926,49 @@ export default function BPSPro() {
                 </button>
               </div>
             </div>
+
+            {plannerNotice && (
+              <div className="mb-4 text-sm bg-blue-50 border border-blue-200 text-slate-900 rounded-lg px-4 py-3 flex items-start justify-between gap-3">
+                <span>{plannerNotice}</span>
+                <button onClick={() => setPlannerNotice('')} className="text-slate-500 hover:text-slate-900" aria-label="Dismiss">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            {plannerConnected === false && (
+              <div className="mb-6 bg-white border border-slate-200 rounded-xl px-4 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <p className="font-medium text-slate-900">Connect your Microsoft 365 account</p>
+                  <p className="text-sm text-slate-700">Your Planner tasks will show here. You only see the plans your own Microsoft account can access.</p>
+                </div>
+                <button
+                  onClick={async () => {
+                    try { await connectMicrosoft(); } catch (e) { setPlannerNotice(e.message); }
+                  }}
+                  className="bps-blue px-4 py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto"
+                >
+                  Connect Microsoft
+                </button>
+              </div>
+            )}
+            {plannerConnected === true && (
+              <div className="mb-6 text-right">
+                <button
+                  onClick={async () => {
+                    if (!confirm('Disconnect your Microsoft 365 account? Planner tasks will stop showing.')) return;
+                    try {
+                      await disconnectMicrosoft();
+                      setPlannerConnected(false);
+                      setPlannerStatus({});
+                      setPlannerItems({});
+                    } catch (e) { setPlannerNotice(e.message); }
+                  }}
+                  className="text-sm text-slate-700 underline hover:text-slate-900"
+                >
+                  Disconnect Microsoft 365
+                </button>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {blocks.length === 0 ? (

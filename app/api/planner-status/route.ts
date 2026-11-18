@@ -1,10 +1,11 @@
-// Returns Planner data for each block:
-//   status: the Confirmation Statement line shown on the block card
-//   items:  every Planner task linked to the block, for the All tasks list
+// Returns Planner data for each block, for the signed-in user only:
+//   connected: whether this user has connected their Microsoft 365 account
+//   status:    the Confirmation Statement line shown on the block card
+//   items:     every Planner task linked to the block, for the All tasks list
 // Body: { blocks: [{ id, name, shortName }] }
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '../../../lib/server-auth';
-import { getPlannerTasks, PlannerTask } from '../../../lib/planner';
+import { getPlannerTasksForUser, PlannerTask } from '../../../lib/planner';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -54,7 +55,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const tasks: PlannerTask[] = await getPlannerTasks();
+    const result = await getPlannerTasksForUser(user.id);
+    if (!result.connected) {
+      return NextResponse.json({ connected: false, reason: result.reason, status: {}, items: {} });
+    }
+    const tasks: PlannerTask[] = result.tasks;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -106,8 +111,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    console.log('Planner match: blocks', (body.blocks ?? []).map((b) => b.name).join(' | '), '→ items for', Object.keys(items).length, 'block(s)');
-    return NextResponse.json({ status, items });
+    return NextResponse.json({ connected: true, status, items });
   } catch (err) {
     console.error('Planner status failed:', err);
     const message = err instanceof Error ? err.message : 'Planner is unavailable';
