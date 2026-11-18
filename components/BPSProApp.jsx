@@ -26,6 +26,7 @@ export default function BPSPro() {
   const [plannerConnected, setPlannerConnected] = useState(null); // null = not checked yet
   const [plannerNotice, setPlannerNotice] = useState('');
   const [currentEmail, setCurrentEmail] = useState('');
+  const [plannerRefreshing, setPlannerRefreshing] = useState(false);
 
   // Shows which login is signed in (useful when testing with two users)
   useEffect(() => {
@@ -195,6 +196,21 @@ export default function BPSPro() {
         : 'Could not connect Microsoft 365. Please try again.'
     );
   }, []);
+
+  // Reloads Planner tasks straight away, skipping the saved copy on the server
+  const refreshPlanner = () => {
+    if (blocks.length === 0 || plannerRefreshing) return;
+    setPlannerRefreshing(true);
+    fetchPlannerStatus(blocks, true)
+      .then(({ connected, status, items }) => {
+        setPlannerConnected(connected);
+        setPlannerStatus(status);
+        setPlannerItems(items);
+        setPlannerNotice(connected ? 'Planner tasks refreshed.' : '');
+      })
+      .catch((err) => setPlannerNotice(err.message || 'Could not refresh Planner'))
+      .finally(() => setPlannerRefreshing(false));
+  };
 
   // Confirmation Statement status from Microsoft Planner, for this user's own plans.
   // Checks when the page opens, then again every 6 hours while it stays open.
@@ -907,6 +923,15 @@ export default function BPSPro() {
                 )}
               </div>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+                <button
+                  onClick={refreshPlanner}
+                  disabled={plannerRefreshing || plannerConnected !== true}
+                  title={plannerConnected === true ? 'Reload Planner tasks now' : 'Connect Microsoft first'}
+                  className="border border-slate-300 text-slate-700 px-4 py-2.5 rounded-lg hover:bg-slate-50 text-sm font-medium w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <RefreshCw className={`w-4 h-4 ${plannerRefreshing ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
                 <button 
                   onClick={async () => {
                     if (confirm('Clear all blocks and start fresh? This cannot be undone.')) {

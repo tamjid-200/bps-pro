@@ -68,9 +68,9 @@ async function planTitles(planIds: string[], token: string): Promise<Map<string,
   return titles;
 }
 
-export async function getPlannerTasksForUser(userId: string): Promise<PlannerResult> {
+export async function getPlannerTasksForUser(userId: string, force = false): Promise<PlannerResult> {
   const hit = cache.get(userId);
-  if (hit && Date.now() - hit.at < CACHE_MS) return { connected: true, tasks: hit.tasks };
+  if (!force && hit && Date.now() - hit.at < CACHE_MS) return { connected: true, tasks: hit.tasks };
 
   const auth = await userMicrosoftToken(userId);
   if (!auth.connected) return { connected: false, reason: auth.reason };

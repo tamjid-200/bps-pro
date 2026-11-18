@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Please log in again.' }, { status: 401 });
   }
 
-  let body: { blocks?: { id: string; name?: string; shortName?: string }[] } = {};
+  let body: { blocks?: { id: string; name?: string; shortName?: string }[]; refresh?: boolean } = {};
   try {
     body = await req.json();
   } catch {
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const result = await getPlannerTasksForUser(user.id);
+    const result = await getPlannerTasksForUser(user.id, body.refresh === true);
     if (!result.connected) {
       return NextResponse.json({ connected: false, reason: result.reason, status: {}, items: {} });
     }
