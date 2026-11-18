@@ -923,15 +923,6 @@ export default function BPSPro() {
                 )}
               </div>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-                <button
-                  onClick={refreshPlanner}
-                  disabled={plannerRefreshing || plannerConnected !== true}
-                  title={plannerConnected === true ? 'Reload Planner tasks now' : 'Connect Microsoft first'}
-                  className="border border-slate-300 text-slate-700 px-4 py-2.5 rounded-lg hover:bg-slate-50 text-sm font-medium w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <RefreshCw className={`w-4 h-4 ${plannerRefreshing ? 'animate-spin' : ''}`} />
-                  Refresh
-                </button>
                 <button 
                   onClick={async () => {
                     if (confirm('Clear all blocks and start fresh? This cannot be undone.')) {
@@ -3551,6 +3542,16 @@ export default function BPSPro() {
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#515152'}
           >
             Log Out
+          </button>
+          <button
+            onClick={refreshPlanner}
+            disabled={plannerRefreshing || plannerConnected !== true}
+            title={plannerConnected === true ? 'Reload Planner tasks now' : 'Connect Microsoft first'}
+            className="mt-2 w-full text-xs text-white px-2 py-1.5 rounded transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: '#2563eb' }}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${plannerRefreshing ? 'animate-spin' : ''}`} />
+            {plannerRefreshing ? 'Refreshing…' : 'Refresh Planner'}
           </button>
           
           {/* Mobile-only: Collapsible Help & Support Section */}
