@@ -197,19 +197,19 @@ export default function BPSPro() {
     );
   }, []);
 
-  // Reloads Planner tasks straight away, skipping the saved copy on the server
-  const refreshPlanner = () => {
-    if (blocks.length === 0 || plannerRefreshing) return;
+  // Refreshes everything: Planner tasks (skipping the server's saved copy), then reloads
+  // BPS Pro so blocks and all other data are loaded again
+  const refreshPlanner = async () => {
+    if (plannerRefreshing) return;
     setPlannerRefreshing(true);
-    fetchPlannerStatus(blocks, true)
-      .then(({ connected, status, items }) => {
-        setPlannerConnected(connected);
-        setPlannerStatus(status);
-        setPlannerItems(items);
-        setPlannerNotice(connected ? 'Planner tasks refreshed.' : '');
-      })
-      .catch((err) => setPlannerNotice(err.message || 'Could not refresh Planner'))
-      .finally(() => setPlannerRefreshing(false));
+    try {
+      if (plannerConnected === true && blocks.length > 0) {
+        await fetchPlannerStatus(blocks, true);
+      }
+    } catch (err) {
+      console.error('Planner refresh:', err);
+    }
+    window.location.reload();
   };
 
   // Confirmation Statement status from Microsoft Planner, for this user's own plans.
@@ -3545,13 +3545,13 @@ export default function BPSPro() {
           </button>
           <button
             onClick={refreshPlanner}
-            disabled={plannerRefreshing || plannerConnected !== true}
-            title={plannerConnected === true ? 'Reload Planner tasks now' : 'Connect Microsoft first'}
+            disabled={plannerRefreshing}
+            title="Reload BPS Pro and Planner tasks"
             className="mt-2 w-full text-xs text-white px-2 py-1.5 rounded transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: '#2563eb' }}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${plannerRefreshing ? 'animate-spin' : ''}`} />
-            {plannerRefreshing ? 'Refreshing…' : 'Refresh Planner'}
+            {plannerRefreshing ? 'Refreshing…' : 'Refresh'}
           </button>
           
           {/* Mobile-only: Collapsible Help & Support Section */}
