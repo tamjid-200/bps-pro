@@ -5,7 +5,211 @@ import { computeAlerts } from '../lib/bps-context';
 import { analyzeInsuranceFile } from '../lib/ai-client';
 import { fetchPlannerStatus, connectMicrosoft, disconnectMicrosoft } from '../lib/planner-client';
 import PlannerStatus from './PlannerStatus';
-import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap, Eye, EyeOff, History } from 'lucide-react';
+import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap, Eye, EyeOff, History, Paperclip } from 'lucide-react';
+
+const COMMENT_BUCKET = 'item-files';
+const MAX_FILE_MB = 10;
+const ALLOWED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png,.webp,.heic,.doc,.docx,.xls,.xlsx,.csv,.txt';
+
+// Comments and file attachments on one item (an issue, job, letter, document or insurance item).
+// Every comment is also written to the block's history.
+function ItemComments({ blockId, blockName, itemKey, itemTitle, currentUserId, currentEmail }) {
+  const [open, setOpen] = useState(false);
+  const [count, setCount] = useState(null);
+  const [rows, setRows] = useState([]);
+  const [text, setText] = useState('');
+  const [file, setFile] = useState(null);
+  const [fileInputKey, setFileInputKey] = useState(0); // changing this clears the file picker
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const loadCount = async () => {
+    const { count: n } = await supabase
+      .from('item_comments')
+      .select('id', { count: 'exact', head: true })
+      .eq('block_id', blockId)
+      .eq('item_key', itemKey);
+    setCount(n ?? 0);
+  };
+
+  const loadRows = async () => {
+    const { data, error: err } = await supabase
+      .from('item_comments')
+      .select('id, body, attachments, user_id, user_email, created_at')
+      .eq('block_id', blockId)
+      .eq('item_key', itemKey)
+      .order('created_at', { ascending: true });
+    if (err) {
+      setError(err.message);
+      return;
+    }
+    setRows(data || []);
+    setCount((data || []).length);
+  };
+
+  useEffect(() => { loadCount(); }, [blockId, itemKey]);
+
+  useEffect(() => {
+    if (!open) return;
+    loadRows();
+    const timer = setInterval(loadRows, 20000); // keeps the list fresh while it is open
+    return () => clearInterval(timer);
+  }, [open, blockId, itemKey]);
+
+  const logHistory = (action, summary) =>
+    supabase.from('block_history').insert({
+      block_id: blockId,
+      block_name: blockName || '',
+      user_id: currentUserId,
+      user_email: currentEmail || '',
+      action,
+      section: 'Comments',
+      summary,
+      detail: {},
+    });
+
+  const post = async () => {
+    const body = text.trim();
+    if (!body && !file) return;
+    setBusy(true);
+    setError('');
+    try {
+      let attachments = [];
+      if (file) {
+        if (file.size > MAX_FILE_MB * 1024 * 1024) throw new Error(`That file is larger than ${MAX_FILE_MB} MB.`);
+        const safeName = file.name.replace(/[^\w.\- ]+/g, '_');
+        const path = `${blockId}/${itemKey.replace(/[^\w-]+/g, '_')}/${Date.now()}-${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from(COMMENT_BUCKET)
+          .upload(path, file, { contentType: file.type || undefined });
+        if (upErr) throw upErr;
+        attachments = [{ name: file.name, path, size: file.size, type: file.type || '' }];
+      }
+
+      const { error: insErr } = await supabase.from('item_comments').insert({
+        block_id: blockId,
+        item_key: itemKey,
+        item_title: itemTitle,
+        user_id: currentUserId,
+        user_email: currentEmail || '',
+        body,
+        attachments,
+      });
+      if (insErr) throw insErr;
+
+      await logHistory(
+        'commented',
+        `Commented on "${itemTitle}"${body ? `: ${body.slice(0, 120)}` : ''}${attachments.length ? ' (attached a file)' : ''}`
+      );
+      setText('');
+      setFile(null);
+      setFileInputKey((k) => k + 1);
+      await loadRows();
+    } catch (e) {
+      setError(e.message || 'Could not post the comment.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openFile = async (a) => {
+    const { data, error: err } = await supabase.storage.from(COMMENT_BUCKET).createSignedUrl(a.path, 300);
+    if (err || !data?.signedUrl) {
+      setError(err?.message || 'Could not open the file.');
+      return;
+    }
+    window.open(data.signedUrl, '_blank', 'noopener');
+  };
+
+  const removeComment = async (row) => {
+    if (!confirm('Delete this comment? It will be removed for everyone, including any attached file.')) return;
+    const { error: delErr } = await supabase.from('item_comments').delete().eq('id', row.id);
+    if (delErr) {
+      setError(delErr.message);
+      return;
+    }
+    const paths = (row.attachments || []).map((a) => a.path);
+    if (paths.length > 0) await supabase.storage.from(COMMENT_BUCKET).remove(paths);
+    await logHistory('comment deleted', `Deleted a comment on "${itemTitle}"`);
+    loadRows();
+  };
+
+  return (
+    <div className="mt-3 pt-3 border-t border-slate-100">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="text-sm text-slate-700 hover:text-slate-900 flex items-center gap-1.5"
+      >
+        <MessageSquare className="w-4 h-4" />
+        {open ? 'Hide comments' : `Comments${count ? ` (${count})` : ''}`}
+      </button>
+
+      {open && (
+        <div className="mt-3 space-y-3">
+          {rows.length === 0 && <p className="text-xs text-slate-500">No comments yet.</p>}
+
+          {rows.map((r) => (
+            <div key={r.id} className="bg-slate-50 rounded-lg p-3">
+              <div className="flex items-center justify-between gap-2 text-xs text-slate-500 mb-1">
+                <span>
+                  <span className="font-medium text-slate-700">{(r.user_email || 'Unknown').split('@')[0]}</span>
+                  {' · '}
+                  {new Date(r.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
+                </span>
+                {r.user_id === currentUserId && (
+                  <button type="button" onClick={() => removeComment(r)} className="text-red-600 hover:underline">
+                    Delete
+                  </button>
+                )}
+              </div>
+              {r.body && <p className="text-sm text-slate-900 whitespace-pre-wrap break-words">{r.body}</p>}
+              {(r.attachments || []).map((a) => (
+                <button
+                  key={a.path}
+                  type="button"
+                  onClick={() => openFile(a)}
+                  className="mt-2 inline-flex items-center gap-1.5 text-sm text-blue-700 hover:underline max-w-full"
+                >
+                  <Paperclip className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">{a.name}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+
+          <div className="space-y-2">
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={2}
+              placeholder="Write a comment…"
+              className="w-full border border-slate-300 rounded-lg p-2 text-sm text-slate-900"
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                key={fileInputKey}
+                type="file"
+                accept={ALLOWED_FILE_TYPES}
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="text-xs text-slate-700 max-w-full"
+              />
+              <button
+                type="button"
+                onClick={post}
+                disabled={busy || (!text.trim() && !file)}
+                className="bps-blue px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 ml-auto"
+              >
+                {busy ? 'Posting…' : 'Post comment'}
+              </button>
+            </div>
+            {error && <p className="text-xs text-red-600">{error}</p>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function BPSPro() {
   const [blocks, setBlocks] = useState([]);
@@ -2214,6 +2418,7 @@ export default function BPSPro() {
                       </button>
                     </div>
                   </div>
+                  <ItemComments blockId={selectedBlock} blockName={blocks.find((b) => b.id === selectedBlock)?.name || ''} itemKey={`issues:${issue.id}`} itemTitle={issue.title} currentUserId={currentUserId} currentEmail={currentEmail} />
                 </div>
               ))}
             </div>
@@ -2245,6 +2450,24 @@ export default function BPSPro() {
               </button>
             ))}
           </div>
+
+          {/* Comments on the open H&S or utilities item (a sub-item of H&S is commented on separately) */}
+          {(activeSection === 'hs' || activeSection === 'utilities') && (
+            <div className="mb-6">
+              <ItemComments
+                blockId={selectedBlock}
+                blockName={blocks.find((b) => b.id === selectedBlock)?.name || ''}
+                itemKey={activeSection === 'hs' && activeSubSubItem
+                  ? `${activeSection}:${activeSubItem.id}:${activeSubSubItem.id}`
+                  : `${activeSection}:${activeSubItem.id}`}
+                itemTitle={activeSection === 'hs' && activeSubSubItem
+                  ? `${activeSubItem.name} - ${activeSubSubItem.name}`
+                  : activeSubItem.name}
+                currentUserId={currentUserId}
+                currentEmail={currentEmail}
+              />
+            </div>
+          )}
 
           {/* HOME TAB */}
           {activeTab === 'home' && (
@@ -2567,6 +2790,7 @@ export default function BPSPro() {
                 <div>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 md:mb-8">
                     <h2 className="text-xl md:text-2xl font-bold text-slate-900">{activeSubItem.name === 'Terrorism insurance' ? 'Terrorism insurance renewal' : activeSubItem.name}</h2>
+                    <ItemComments blockId={selectedBlock} blockName={blocks.find((b) => b.id === selectedBlock)?.name || ''} itemKey={`insurance:${activeSubItem.id}`} itemTitle={activeSubItem.name} currentUserId={currentUserId} currentEmail={currentEmail} />
                     {isSetUp ? (
                       <span className="bg-green-100 text-green-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set up</span>
                     ) : (
@@ -2797,6 +3021,7 @@ export default function BPSPro() {
                 <div>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 md:mb-8">
                     <h2 className="text-xl md:text-2xl font-bold text-slate-900">{activeSubItem.name}</h2>
+                    <ItemComments blockId={selectedBlock} blockName={blocks.find((b) => b.id === selectedBlock)?.name || ''} itemKey={`documents:${activeSubItem.id}`} itemTitle={activeSubItem.name} currentUserId={currentUserId} currentEmail={currentEmail} />
                     {isSetUp ? (
                       <span className="bg-green-100 text-green-700 text-xs md:text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap">Set up</span>
                     ) : (
@@ -3318,6 +3543,7 @@ export default function BPSPro() {
                       </button>
                     </div>
                   </div>
+                  <ItemComments blockId={selectedBlock} blockName={blocks.find((b) => b.id === selectedBlock)?.name || ''} itemKey={`correspondence:${item.id}`} itemTitle={item.subject} currentUserId={currentUserId} currentEmail={currentEmail} />
                 </div>
               ))}
             </div>
@@ -3420,6 +3646,7 @@ export default function BPSPro() {
                       </button>
                     </div>
                   </div>
+                  <ItemComments blockId={selectedBlock} blockName={blocks.find((b) => b.id === selectedBlock)?.name || ''} itemKey={`jobs:${job.id}`} itemTitle={job.title} currentUserId={currentUserId} currentEmail={currentEmail} />
                 </div>
               ))}
             </div>
