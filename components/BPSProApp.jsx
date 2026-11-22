@@ -241,7 +241,7 @@ export default function BPSPro() {
     setHistoryLoading(true);
     let query = supabase
       .from('block_history')
-      .select('id, block_id, block_name, user_email, action, summary, created_at')
+      .select('id, block_id, block_name, user_email, action, section, summary, detail, created_at')
       .order('created_at', { ascending: false })
       .limit(300);
     if (historyFor.blockId) query = query.eq('block_id', historyFor.blockId);
@@ -252,6 +252,87 @@ export default function BPSPro() {
       })
       .finally(() => setHistoryLoading(false));
   }, [historyFor]);
+
+  // Archive, restore and conflict notices
+  const [viewers, setViewers] = useState([]); // other people who have this block open
+  const [saveError, setSaveError] = useState('');
+  const [archivedOpen, setArchivedOpen] = useState(false);
+  const [archivedRows, setArchivedRows] = useState([]);
+  const [clearOpen, setClearOpen] = useState(false);
+  const [histPerson, setHistPerson] = useState('');
+  const [histSection, setHistSection] = useState('');
+  const [histFrom, setHistFrom] = useState('');
+  const [histTo, setHistTo] = useState('');
+
+  // Shows who else has the open block (a soft notice; nobody is locked out)
+  useEffect(() => {
+    setViewers([]);
+    if (!selectedBlock || !currentUserId) return;
+    const myName = (currentEmail || 'Someone').split('@')[0];
+    const channel = supabase.channel(`block-${selectedBlock}`, { config: { presence: { key: currentUserId } } });
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const names = [];
+        Object.entries(state).forEach(([key, metas]) => {
+          if (key === currentUserId) return;
+          metas.forEach((m) => names.push(m.name));
+        });
+        setViewers(Array.from(new Set(names)));
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') await channel.track({ name: myName });
+      });
+    return () => { supabase.removeChannel(channel); };
+  }, [selectedBlock, currentUserId, currentEmail]);
+
+  // Shows a clear message when a save fails (for example, someone else changed the block first)
+  useEffect(() => {
+    const onError = (e) => setSaveError(e.detail || 'Your change was not saved.');
+    window.addEventListener('bps-save-error', onError);
+    return () => window.removeEventListener('bps-save-error', onError);
+  }, []);
+
+  // Archives only the blocks this person created. They are hidden for everyone and can be restored for 30 days.
+  const archiveMyBlocks = async (mine) => {
+    const archived = new Set();
+    const failed = [];
+    for (const b of mine) {
+      try {
+        await window.storage.archiveBlock(b.id);
+        archived.add(b.id);
+      } catch (e) {
+        failed.push(b.shortName || b.name);
+      }
+    }
+    const keep = blocks.filter((b) => !archived.has(b.id));
+    const keepData = { ...blockData };
+    archived.forEach((id) => { delete keepData[id]; });
+    setBlocks(keep);
+    setBlockData(keepData);
+    setSelectedBlock((s) => (s && archived.has(s) ? null : s));
+    setClearOpen(false);
+    if (failed.length > 0) setPlannerNotice(`Could not archive: ${failed.join(', ')}`);
+  };
+
+  // Restores one of this person's archived blocks and reloads the list
+  const restoreArchived = async (row) => {
+    try {
+      await window.storage.restoreBlock(row.id, row.short_name || row.name);
+      const b = await window.storage.get('bps_pro_blocks');
+      const d = await window.storage.get('bps_pro_block_data');
+      setBlocks(JSON.parse(b?.value || '[]'));
+      setBlockData(JSON.parse(d?.value || '{}'));
+      setArchivedRows((rows) => rows.filter((r) => r.id !== row.id));
+    } catch (e) {
+      setPlannerNotice(e.message);
+    }
+  };
+
+  const openArchived = async () => {
+    setArchivedOpen(true);
+    setArchivedRows(await window.storage.listArchived());
+  };
 
   const alerts = useMemo(() => computeAlerts(visibleBlocks, blockData), [visibleBlocks, blockData]);
 
@@ -993,17 +1074,10 @@ export default function BPSPro() {
               </div>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 <button 
-                  onClick={async () => {
-                    if (confirm('Clear all blocks and start fresh? This cannot be undone.')) {
-                      setBlocks([]);
-                      setBlockData({});
-                      await window.storage.set('bps_pro_blocks', JSON.stringify([]));
-                      await window.storage.set('bps_pro_block_data', JSON.stringify({}));
-                    }
-                  }}
+                  onClick={() => setClearOpen(true)}
                   className="border border-red-500 text-red-500 px-4 py-2.5 rounded-lg hover:bg-red-50 text-sm placeholder:text-slate-500 font-medium w-full sm:w-auto"
                 >
-                  Clear all blocks
+                  Archive my blocks
                 </button>
                 <button 
                   onClick={() => {
@@ -1020,6 +1094,12 @@ export default function BPSPro() {
                   className="border border-slate-300 text-slate-900 px-4 py-2.5 rounded-lg hover:bg-slate-50 text-sm font-medium w-full sm:w-auto"
                 >
                   Choose blocks
+                </button>
+                <button
+                  onClick={openArchived}
+                  className="border border-slate-300 text-slate-900 px-4 py-2.5 rounded-lg hover:bg-slate-50 text-sm font-medium w-full sm:w-auto"
+                >
+                  Archived blocks
                 </button>
                 <button
                   onClick={() => { setHistoryRows([]); setHistoryFor({ blockId: null, title: 'All blocks' }); }}
@@ -1108,7 +1188,12 @@ export default function BPSPro() {
                     <button
                       onClick={async (e) => {
                         e.stopPropagation();
-                        if (confirm(`Delete ${block.name}?`)) {
+                        if (block.created_by !== currentUserId) {
+                          setPlannerNotice('Only the person who created this block can delete it. Use the eye button to hide it from your dashboard.');
+                          return;
+                        }
+                        if (confirm(`Archive ${block.name}? It will be hidden from every user, including you. You can restore it from Archived blocks within 30 days.`)) {
+                          await window.storage.archiveBlock(block.id);
                           const updatedBlocks = blocks.filter(b => b.id !== block.id);
                           setBlocks(updatedBlocks);
                           
@@ -4296,6 +4381,104 @@ export default function BPSPro() {
         </div>
       )}
 
+      {/* Save problems, for example when someone else changed the block first */}
+      {saveError && (
+        <div role="alert" className="fixed top-0 inset-x-0 z-[70] bg-red-600 text-white text-sm px-4 py-3 shadow-lg flex flex-col sm:flex-row items-center justify-center gap-3">
+          <span className="font-medium text-center">{saveError}</span>
+          <div className="flex gap-2">
+            <button onClick={() => window.location.reload()} className="bg-white text-red-700 px-3 py-1 rounded text-sm font-medium">Reload page</button>
+            <button onClick={() => setSaveError('')} className="border border-white/70 px-3 py-1 rounded text-sm">Dismiss</button>
+          </div>
+        </div>
+      )}
+
+      {/* Someone else is also viewing this block (nobody is locked out) */}
+      {viewers.length > 0 && !saveError && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] bg-amber-100 border border-amber-300 text-amber-900 text-sm px-4 py-2 rounded-full shadow">
+          Also viewing this block: {viewers.join(', ')}
+        </div>
+      )}
+
+      {/* Archive my blocks: confirmation with a clear warning */}
+      {clearOpen && (() => {
+        const mine = blocks.filter((b) => b.created_by === currentUserId);
+        const n = mine.length;
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-2">Archive your blocks?</h3>
+              {n === 0 ? (
+                <p className="text-sm text-slate-700 mb-4">You have not created any blocks, so there is nothing to archive. Blocks created by other people are not affected.</p>
+              ) : (
+                <>
+                  <p className="text-sm text-slate-700 mb-3">
+                    {n === 1 ? 'This block' : `These ${n} blocks`} will be hidden from every user, including you. You can restore {n === 1 ? 'it' : 'them'} from Archived blocks within 30 days.
+                  </p>
+                  <ul className="text-sm text-slate-900 mb-3 list-disc pl-5 max-h-40 overflow-y-auto">
+                    {mine.map((b) => <li key={b.id}>{b.shortName || b.name}</li>)}
+                  </ul>
+                  <p className="text-xs text-slate-500 mb-4">Blocks created by other people are not affected.</p>
+                </>
+              )}
+              <div className="flex flex-col sm:flex-row justify-end gap-2">
+                <button onClick={() => setClearOpen(false)} className="border border-slate-300 text-slate-900 px-4 py-2 rounded-lg text-sm font-medium">
+                  Cancel
+                </button>
+                {n > 0 && (
+                  <button onClick={() => archiveMyBlocks(mine)} className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700">
+                    Archive my blocks
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Archived blocks: restore your own within 30 days */}
+      {archivedOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-lg max-h-[90vh] flex flex-col">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <h3 className="text-lg md:text-xl font-bold text-slate-900">Archived blocks</h3>
+                <p className="text-sm text-slate-700">Blocks you archived. You can restore them within 30 days of archiving.</p>
+              </div>
+              <button onClick={() => setArchivedOpen(false)} className="text-slate-500 hover:bg-slate-100 p-2 rounded flex-shrink-0">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 min-h-0 divide-y divide-slate-200 border border-slate-200 rounded-lg">
+              {archivedRows.length === 0 && <p className="p-4 text-sm text-slate-700">Nothing archived.</p>}
+              {archivedRows.map((row) => {
+                const archivedAt = new Date(row.archived_at);
+                const restoreBy = new Date(archivedAt.getTime() + 30 * 24 * 60 * 60 * 1000);
+                const expired = Date.now() > restoreBy.getTime();
+                return (
+                  <div key={row.id} className="p-3 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-slate-900 truncate">{row.short_name || row.name}</p>
+                      <p className="text-xs text-slate-500">
+                        Archived {archivedAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })}
+                        {' · '}
+                        {expired ? 'restore period ended' : `restore by ${restoreBy.toLocaleDateString('en-GB', { dateStyle: 'medium' })}`}
+                      </p>
+                    </div>
+                    <button
+                      disabled={expired}
+                      onClick={() => restoreArchived(row)}
+                      className="bps-blue px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 flex-shrink-0"
+                    >
+                      Restore
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Choose blocks modal: each person decides which blocks appear on their dashboard */}
       {showChooser && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -4331,43 +4514,100 @@ export default function BPSPro() {
         </div>
       )}
 
-      {/* Change history modal: who changed what, and when */}
-      {historyFor && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div className="flex items-start justify-between gap-3 mb-4">
-              <div className="min-w-0">
-                <h3 className="text-lg md:text-xl font-bold text-slate-900">Change history</h3>
-                <p className="text-sm text-slate-700 truncate">{historyFor.blockId ? historyFor.title : 'All blocks'}</p>
+      {/* Change history: who changed what, when, with filters and CSV export */}
+      {historyFor && (() => {
+        const personOf = (r) => (r.user_email || 'Unknown').split('@')[0];
+        const people = Array.from(new Set(historyRows.map(personOf))).sort();
+        const sections = Array.from(new Set(historyRows.map((r) => r.section).filter(Boolean))).sort();
+        const fromTs = histFrom ? new Date(histFrom + 'T00:00:00').getTime() : null;
+        const toTs = histTo ? new Date(histTo + 'T23:59:59').getTime() : null;
+        const filtered = historyRows.filter((r) => {
+          if (histPerson && personOf(r) !== histPerson) return false;
+          if (histSection && r.section !== histSection) return false;
+          const t = new Date(r.created_at).getTime();
+          if (fromTs && t < fromTs) return false;
+          if (toTs && t > toTs) return false;
+          return true;
+        });
+        const exportCsv = () => {
+          const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+          const lines = [['When', 'Person', 'Block', 'Action', 'Section', 'Details'].join(',')];
+          filtered.forEach((r) => {
+            lines.push([
+              new Date(r.created_at).toISOString(),
+              r.user_email || '',
+              r.block_name || '',
+              r.action,
+              r.section || '',
+              r.summary,
+            ].map(esc).join(','));
+          });
+          const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `bps-history-${new Date().toISOString().slice(0, 10)}.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+        };
+        const selectCls = 'border border-slate-300 rounded-lg px-2 py-1.5 text-sm text-slate-900 bg-white';
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-3xl max-h-[90vh] flex flex-col">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="min-w-0">
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900">Change history</h3>
+                  <p className="text-sm text-slate-700 truncate">{historyFor.blockId ? historyFor.title : 'All blocks'}</p>
+                </div>
+                <button onClick={() => setHistoryFor(null)} className="text-slate-500 hover:bg-slate-100 p-2 rounded flex-shrink-0">
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button onClick={() => setHistoryFor(null)} className="text-slate-500 hover:bg-slate-100 p-2 rounded flex-shrink-0">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="overflow-y-auto flex-1 min-h-0">
-              {historyLoading ? (
-                <p className="text-sm text-slate-700">Loading…</p>
-              ) : historyRows.length === 0 ? (
-                <p className="text-sm text-slate-700">No changes recorded yet.</p>
-              ) : (
-                <ul className="divide-y divide-slate-200">
-                  {historyRows.map((row) => (
-                    <li key={row.id} className="py-3">
-                      <p className="text-sm text-slate-900">{row.summary}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        {(row.user_email || 'Unknown').split('@')[0]}
-                        {' · '}
-                        {new Date(row.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
-                        {!historyFor.blockId && row.block_name ? ` · ${row.block_name}` : ''}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <div className="flex flex-wrap gap-2 mb-3">
+                <select value={histPerson} onChange={(e) => setHistPerson(e.target.value)} className={selectCls}>
+                  <option value="">All people</option>
+                  {people.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+                <select value={histSection} onChange={(e) => setHistSection(e.target.value)} className={selectCls}>
+                  <option value="">All sections</option>
+                  {sections.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <input type="date" value={histFrom} onChange={(e) => setHistFrom(e.target.value)} className={selectCls} aria-label="From date" />
+                <input type="date" value={histTo} onChange={(e) => setHistTo(e.target.value)} className={selectCls} aria-label="To date" />
+                <button
+                  onClick={exportCsv}
+                  disabled={filtered.length === 0}
+                  className="ml-auto border border-slate-300 text-slate-900 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-slate-50 disabled:opacity-40"
+                >
+                  Export CSV
+                </button>
+              </div>
+              <div className="overflow-y-auto flex-1 min-h-0">
+                {historyLoading ? (
+                  <p className="text-sm text-slate-700">Loading…</p>
+                ) : filtered.length === 0 ? (
+                  <p className="text-sm text-slate-700">{historyRows.length === 0 ? 'No changes recorded yet.' : 'No changes match these filters.'}</p>
+                ) : (
+                  <ul className="divide-y divide-slate-200">
+                    {filtered.map((row) => (
+                      <li key={row.id} className="py-3">
+                        <p className="text-sm text-slate-900">{row.summary}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          <span className="font-medium text-slate-700">{personOf(row)}</span>
+                          {' · '}
+                          {new Date(row.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
+                          {!historyFor.blockId && row.block_name ? ` · ${row.block_name}` : ''}
+                          {row.section ? ` · ${row.section}` : ''}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Add Block Modal */}
       {showModal && modalType === 'add-block' && (
