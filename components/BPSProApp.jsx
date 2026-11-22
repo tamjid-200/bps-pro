@@ -5,7 +5,7 @@ import { computeAlerts } from '../lib/bps-context';
 import { analyzeInsuranceFile } from '../lib/ai-client';
 import { fetchPlannerStatus, connectMicrosoft, disconnectMicrosoft } from '../lib/planner-client';
 import PlannerStatus from './PlannerStatus';
-import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap, Eye, EyeOff, History, Paperclip } from 'lucide-react';
+import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap, Eye, EyeOff, History, Paperclip, Bell } from 'lucide-react';
 
 const COMMENT_BUCKET = 'item-files';
 const MAX_FILE_MB = 10;
@@ -183,7 +183,7 @@ function ItemComments({ blockId, blockName, itemKey, itemTitle, currentUserId, c
               value={text}
               onChange={(e) => setText(e.target.value)}
               rows={2}
-              placeholder="Write a comment…"
+              placeholder="Write a comment… (type @name to notify someone)"
               className="w-full border border-slate-300 rounded-lg p-2 text-sm text-slate-900"
             />
             <div className="flex flex-wrap items-center gap-2">
@@ -535,6 +535,68 @@ export default function BPSPro() {
   const openArchived = async () => {
     setArchivedOpen(true);
     setArchivedRows(await window.storage.listArchived());
+  };
+
+  // Notifications: comments that mention you, or that are added to an item you have commented on
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const loadNotifications = async () => {
+    if (!currentUserId) return;
+    const { data, error } = await supabase
+      .from('comment_notifications')
+      .select('id, block_id, item_key, item_title, from_email, excerpt, reason, read_at, created_at')
+      .eq('user_id', currentUserId)
+      .order('created_at', { ascending: false })
+      .limit(100);
+    if (!error) setNotifications(data || []);
+  };
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    loadNotifications();
+    const timer = setInterval(loadNotifications, 30000);
+    return () => clearInterval(timer);
+  }, [currentUserId]);
+
+  const unreadCount = notifications.filter((n) => !n.read_at).length;
+
+  const markRead = async (ids) => {
+    const now = new Date().toISOString();
+    setNotifications((list) => list.map((n) => (ids.includes(n.id) && !n.read_at ? { ...n, read_at: now } : n)));
+    await supabase.from('comment_notifications').update({ read_at: now }).in('id', ids).is('read_at', null);
+  };
+
+  const markAllRead = () => {
+    const ids = notifications.filter((n) => !n.read_at).map((n) => n.id);
+    if (ids.length > 0) markRead(ids);
+  };
+
+  // Opens the block and the item a notification is about
+  const openNotification = (n) => {
+    markRead([n.id]);
+    setShowNotifications(false);
+    const [section, id, sub] = String(n.item_key).split(':');
+    setSelectedBlock(n.block_id);
+    setShowAllBlocks(false);
+    setActiveTab('home');
+    setActiveClaim(null);
+    setActiveSection(section);
+    setActiveSubSubItem(null);
+
+    let found = null;
+    if (section === 'hs') {
+      found = hsItems.find((i) => String(i.id) === id) || null;
+      const subItem = found?.subItems?.find((s) => String(s.id) === sub);
+      if (subItem) setActiveSubSubItem(subItem);
+    } else if (section === 'utilities') {
+      found = utilityItems.find((i) => String(i.id) === id) || null;
+    } else if (section === 'insurance') {
+      found = [...insuranceCategories.policy, ...insuranceCategories.other].find((i) => String(i.id) === id) || null;
+    } else if (section === 'documents') {
+      found = documentCategories.flatMap((c) => c.items || []).find((i) => String(i.id) === id) || null;
+    }
+    setActiveSubItem(found);
   };
 
   const alerts = useMemo(() => computeAlerts(visibleBlocks, blockData), [visibleBlocks, blockData]);
@@ -3954,6 +4016,20 @@ export default function BPSPro() {
             Log Out
           </button>
           <button
+            onClick={() => {
+              if (!showNotifications) loadNotifications();
+              setShowNotifications((s) => !s);
+            }}
+            className="mt-2 w-full text-xs text-white px-2 py-1.5 rounded transition-colors flex items-center justify-center gap-1.5"
+            style={{ backgroundColor: '#515152' }}
+          >
+            <Bell className="w-3.5 h-3.5" />
+            Notifications
+            {unreadCount > 0 && (
+              <span className="bg-red-500 text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">{unreadCount}</span>
+            )}
+          </button>
+          <button
             onClick={refreshPlanner}
             disabled={plannerRefreshing || plannerConnected !== true}
             title={plannerConnected === true ? 'Reload Planner tasks now' : 'Connect Microsoft first'}
@@ -4703,6 +4779,58 @@ export default function BPSPro() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Notifications: comments that mention you, or that are added to an item you have commented on */}
+      {showNotifications && (
+        <>
+          <div className="fixed inset-0 z-[55]" onClick={() => setShowNotifications(false)} />
+          <div className="fixed bottom-4 left-4 md:left-[21rem] z-[56] w-[min(24rem,calc(100vw-2rem))] max-h-[70vh] bg-white border border-slate-200 rounded-xl shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+              <p className="font-semibold text-slate-900">
+                Notifications{unreadCount > 0 ? ` (${unreadCount} new)` : ''}
+              </p>
+              <div className="flex items-center gap-3">
+                {unreadCount > 0 && (
+                  <button onClick={markAllRead} className="text-xs text-blue-700 hover:underline">Mark all read</button>
+                )}
+                <button onClick={() => setShowNotifications(false)} className="text-slate-500 hover:bg-slate-100 p-1 rounded">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="overflow-y-auto divide-y divide-slate-100">
+              {notifications.length === 0 && (
+                <p className="p-4 text-sm text-slate-600">No notifications yet. Comments that mention you will appear here.</p>
+              )}
+              {notifications.map((n) => {
+                const block = blocks.find((b) => b.id === n.block_id);
+                const blockName = block ? (block.shortName || block.name) : 'Archived block';
+                const who = (n.from_email || 'Someone').split('@')[0];
+                return (
+                  <button
+                    key={n.id}
+                    onClick={() => openNotification(n)}
+                    className={`w-full text-left px-4 py-3 hover:bg-slate-50 flex gap-3 ${n.read_at ? '' : 'bg-blue-50/60'}`}
+                  >
+                    <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${n.read_at ? 'bg-transparent' : 'bg-blue-600'}`} />
+                    <span className="min-w-0">
+                      <span className="block text-sm text-slate-900">
+                        <span className="font-medium">{who}</span>
+                        {n.reason === 'mention' ? ' mentioned you on ' : ' commented on '}
+                        <span className="font-medium">{n.item_title}</span>
+                      </span>
+                      {n.excerpt && <span className="block text-xs text-slate-600 truncate">{n.excerpt}</span>}
+                      <span className="block text-[11px] text-slate-500 mt-0.5">
+                        {blockName} · {new Date(n.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
       )}
 
       {/* Choose blocks modal: each person decides which blocks appear on their dashboard */}
