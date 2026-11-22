@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import AIChat from './AIChat';
 import ToastStack from './ToastStack';
 import { computeAlerts } from '../lib/bps-context';
 import { analyzeInsuranceFile } from '../lib/ai-client';
@@ -6213,7 +6212,6 @@ export default function BPSPro() {
       )}
 
       <ToastStack alerts={alerts} />
-      <AIChat blocks={blocks} blockData={blockData} hidden={showModal || showInfoModal || showTrainingModal} />
       
     </div>
   );
