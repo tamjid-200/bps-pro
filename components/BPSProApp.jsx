@@ -6,7 +6,7 @@ import { computeAlerts } from '../lib/bps-context';
 import { analyzeInsuranceFile } from '../lib/ai-client';
 import { fetchPlannerStatus, connectMicrosoft, disconnectMicrosoft } from '../lib/planner-client';
 import PlannerStatus from './PlannerStatus';
-import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap, Eye } from 'lucide-react';
+import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap, Eye, EyeOff, History } from 'lucide-react';
 
 export default function BPSPro() {
   const [blocks, setBlocks] = useState([]);
@@ -27,10 +27,19 @@ export default function BPSPro() {
   const [plannerNotice, setPlannerNotice] = useState('');
   const [currentEmail, setCurrentEmail] = useState('');
   const [plannerRefreshing, setPlannerRefreshing] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState('');
+  const [shownChoices, setShownChoices] = useState({}); // blockId -> true/false (this person's own choice)
+  const [showChooser, setShowChooser] = useState(false);
+  const [historyFor, setHistoryFor] = useState(null); // null = closed; blockId null = all blocks
+  const [historyRows, setHistoryRows] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   // Shows which login is signed in (useful when testing with two users)
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setCurrentEmail(data?.user?.email || '')).catch(() => {});
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentEmail(data?.user?.email || '');
+      setCurrentUserId(data?.user?.id || '');
+    }).catch(() => {});
   }, []);
   
   // Mobile menu states
@@ -183,7 +192,68 @@ export default function BPSPro() {
 
   // Memoized calculation of total tasks across all blocks (performance optimization)
   // Deadline and insurance alerts (pop-up toasts)
-  const alerts = useMemo(() => computeAlerts(blocks, blockData), [blocks, blockData]);
+  // Load this person's own choice of blocks to show
+  useEffect(() => {
+    if (!currentUserId) return;
+    supabase
+      .from('block_visibility')
+      .select('block_id, shown')
+      .eq('user_id', currentUserId)
+      .then(({ data }) => {
+        const map = {};
+        (data || []).forEach((r) => { map[r.block_id] = r.shown; });
+        setShownChoices(map);
+      });
+  }, [currentUserId]);
+
+  // A block is shown if this person chose it. Without a choice, only blocks they created are shown.
+  const isBlockShown = (block) => {
+    const choice = shownChoices[block.id];
+    if (choice !== undefined) return choice;
+    return !!currentUserId && block.created_by === currentUserId;
+  };
+  const visibleBlocks = useMemo(
+    () => blocks.filter((b) => isBlockShown(b)),
+    [blocks, shownChoices, currentUserId]
+  );
+  const creatorName = (block) => (block.created_by_email || '').split('@')[0] || 'Unknown';
+
+  // Saves this person's choice for one or more blocks
+  const setManyShown = async (list, shown) => {
+    if (list.length === 0) return;
+    setShownChoices((prev) => {
+      const next = { ...prev };
+      list.forEach((b) => { next[b.id] = shown; });
+      return next;
+    });
+    const { error } = await supabase
+      .from('block_visibility')
+      .upsert(
+        list.map((b) => ({ user_id: currentUserId, block_id: b.id, shown, updated_at: new Date().toISOString() })),
+        { onConflict: 'user_id,block_id' }
+      );
+    if (error) setPlannerNotice(`Could not save your choice: ${error.message}`);
+  };
+
+  // Loads the change history when it is opened
+  useEffect(() => {
+    if (!historyFor) return;
+    setHistoryLoading(true);
+    let query = supabase
+      .from('block_history')
+      .select('id, block_id, block_name, user_email, action, summary, created_at')
+      .order('created_at', { ascending: false })
+      .limit(300);
+    if (historyFor.blockId) query = query.eq('block_id', historyFor.blockId);
+    query
+      .then(({ data, error }) => {
+        if (error) setPlannerNotice(`Could not load history: ${error.message}`);
+        setHistoryRows(data || []);
+      })
+      .finally(() => setHistoryLoading(false));
+  }, [historyFor]);
+
+  const alerts = useMemo(() => computeAlerts(visibleBlocks, blockData), [visibleBlocks, blockData]);
 
   // Shows a short message when Microsoft's sign-in page sends the user back to the app
   useEffect(() => {
@@ -199,9 +269,9 @@ export default function BPSPro() {
 
   // Reloads Planner tasks now, skipping the server's saved copy. Blocks are not reloaded.
   const refreshPlanner = () => {
-    if (plannerRefreshing || plannerConnected !== true || blocks.length === 0) return;
+    if (plannerRefreshing || plannerConnected !== true || visibleBlocks.length === 0) return;
     setPlannerRefreshing(true);
-    fetchPlannerStatus(blocks, true)
+    fetchPlannerStatus(visibleBlocks, true)
       .then(({ connected, status, items }) => {
         setPlannerConnected(connected);
         setPlannerStatus(status);
@@ -216,7 +286,7 @@ export default function BPSPro() {
   useEffect(() => {
     // Runs even with no blocks yet, so the Connect Microsoft button always shows
     const check = () =>
-      fetchPlannerStatus(blocks)
+      fetchPlannerStatus(visibleBlocks)
         .then(({ connected, status, items }) => {
           setPlannerConnected(connected);
           setPlannerStatus(status);
@@ -226,15 +296,15 @@ export default function BPSPro() {
     check();
     const timer = setInterval(check, 6 * 60 * 60 * 1000);
     return () => clearInterval(timer);
-  }, [blocks]);
+  }, [visibleBlocks]);
 
   const totalTasksAllBlocks = useMemo(() => {
-    return blocks.reduce((sum, block) => {
+    return visibleBlocks.reduce((sum, block) => {
       const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
       const taskCount = countDueTasks(currentBlockData.tasks) + plannerDueCount(block.id) + (currentBlockData.issues?.length || 0);
       return sum + taskCount;
     }, 0);
-  }, [blocks, blockData, plannerItems]);
+  }, [visibleBlocks, blockData, plannerItems]);
 
   const hasOverdueTasks = (blockId) => {
     const currentBlockData = blockData[blockId] || { tasks: [] };
@@ -945,6 +1015,19 @@ export default function BPSPro() {
                   <Plus className="w-4 h-4" />
                   Add new block
                 </button>
+                <button
+                  onClick={() => setShowChooser(true)}
+                  className="border border-slate-300 text-slate-900 px-4 py-2.5 rounded-lg hover:bg-slate-50 text-sm font-medium w-full sm:w-auto"
+                >
+                  Choose blocks
+                </button>
+                <button
+                  onClick={() => { setHistoryRows([]); setHistoryFor({ blockId: null, title: 'All blocks' }); }}
+                  className="border border-slate-300 text-slate-900 px-4 py-2.5 rounded-lg hover:bg-slate-50 text-sm font-medium w-full sm:w-auto flex items-center justify-center gap-2"
+                >
+                  <History className="w-4 h-4" />
+                  History
+                </button>
               </div>
             </div>
 
@@ -992,14 +1075,14 @@ export default function BPSPro() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {blocks.length === 0 ? (
+              {visibleBlocks.length === 0 ? (
                 <div className="col-span-full text-center py-12 text-slate-500">
                   <Building className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-                  <p className="text-lg text-slate-900 mb-2">No blocks yet</p>
-                  <p className="text-sm text-slate-900">Click "Add new block" to get started</p>
+                  <p className="text-lg text-slate-900 mb-2">{blocks.length === 0 ? 'No blocks yet' : 'No blocks on your dashboard'}</p>
+                  <p className="text-sm text-slate-900">{blocks.length === 0 ? 'Click "Add new block" to get started' : 'Click "Choose blocks" to pick which blocks to show'}</p>
                 </div>
               ) : (
-                blocks.map(block => {
+                visibleBlocks.map(block => {
                 const currentBlockData = blockData[block.id] || { tasks: [], issues: [] };
                 const taskCount = countDueTasks(currentBlockData.tasks) + plannerDueCount(block.id) + (currentBlockData.issues?.length || 0);
                 
@@ -1008,6 +1091,20 @@ export default function BPSPro() {
                     key={block.id}
                     className="bg-white border-2 border-slate-200 rounded-lg p-4 md:p-6 hover:bps-blue-border hover:shadow-lg transition-all relative"
                   >
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setManyShown([block], false); }}
+                      title="Hide from my dashboard"
+                      className="absolute top-3 right-20 text-slate-500 hover:bg-slate-100 p-2 rounded"
+                    >
+                      <EyeOff className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setHistoryRows([]); setHistoryFor({ blockId: block.id, title: block.shortName || block.name }); }}
+                      title="View change history"
+                      className="absolute top-3 right-12 text-slate-500 hover:bg-slate-100 p-2 rounded"
+                    >
+                      <History className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={async (e) => {
                         e.stopPropagation();
@@ -1047,6 +1144,7 @@ export default function BPSPro() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-slate-900 text-base md:text-lg mb-1 truncate">{block.shortName || block.name}</h3>
                         <p className="text-xs text-slate-500 line-clamp-2">{block.address}</p>
+                        <p className="text-[11px] text-slate-500/70 mt-1">Created by {creatorName(block)}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -4198,6 +4296,79 @@ export default function BPSPro() {
         </div>
       )}
 
+      {/* Choose blocks modal: each person decides which blocks appear on their dashboard */}
+      {showChooser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-lg max-h-[90vh] flex flex-col">
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-1">Choose blocks for your dashboard</h3>
+            <p className="text-sm text-slate-700 mb-4">Tick the blocks you want to see. Hidden blocks are kept for the team and can be shown again at any time. Blocks you create are shown to you by default.</p>
+            <div className="flex gap-2 mb-3">
+              <button onClick={() => setManyShown(blocks, true)} className="text-sm px-3 py-1.5 rounded border border-slate-300 text-slate-900 hover:bg-slate-50">Show all</button>
+              <button onClick={() => setManyShown(blocks, false)} className="text-sm px-3 py-1.5 rounded border border-slate-300 text-slate-900 hover:bg-slate-50">Hide all</button>
+            </div>
+            <div className="overflow-y-auto flex-1 min-h-0 border border-slate-200 rounded-lg divide-y divide-slate-200">
+              {blocks.length === 0 && <p className="p-4 text-sm text-slate-700">No blocks have been added yet.</p>}
+              {blocks.map((b) => (
+                <label key={b.id} className="flex items-start gap-3 p-3 cursor-pointer hover:bg-slate-50">
+                  <input
+                    type="checkbox"
+                    className="mt-1 w-4 h-4"
+                    checked={isBlockShown(b)}
+                    onChange={(e) => setManyShown([b], e.target.checked)}
+                  />
+                  <span className="min-w-0">
+                    <span className="block font-medium text-slate-900 truncate">{b.shortName || b.name}</span>
+                    <span className="block text-xs text-slate-700 truncate">{b.address}</span>
+                    <span className="block text-[11px] text-slate-500/70">Created by {creatorName(b)}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-end mt-4">
+              <button onClick={() => setShowChooser(false)} className="bps-blue px-4 py-2 rounded-lg text-sm font-medium">Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change history modal: who changed what, and when */}
+      {historyFor && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="min-w-0">
+                <h3 className="text-lg md:text-xl font-bold text-slate-900">Change history</h3>
+                <p className="text-sm text-slate-700 truncate">{historyFor.blockId ? historyFor.title : 'All blocks'}</p>
+              </div>
+              <button onClick={() => setHistoryFor(null)} className="text-slate-500 hover:bg-slate-100 p-2 rounded flex-shrink-0">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 min-h-0">
+              {historyLoading ? (
+                <p className="text-sm text-slate-700">Loading…</p>
+              ) : historyRows.length === 0 ? (
+                <p className="text-sm text-slate-700">No changes recorded yet.</p>
+              ) : (
+                <ul className="divide-y divide-slate-200">
+                  {historyRows.map((row) => (
+                    <li key={row.id} className="py-3">
+                      <p className="text-sm text-slate-900">{row.summary}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {(row.user_email || 'Unknown').split('@')[0]}
+                        {' · '}
+                        {new Date(row.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
+                        {!historyFor.blockId && row.block_name ? ` · ${row.block_name}` : ''}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add Block Modal */}
       {showModal && modalType === 'add-block' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -4270,11 +4441,13 @@ export default function BPSPro() {
                   }
                   
                   const newBlock = {
-                    id: String(Date.now()),
+                    id: crypto.randomUUID(),
                     name: newBlockForm.name,
                     shortName: newBlockForm.shortName,
                     address: newBlockForm.address,
                     height: newBlockForm.height,
+                    created_by: currentUserId,
+                    created_by_email: currentEmail,
                     evacuationStrategy: 'stay-put',
                     managingAgent: {
                       name: 'Block Property Solutions',

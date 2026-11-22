@@ -7,6 +7,27 @@ const idMapping = new Map<string, string>();
 // delete blocks this person removed. Blocks added by other people are never touched.
 let knownBlocks = new Map<string, string>(); // block id -> JSON of its saved row
 let knownBlockData = new Map<string, string>(); // block id -> JSON of its saved data
+let knownBlockDataObj = new Map<string, any>(); // block id -> its saved data (for history)
+
+// Human names for the sections and fields shown in the history
+const SECTION_LABELS: Record<string, string> = {
+  tasks: 'Tasks',
+  documents: 'Documents',
+  hsItems: 'Health & Safety',
+  utilities: 'Utilities',
+  insurance: 'Insurance',
+  issues: 'Issues/complaints',
+  jobs: 'Jobs/projects',
+  units: 'Units',
+  correspondence: 'Correspondence',
+};
+const FIELD_LABELS: Record<string, string> = {
+  name: 'name',
+  short_name: 'short name',
+  address: 'address',
+  height: 'height',
+  managing_agent: 'managing agent',
+};
 
 // Turns an app block into the database row (same field order every time)
 function toRow(block: any) {
@@ -33,6 +54,27 @@ function toRow(block: any) {
   };
 }
 
+// Writes history entries for the signed-in person. Never blocks a save if it fails.
+async function writeHistory(user: any, entries: { block_id: string | null; block_name: string; action: string; summary: string }[]) {
+  if (entries.length === 0) return;
+  const rows = entries.map((e) => ({ ...e, user_id: user.id, user_email: user.email ?? '' }));
+  const { error } = await supabase.from('block_history').insert(rows);
+  if (error) console.warn('History not saved:', error.message);
+}
+
+// Describes what changed in one section of a block, e.g. "Documents: added 2 (now 5)"
+function describeSection(key: string, oldVal: any, newVal: any): string {
+  const label = SECTION_LABELS[key] ?? key;
+  if (Array.isArray(oldVal) || Array.isArray(newVal)) {
+    const a = Array.isArray(oldVal) ? oldVal.length : 0;
+    const b = Array.isArray(newVal) ? newVal.length : 0;
+    if (a === b) return `${label}: edited`;
+    if (b > a) return `${label}: added ${b - a} (now ${b})`;
+    return `${label}: removed ${a - b} (now ${b})`;
+  }
+  return `${label}: updated`;
+}
+
 export const storageHelper = {
   async get(key: string) {
     try {
@@ -43,7 +85,7 @@ export const storageHelper = {
         // Shared team list: every signed-in user sees all blocks
         const { data, error } = await supabase
           .from('blocks')
-          .select('id, name, short_name, address, height, managing_agent, created_at')
+          .select('id, name, short_name, address, height, managing_agent, created_at, created_by, created_by_email')
           .order('created_at', { ascending: true });
 
         if (error) {
@@ -87,10 +129,12 @@ export const storageHelper = {
         // Convert array to object keyed by block_id
         const blockDataObj: any = {};
         knownBlockData = new Map();
+        knownBlockDataObj = new Map();
         (data || []).forEach((item: any) => {
           if (item.block_id && item.data) {
             blockDataObj[item.block_id] = item.data;
             knownBlockData.set(item.block_id, JSON.stringify(item.data));
+            knownBlockDataObj.set(item.block_id, item.data);
           }
         });
 
@@ -117,6 +161,7 @@ export const storageHelper = {
         const blocks = JSON.parse(value);
         const rows = blocks.map(toRow);
         const incoming = new Set(rows.map((r: any) => r.id));
+        const history: any[] = [];
 
         // Delete only blocks this browser knew about that were removed here
         const removed = Array.from(knownBlocks.keys()).filter((id) => !incoming.has(id));
@@ -126,30 +171,55 @@ export const storageHelper = {
             console.error('Error deleting blocks:', error);
             throw error;
           }
+          removed.forEach((id) => {
+            const old = JSON.parse(knownBlocks.get(id) || '{}');
+            history.push({ block_id: id, block_name: old.name || '', action: 'deleted', summary: `Deleted block "${old.name || ''}"` });
+          });
         }
 
         // Save only the blocks that changed
         const changed = rows.filter((r: any) => knownBlocks.get(r.id) !== JSON.stringify(r));
         if (changed.length > 0) {
-          // user_id records the last person who saved the block
-          const payload = changed.map((r: any) => ({ ...r, user_id: user.id }));
+          const payload = changed.map((r: any) => {
+            if (knownBlocks.has(r.id)) {
+              // Existing block: record who saved it last
+              return { ...r, user_id: user.id };
+            }
+            // New block: record who created it
+            return { ...r, user_id: user.id, created_by: user.id, created_by_email: user.email ?? '' };
+          });
           const { error } = await supabase.from('blocks').upsert(payload, { onConflict: 'id' });
           if (error) {
             console.error('Error saving blocks:', error);
             throw error;
           }
+
+          changed.forEach((r: any) => {
+            if (!knownBlocks.has(r.id)) {
+              history.push({ block_id: r.id, block_name: r.name, action: 'created', summary: `Created block "${r.name}"` });
+              return;
+            }
+            const old = JSON.parse(knownBlocks.get(r.id) || '{}');
+            const fields = Object.keys(FIELD_LABELS).filter((f) => JSON.stringify(old[f]) !== JSON.stringify((r as any)[f]));
+            if (fields.length > 0) {
+              const names = fields.map((f) => FIELD_LABELS[f]).join(', ');
+              history.push({ block_id: r.id, block_name: r.name, action: 'updated', summary: `Changed ${names}` });
+            }
+          });
         }
 
         knownBlocks = new Map(rows.map((r: any) => [r.id, JSON.stringify(r)]));
+        await writeHistory(user, history);
         return { key, value, shared: shared || false };
       }
 
       if (key === 'bps_pro_block_data') {
         const blockDataObj = JSON.parse(value);
+        const history: any[] = [];
 
         // Only save the block data that changed, so one person's save
         // cannot overwrite another person's changes to other blocks
-        const changed: { dbId: string; json: string; row: any }[] = [];
+        const changed: { dbId: string; json: string; row: any; data: any }[] = [];
         Object.keys(blockDataObj).forEach((blockId) => {
           const dbId = idMapping.get(String(blockId)) || blockId; // Use mapped UUID if available
           const json = JSON.stringify(blockDataObj[blockId]);
@@ -157,6 +227,7 @@ export const storageHelper = {
             changed.push({
               dbId,
               json,
+              data: blockDataObj[blockId],
               row: {
                 block_id: dbId,
                 user_id: user.id, // last person who saved this block's data
@@ -177,10 +248,35 @@ export const storageHelper = {
             console.error('Error saving block data:', error);
             console.warn('Block data save failed, but blocks are saved');
           } else {
-            changed.forEach((c) => knownBlockData.set(c.dbId, c.json));
+            // Work out what changed inside each block, for the history
+            changed.forEach((c) => {
+              const oldObj = knownBlockDataObj.get(c.dbId) || {};
+              const newObj = c.data || {};
+              const blockName = (() => {
+                const old = knownBlocks.get(c.dbId);
+                return old ? JSON.parse(old).name || '' : '';
+              })();
+              const sections = Array.from(new Set([...Object.keys(oldObj), ...Object.keys(newObj)]));
+              sections.forEach((section) => {
+                const o = oldObj[section];
+                const n = newObj[section];
+                if (JSON.stringify(o ?? null) === JSON.stringify(n ?? null)) return;
+                // Empty to empty is not a change
+                if ((o === undefined || (Array.isArray(o) && o.length === 0)) && (n === undefined || (Array.isArray(n) && n.length === 0))) return;
+                history.push({
+                  block_id: c.dbId,
+                  block_name: blockName,
+                  action: 'changed',
+                  summary: describeSection(section, o, n),
+                });
+              });
+              knownBlockData.set(c.dbId, c.json);
+              knownBlockDataObj.set(c.dbId, c.data);
+            });
           }
         }
 
+        await writeHistory(user, history);
         return { key, value, shared: shared || false };
       }
 
@@ -216,6 +312,7 @@ export const storageHelper = {
           await supabase.from('block_data').delete().in('block_id', ids);
         }
         knownBlockData = new Map();
+        knownBlockDataObj = new Map();
 
         return { key, deleted: true, shared: shared || false };
       }
