@@ -7,6 +7,8 @@ import { fetchPlannerStatus, connectMicrosoft, disconnectMicrosoft } from '../li
 import PlannerStatus from './PlannerStatus';
 import { Building, Home, FileText, Zap, Shield, MapPin, Users, Settings, Plus, Upload, Calendar, AlertCircle, CheckCircle, Edit2, Trash2, Download, X, Info, Menu, Wrench, MessageSquare, DoorOpen, Mail, Search, RefreshCw, ChevronDown, GraduationCap, Eye, EyeOff, History, Paperclip, Bell } from 'lucide-react';
 
+const FILE_BUCKET = 'block-files';
+const MAX_BLOCK_FILE_MB = 25;
 const COMMENT_BUCKET = 'item-files';
 const MAX_FILE_MB = 10;
 const ALLOWED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png,.webp,.heic,.doc,.docx,.xls,.xlsx,.csv,.txt';
@@ -860,58 +862,77 @@ export default function BPSPro() {
   // ============ END BACKUP SYSTEM FUNCTIONS ============
 
   // File upload and management functions
+  // Uploaded files live in Supabase Storage. Block data keeps only each file's name and location.
+  const filePathFor = (blockId, sectionKey, fileName) => {
+    const safeName = fileName.replace(/[^\w.\- ]+/g, '_');
+    const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    return `${blockId}/${sectionKey.replace(/[^\w-]+/g, '_')}/${unique}-${safeName}`;
+  };
+
+  // A short-lived link to a stored file (expires after 5 minutes)
+  const signedFileUrl = async (path, downloadName = null) => {
+    const { data, error } = await supabase.storage
+      .from(FILE_BUCKET)
+      .createSignedUrl(path, 300, downloadName ? { download: downloadName } : undefined);
+    if (error || !data?.signedUrl) throw new Error(error?.message || 'File not found');
+    return data.signedUrl;
+  };
+
+  // The file's contents as a data URL (used by the insurance reader)
+  const fileAsDataUrl = async (file) => {
+    if (file.data) return file.data;
+    const blob = await (await fetch(await signedFileUrl(file.path))).blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const handleFileUpload = async (section, subSection = null) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.pdf,.jpg,.jpeg,.png,.gif';
     input.multiple = true;
-    
+
     input.onchange = async (e) => {
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
-      
+
       setUploadingFile(true);
-      
+
       try {
         const currentData = blockData[selectedBlock] || {};
         const uploadedFiles = currentData.uploadedFiles || {};
-        
-        // Create section key (e.g., "insurance-building" or "documents-fire-doors")
+
+        // Section key (e.g., "insurance-building" or "documents-fire-doors")
         const sectionKey = subSection ? `${section}-${subSection}` : section;
         const sectionFiles = uploadedFiles[sectionKey] || [];
-        
-        // Process each file
+
+        const added = [];
         for (const file of files) {
-          const reader = new FileReader();
-          const fileData = await new Promise((resolve) => {
-            reader.onload = (event) => {
-              resolve({
-                name: file.name,
-                type: file.type,
-                size: file.size,
-                data: event.target.result,
-                uploadedAt: new Date().toISOString()
-              });
-            };
-            reader.readAsDataURL(file);
-          });
-          
-          sectionFiles.push(fileData);
+          if (file.size > MAX_BLOCK_FILE_MB * 1024 * 1024) {
+            throw new Error(`"${file.name}" is larger than ${MAX_BLOCK_FILE_MB} MB.`);
+          }
+          const path = filePathFor(selectedBlock, sectionKey, file.name);
+          const { error: upErr } = await supabase.storage
+            .from(FILE_BUCKET)
+            .upload(path, file, { contentType: file.type || undefined });
+          if (upErr) throw upErr;
+          added.push({ name: file.name, type: file.type, size: file.size, uploadedAt: new Date().toISOString(), path });
         }
-        
-        // Update block data with new files
-        uploadedFiles[sectionKey] = sectionFiles;
+
         const updatedData = {
           ...currentData,
-          uploadedFiles
+          uploadedFiles: { ...uploadedFiles, [sectionKey]: [...sectionFiles, ...added] }
         };
-        
+
         setBlockData(prev => ({
           ...prev,
           [selectedBlock]: updatedData
         }));
-        
-        // Save to storage
+
         await window.storage.set('bps_pro_block_data', JSON.stringify({
           ...blockData,
           [selectedBlock]: updatedData
@@ -919,12 +940,11 @@ export default function BPSPro() {
 
         // Read insurance documents with AI to find cover dates
         if (sectionKey.startsWith('insurance-')) {
-          const newFiles = sectionFiles.slice(-files.length);
           const covers = { ...(updatedData.insuranceCover || {}) };
-          for (const f of newFiles) {
+          for (const f of added) {
             if (!['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(f.type)) continue;
             try {
-              covers[sectionKey] = await analyzeInsuranceFile(f);
+              covers[sectionKey] = await analyzeInsuranceFile({ ...f, data: await fileAsDataUrl(f) });
             } catch (err) {
               console.error('Insurance read failed:', err);
               alert(`Could not read "${f.name}" automatically: ${err.message}`);
@@ -937,61 +957,81 @@ export default function BPSPro() {
             [selectedBlock]: withCovers
           }));
         }
-        
+
       } catch (error) {
         console.error('File upload error:', error);
-        alert('Error uploading files. Please try again.');
+        alert(`Could not upload the file. ${error.message || 'Please try again.'}`);
       } finally {
         setUploadingFile(false);
       }
     };
-    
+
     input.click();
   };
-  
+
   const handleFileDelete = async (section, subSection, fileIndex) => {
     if (!confirm('Are you sure you want to delete this file?')) return;
-    
+
     try {
       const currentData = blockData[selectedBlock] || {};
       const uploadedFiles = { ...(currentData.uploadedFiles || {}) };
       const sectionKey = subSection ? `${section}-${subSection}` : section;
       const sectionFiles = [...(uploadedFiles[sectionKey] || [])];
-      
+      const removed = sectionFiles[fileIndex];
+
       sectionFiles.splice(fileIndex, 1);
       uploadedFiles[sectionKey] = sectionFiles;
-      
+
       const updatedData = {
         ...currentData,
         uploadedFiles
       };
-      
+
       setBlockData(prev => ({
         ...prev,
         [selectedBlock]: updatedData
       }));
-      
+
       await window.storage.set('bps_pro_block_data', JSON.stringify({
         ...blockData,
         [selectedBlock]: updatedData
       }));
-      
+
+      if (removed?.path) {
+        await supabase.storage.from(FILE_BUCKET).remove([removed.path]);
+      }
+
     } catch (error) {
       console.error('File delete error:', error);
       alert('Error deleting file. Please try again.');
     }
   };
-  
-  const handleFileDownload = (fileData) => {
-    const link = document.createElement('a');
-    link.href = fileData.data;
-    link.download = fileData.name;
-    link.click();
-  };
-  
-  // Preview: open the file in a new tab (works for PDFs, images and other browser-viewable files)
-  const handleFilePreview = (fileData) => {
+
+  const handleFileDownload = async (fileData) => {
     try {
+      const link = document.createElement('a');
+      link.href = fileData.path ? await signedFileUrl(fileData.path, fileData.name) : fileData.data;
+      link.download = fileData.name;
+      link.click();
+    } catch (err) {
+      alert(`Could not download the file. ${err.message}`);
+    }
+  };
+
+  // Preview: open the file in a new tab (works for PDFs, images and other browser-viewable files)
+  const handleFilePreview = async (fileData) => {
+    try {
+      if (fileData.path) {
+        // Open the tab first so the browser allows it, then point it at the file
+        const win = window.open('', '_blank');
+        if (!win) {
+          alert('Please allow pop-ups for this site to preview files.');
+          return;
+        }
+        win.location = await signedFileUrl(fileData.path);
+        return;
+      }
+      // Files uploaded before storage was added are still stored inside the block data
       const [header, b64] = String(fileData.data).split(',');
       const mime = (header.match(/data:(.*?);base64/) || [])[1] || fileData.type || 'application/octet-stream';
       const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
@@ -1002,6 +1042,49 @@ export default function BPSPro() {
     } catch (err) {
       console.error('Preview failed:', err);
       alert('This file cannot be previewed here. Use Download instead.');
+    }
+  };
+
+  // Moves files uploaded before storage was added out of the block data and into Storage.
+  // Runs once after load; files that cannot be moved are left as they are and retried next time.
+  const migrateLegacyFiles = async (loaded) => {
+    const next = { ...loaded };
+    let changed = false;
+    for (const blockId of Object.keys(loaded)) {
+      const uploaded = loaded[blockId]?.uploadedFiles;
+      if (!uploaded) continue;
+      const moved = {};
+      for (const [sectionKey, files] of Object.entries(uploaded)) {
+        moved[sectionKey] = [];
+        for (const f of files || []) {
+          if (!f.data) {
+            moved[sectionKey].push(f);
+            continue;
+          }
+          try {
+            const blob = await (await fetch(f.data)).blob();
+            const path = filePathFor(blockId, sectionKey, f.name || 'file');
+            const { error } = await supabase.storage
+              .from(FILE_BUCKET)
+              .upload(path, blob, { contentType: f.type || undefined });
+            if (error) throw error;
+            const { data, ...rest } = f;
+            moved[sectionKey].push({ ...rest, path });
+            changed = true;
+          } catch (e) {
+            console.warn('Could not move a file to storage yet:', e.message);
+            moved[sectionKey].push(f);
+          }
+        }
+      }
+      next[blockId] = { ...loaded[blockId], uploadedFiles: moved };
+    }
+    if (!changed) return;
+    setBlockData(next);
+    try {
+      await window.storage.setSilent('bps_pro_block_data', JSON.stringify(next));
+    } catch (e) {
+      console.warn('Saving moved files failed; they will be moved again next time:', e.message);
     }
   };
 
@@ -1188,7 +1271,10 @@ export default function BPSPro() {
           
           const dataResult = dataPrefetch;
           if (dataResult) {
-            setBlockData(JSON.parse(dataResult.value));
+            const loadedData = JSON.parse(dataResult.value);
+            setBlockData(loadedData);
+            // Move any files still stored inside the data into Storage, after the page has loaded
+            setTimeout(() => migrateLegacyFiles(loadedData), 3000);
           } else {
             const initialData = {};
             loadedBlocks.forEach(block => {

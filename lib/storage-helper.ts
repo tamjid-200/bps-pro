@@ -16,7 +16,8 @@ let knownBlockVersion = new Map<string, number>();  // block id -> version of it
 let knownBlockData = new Map<string, string>();     // block id -> JSON of its saved data
 let knownBlockDataObj = new Map<string, any>();     // block id -> its saved data (for history)
 let knownDataVersion = new Map<string, number>();   // block id -> version of its saved data
-let archivedHere = new Set<string>();               // blocks archived in this browser (never written back)
+let archivedHere = new Set<string>();
+let silentSave = false;                             // true while the app moves files (no history entries)               // blocks archived in this browser (never written back)
 
 // Human names for the sections and fields shown in the history
 const SECTION_LABELS: Record<string, string> = {
@@ -319,7 +320,7 @@ async function saveBlockData(user: any, value: string, shared?: boolean) {
 
       const knownRow = knownBlocks.get(c.dbId);
       const blockName = knownRow ? JSON.parse(knownRow).name || '' : '';
-      history.push(...sectionHistory(c.dbId, blockName, knownBlockDataObj.get(c.dbId) || {}, c.data));
+      if (!silentSave) history.push(...sectionHistory(c.dbId, blockName, knownBlockDataObj.get(c.dbId) || {}, c.data));
 
       knownDataVersion.set(c.dbId, Number(newVersion));
       knownBlockData.set(c.dbId, c.json);
@@ -418,6 +419,16 @@ export const storageHelper = {
     if (key === 'bps_pro_blocks') return saveBlocks(user, value, shared);
     if (key === 'bps_pro_block_data') return saveBlockData(user, value, shared);
     return null;
+  },
+
+  // Saves without writing history entries (used when the app moves files into storage)
+  async setSilent(key: string, value: string) {
+    silentSave = true;
+    try {
+      return await storageHelper.set(key, value);
+    } finally {
+      silentSave = false;
+    }
   },
 
   // Blocks are archived one at a time (see archiveBlock), never deleted in bulk
