@@ -627,6 +627,9 @@ export default function BPSPro() {
       .finally(() => setPlannerRefreshing(false));
   };
 
+  // Only re-check Planner when the set of visible blocks really changes, not on every render
+  const visibleKey = visibleBlocks.map((b) => b.id).join(',');
+
   // Confirmation Statement status from Microsoft Planner, for this user's own plans.
   // Checks when the page opens, then again every 6 hours while it stays open.
   useEffect(() => {
@@ -642,7 +645,7 @@ export default function BPSPro() {
     check();
     const timer = setInterval(check, 6 * 60 * 60 * 1000);
     return () => clearInterval(timer);
-  }, [visibleBlocks]);
+  }, [visibleKey, currentUserId]);
 
   const totalTasksAllBlocks = useMemo(() => {
     return visibleBlocks.reduce((sum, block) => {
@@ -759,7 +762,7 @@ export default function BPSPro() {
 
       const { data, error } = await supabase
         .from('backups')
-        .select('*')
+        .select('id, backup_name, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -1171,7 +1174,11 @@ export default function BPSPro() {
   useEffect(() => {
     async function loadData() {
       try {
-        const blocksResult = await window.storage.get('bps_pro_blocks');
+        // Blocks and block data load at the same time, not one after the other
+        const [blocksResult, dataPrefetch] = await Promise.all([
+          window.storage.get('bps_pro_blocks'),
+          window.storage.get('bps_pro_block_data'),
+        ]);
         
         if (blocksResult) {
           const loadedBlocks = JSON.parse(blocksResult.value);
@@ -1179,7 +1186,7 @@ export default function BPSPro() {
           setShowAllBlocks(true);
           setActiveSection('home');
           
-          const dataResult = await window.storage.get('bps_pro_block_data');
+          const dataResult = dataPrefetch;
           if (dataResult) {
             setBlockData(JSON.parse(dataResult.value));
           } else {
@@ -1290,10 +1297,10 @@ export default function BPSPro() {
   }, [showMainNav]);
 
   // Automatic backup system - runs every 12 hours
-  useEffect(() => {
-    // Load backups on mount
-    loadBackups();
+  // Backup list: names and dates only. A full backup is loaded only when restoring one.
+  useEffect(() => { loadBackups(); }, []);
 
+  useEffect(() => {
     // Set up automatic backup every 12 hours
     const backupInterval = setInterval(() => {
       console.log('🔄 Running automatic 12-hour backup...');

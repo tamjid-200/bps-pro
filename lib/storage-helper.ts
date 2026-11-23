@@ -1,5 +1,12 @@
 import { supabase } from './supabase';
 
+// Reads the signed-in user from the session saved in the browser. This avoids a round trip
+// to the login server on every load and save, which made the app feel slow.
+async function currentUser() {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user ?? null;
+}
+
 // ID mapping: old numeric ID -> new UUID
 const idMapping = new Map<string, string>();
 
@@ -334,7 +341,7 @@ async function saveBlockData(user: any, value: string, shared?: boolean) {
 export const storageHelper = {
   async get(key: string) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await currentUser();
       if (!user) return null;
 
       if (key === 'bps_pro_blocks') {
@@ -405,7 +412,7 @@ export const storageHelper = {
   },
 
   async set(key: string, value: string, shared?: boolean) {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await currentUser();
     if (!user) return null;
 
     if (key === 'bps_pro_blocks') return saveBlocks(user, value, shared);
@@ -428,7 +435,7 @@ export const storageHelper = {
 
   // Hides a block for everyone. Only its creator can do this. It can be restored for 30 days.
   async archiveBlock(id: string) {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await currentUser();
     if (!user) throw new Error('Not signed in');
 
     const known = knownBlocks.get(id);
@@ -455,7 +462,7 @@ export const storageHelper = {
 
   // Brings back one of this person's archived blocks (within 30 days)
   async restoreBlock(id: string, name?: string) {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await currentUser();
     if (!user) throw new Error('Not signed in');
 
     const { error } = await supabase.rpc('restore_block', { p_id: id });
@@ -471,7 +478,7 @@ export const storageHelper = {
 
   // This person's archived blocks, newest first
   async listArchived() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await currentUser();
     if (!user) return [];
 
     const { data, error } = await supabase
