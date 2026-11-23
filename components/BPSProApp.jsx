@@ -231,6 +231,7 @@ export default function BPSPro() {
   const [plannerConnected, setPlannerConnected] = useState(null); // null = not checked yet
   const [plannerNotice, setPlannerNotice] = useState('');
   const [currentEmail, setCurrentEmail] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false); // Admin role, read from app_roles
   const [plannerRefreshing, setPlannerRefreshing] = useState(false);
   const [currentUserId, setCurrentUserId] = useState('');
   const [shownChoices, setShownChoices] = useState({}); // blockId -> true/false (this person's own choice)
@@ -244,6 +245,15 @@ export default function BPSPro() {
     supabase.auth.getUser().then(({ data }) => {
       setCurrentEmail(data?.user?.email || '');
       setCurrentUserId(data?.user?.id || '');
+      if (data?.user?.id) {
+        supabase
+          .from('app_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .maybeSingle()
+          .then(({ data: row }) => setIsAdmin(row?.role === 'admin'))
+          .catch(() => setIsAdmin(false));
+      }
     }).catch(() => {});
   }, []);
   
@@ -785,8 +795,9 @@ export default function BPSPro() {
 
   // Restore from backup
   const restoreAutoBackup = async (snapshotId, createdAt) => {
+    if (!isAdmin) return; // Admins only
     if (!confirm(`Restore your data from the backup taken ${new Date(createdAt).toLocaleString('en-GB')}? This replaces your current blocks and data.`)) return;
-    const { error } = await supabase.rpc('restore_auto_backup', { p_id: snapshotId });
+    const { error } = await supabase.rpc('admin_restore_backup', { p_id: String(snapshotId) });
     if (error) {
       console.error('Restore error:', error);
       alert('Restore failed: ' + error.message);
@@ -797,6 +808,7 @@ export default function BPSPro() {
   };
 
   const restoreFromBackup = async (backupId) => {
+    if (!isAdmin) return; // Admins only
     if (!confirm('⚠️ This will replace ALL current data with the backup. Are you sure?')) {
       return;
     }
@@ -2011,7 +2023,7 @@ export default function BPSPro() {
                 return (
                   <div 
                     key={task.id} 
-                    className={`bg-white border rounded-lg p-4 flex items-start gap-3 md:gap-4 ${
+                    className={`bg-white border rounded-lg p-4 flex items-start gap-3 md:gap-4 bps-enter transition-opacity duration-300 ${
                       task.completed ? 'opacity-50' : ''
                     }`}
                   >
@@ -2035,7 +2047,7 @@ export default function BPSPro() {
                       className="w-5 h-5 mt-0.5 flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <div className={`font-medium text-slate-900 ${task.completed ? 'line-through' : ''} break-words`}>{task.title}</div>
+                      <div className={`font-medium text-slate-900 transition-colors duration-300 ${task.completed ? 'line-through' : ''} break-words`}>{task.title}</div>
                       {task.description && (
                         <div className="text-sm text-slate-600 mt-1 break-words">{task.description}</div>
                       )}
@@ -4057,6 +4069,17 @@ export default function BPSPro() {
         .bps-blue-bg-circle { background-color: #1d89c6 !important; }
         .hover-bps-border:hover { border-color: #1d89c6 !important; }
         .hover-bps-text:hover { color: #1670a8 !important; }
+        @keyframes bps-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        @keyframes bps-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bps-pop { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+        .bps-page > * { animation: bps-rise 0.28s ease-out both; }
+        .bps-backdrop { animation: bps-fade 0.18s ease-out both; }
+        .bps-backdrop > * { animation: bps-pop 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+        .bps-enter { animation: bps-rise 0.25s ease-out both; }
+        @media (prefers-reduced-motion: reduce) {
+          .bps-page > *, .bps-backdrop, .bps-backdrop > *, .bps-enter { animation: none !important; }
+          .bps-page > *, .bps-enter, .bps-backdrop, .bps-backdrop > * { opacity: 1 !important; transform: none !important; }
+        }
       `}</style>
 
       {/* Mobile Overlay for Main Nav */}
@@ -4085,7 +4108,7 @@ export default function BPSPro() {
             </button>
           </div>
           <div className="text-xs font-medium text-white">Block Property Solutions</div>
-          {currentEmail.toLowerCase() === 'tamjid@blockpropertysolutions.co.uk' && (
+          {isAdmin && (
             <div className="text-xs font-medium text-white mt-1 flex items-center gap-1">
               <span>👑</span> Admin
             </div>
@@ -4643,7 +4666,7 @@ export default function BPSPro() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-slate-50">
+        <div key={activeSection} className="flex-1 overflow-y-auto bg-slate-50 bps-page">
           {renderContent()}
         </div>
       </div>
@@ -4652,7 +4675,7 @@ export default function BPSPro() {
       
       {/* Setup Modal */}
       {showModal && modalType === 'setup' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Finish set-up</h3>
             <div className="space-y-4">
@@ -4802,7 +4825,7 @@ export default function BPSPro() {
         const mine = blocks.filter((b) => b.created_by === currentUserId);
         const n = mine.length;
         return (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
             <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-2">Archive your blocks?</h3>
               {n === 0 ? (
@@ -4835,7 +4858,7 @@ export default function BPSPro() {
 
       {/* Archived blocks: restore your own within 30 days */}
       {archivedOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-lg max-h-[90vh] flex flex-col">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
@@ -4931,7 +4954,7 @@ export default function BPSPro() {
 
       {/* Choose blocks modal: each person decides which blocks appear on their dashboard */}
       {showChooser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-lg max-h-[90vh] flex flex-col">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-1">Choose blocks for your dashboard</h3>
             <p className="text-sm text-slate-700 mb-4">Tick the blocks you want to see. Hidden blocks are kept for the team and can be shown again at any time. Blocks you create are shown to you by default.</p>
@@ -5002,7 +5025,7 @@ export default function BPSPro() {
         };
         const selectCls = 'border border-slate-300 rounded-lg px-2 py-1.5 text-sm text-slate-900 bg-white';
         return (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
             <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-3xl max-h-[90vh] flex flex-col">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="min-w-0">
@@ -5061,7 +5084,7 @@ export default function BPSPro() {
 
       {/* Add Block Modal */}
       {showModal && modalType === 'add-block' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Add new block</h3>
             <div className="space-y-4">
@@ -5184,7 +5207,7 @@ export default function BPSPro() {
 
       {/* Add Task Modal */}
       {showModal && modalType === 'add-task' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">{editingTaskId ? 'Edit task' : 'New task'}</h3>
             <div className="space-y-4">
@@ -5331,7 +5354,7 @@ export default function BPSPro() {
 
       {/* Add Responsible Person Modal */}
       {showModal && modalType === 'add-rp' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Add Responsible Person</h3>
             <div className="space-y-4">
@@ -5416,7 +5439,7 @@ export default function BPSPro() {
 
       {/* Add Meter Reading Modal */}
       {showModal && modalType === 'add-meter' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Add meter reading</h3>
             <div className="space-y-4">
@@ -5495,7 +5518,7 @@ export default function BPSPro() {
 
       {/* Add Issue Modal */}
       {showModal && modalType === 'add-issue' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">New issue or complaint</h3>
             <div className="space-y-4">
@@ -5588,7 +5611,7 @@ export default function BPSPro() {
 
       {/* Edit Block Modal */}
       {showModal && modalType === 'edit-block' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Edit block details</h3>
             <div className="space-y-4">
@@ -5665,7 +5688,7 @@ export default function BPSPro() {
 
       {/* Edit Managing Agent Modal */}
       {showModal && modalType === 'edit-agent' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Edit managing agent</h3>
             <div className="space-y-4">
@@ -5743,7 +5766,7 @@ export default function BPSPro() {
 
       {/* Add/Edit Job Modal */}
       {showModal && modalType === 'add-job' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">{jobForm.id ? 'Edit job' : 'New job'}</h3>
             <div className="space-y-4">
@@ -5936,7 +5959,7 @@ export default function BPSPro() {
 
       {/* Add/Edit Unit Modal */}
       {showModal && modalType === 'add-unit' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">{unitForm.id ? 'Edit unit' : 'Add unit'}</h3>
             <div className="space-y-4">
@@ -6129,7 +6152,7 @@ export default function BPSPro() {
 
       {/* Bulk Import Units Modal */}
       {showModal && modalType === 'bulk-import' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Bulk import units</h3>
             <div className="mb-6">
@@ -6272,7 +6295,7 @@ export default function BPSPro() {
 
       {/* Add/Edit Correspondence Modal */}
       {showModal && modalType === 'add-correspondence' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop">
           <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">{correspondenceForm.id ? 'Edit correspondence' : 'New correspondence'}</h3>
             <div className="space-y-4">
@@ -6468,7 +6491,7 @@ export default function BPSPro() {
       {/* Custom Info Modal (Pres. mode, Feature, Help) - Click anywhere to close */}
       {showInfoModal && (
         <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop"
           onClick={() => setShowInfoModal(false)}
         >
           <div 
@@ -6502,7 +6525,7 @@ export default function BPSPro() {
       {/* Training Module Modal */}
       {showTrainingModal && (
         <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 bps-backdrop"
           onClick={() => {
             setShowTrainingModal(false);
             setSelectedVideo(null);
@@ -6606,7 +6629,9 @@ export default function BPSPro() {
                     </div>
                     <button
                       onClick={() => restoreAutoBackup(b.id, b.created_at)}
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium text-sm transition-colors whitespace-nowrap"
+                      disabled={!isAdmin}
+                      title={isAdmin ? 'Restore this backup' : 'Admins only'}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium text-sm transition-colors whitespace-nowrap disabled:bg-slate-300 disabled:cursor-not-allowed disabled:hover:bg-slate-300"
                     >
                       Restore
                     </button>
@@ -6636,6 +6661,8 @@ export default function BPSPro() {
                     </div>
                     <button
                       onClick={() => restoreFromBackup(backup.id)}
+                      disabled={!isAdmin}
+                      title={isAdmin ? 'Restore this backup' : 'Admins only'}
                       className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium text-sm transition-colors whitespace-nowrap"
                     >
                       Restore
