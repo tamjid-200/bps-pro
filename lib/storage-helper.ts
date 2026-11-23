@@ -30,6 +30,15 @@ const SECTION_LABELS: Record<string, string> = {
   jobs: 'Jobs/projects',
   units: 'Units',
   correspondence: 'Correspondence',
+  insuranceCover: 'Insurance cover dates',
+};
+
+// Area names for uploaded files, by the first part of their section key
+const FILE_AREA_LABELS: Record<string, string> = {
+  documents: 'Documents',
+  insurance: 'Insurance',
+  hs: 'Health & Safety',
+  utilities: 'Utilities',
 };
 const FIELD_LABELS: Record<string, string> = {
   name: 'name',
@@ -133,6 +142,37 @@ function describeSection(section: string, oldVal: any, newVal: any): { summary: 
   };
 }
 
+// Names the files added and removed in each area (for example, a document removed from Insurance)
+function fileHistory(blockId: string, blockName: string, oldMap: any, newMap: any): HistoryEntry[] {
+  const out: HistoryEntry[] = [];
+  const keys = Array.from(new Set([...Object.keys(oldMap), ...Object.keys(newMap)]));
+  keys.forEach((key) => {
+    const before: any[] = Array.isArray(oldMap[key]) ? oldMap[key] : [];
+    const after: any[] = Array.isArray(newMap[key]) ? newMap[key] : [];
+    const idOf = (f: any) => f?.path || `${f?.name}-${f?.uploadedAt}`;
+    const beforeIds = before.map(idOf);
+    const afterIds = after.map(idOf);
+    const added = after.filter((_, i) => !beforeIds.includes(afterIds[i])).map((f) => String(f?.name || 'file'));
+    const removed = before.filter((_, i) => !afterIds.includes(beforeIds[i])).map((f) => String(f?.name || 'file'));
+    if (added.length === 0 && removed.length === 0) return;
+
+    const area = FILE_AREA_LABELS[key.split('-')[0]] || 'Documents';
+    const parts: string[] = [];
+    if (added.length) parts.push(`added ${quoteList(added)}`);
+    if (removed.length) parts.push(`removed ${quoteList(removed)}`);
+    const action = added.length && removed.length ? 'changed' : added.length ? 'file added' : 'file removed';
+    out.push({
+      block_id: blockId,
+      block_name: blockName,
+      action,
+      section: area,
+      summary: `${area}: ${parts.join('; ')}`,
+      detail: { added, removed },
+    });
+  });
+  return out;
+}
+
 // One history entry per section that changed in a block
 function sectionHistory(blockId: string, blockName: string, oldObj: any, newObj: any): HistoryEntry[] {
   const out: HistoryEntry[] = [];
@@ -142,6 +182,10 @@ function sectionHistory(blockId: string, blockName: string, oldObj: any, newObj:
     const n = newObj[s];
     if (JSON.stringify(o ?? null) === JSON.stringify(n ?? null)) return;
     if (isEmpty(o) && isEmpty(n)) return;
+    if (s === 'uploadedFiles') {
+      out.push(...fileHistory(blockId, blockName, o || {}, n || {}));
+      return;
+    }
     const change = describeSection(s, o, n);
     if (!change) return;
     out.push({

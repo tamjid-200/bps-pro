@@ -970,7 +970,10 @@ export default function BPSPro() {
   };
 
   const handleFileDelete = async (section, subSection, fileIndex) => {
-    if (!confirm('Are you sure you want to delete this file?')) return;
+    const sectionKeyForName = subSection ? `${section}-${subSection}` : section;
+    const fileToDelete = (blockData[selectedBlock]?.uploadedFiles?.[sectionKeyForName] || [])[fileIndex];
+    const label = fileToDelete?.name ? `"${fileToDelete.name}"` : 'this file';
+    if (!confirm(`Delete ${label}? It will be removed for everyone and cannot be undone. The deletion is recorded in the block's history.`)) return;
 
     try {
       const currentData = blockData[selectedBlock] || {};
