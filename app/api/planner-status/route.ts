@@ -67,24 +67,12 @@ export async function POST(req: NextRequest) {
     const items: Record<string, unknown[]> = {};
 
     for (const block of body.blocks ?? []) {
-      const terms = [block.shortName, block.name]
+      // A task belongs to a block only when its Planner plan name is exactly the block name
+      // (case and extra spaces ignored). Task titles are never used, so there are no partial matches.
+      const names = [block.shortName, block.name]
         .filter((t): t is string => !!t && t.trim().length > 0)
-        .map((t) => t.toLowerCase());
-      const hasTerm = (text: string) => {
-        const lower = (text || '').toLowerCase();
-        return terms.some((term) => lower.includes(term));
-      };
-
-      // A task belongs to a block if its title or its plan's name mentions the block
-      // The plan name matches if it sits inside the block name, or the block name
-      // sits inside it (so "Granary Wharf" matches "Granary Wharf, Mansfield" and back)
-      const planMatches = (planTitle: string) => {
-        const p = (planTitle || '').toLowerCase().trim();
-        if (p.length < 4) return false; // ignore very short plan names
-        return terms.some((term) => term.includes(p) || p.includes(term));
-      };
-
-      const linked = tasks.filter((t) => hasTerm(t.title) || planMatches(t.planTitle));
+        .map((t) => t.trim().toLowerCase());
+      const linked = tasks.filter((t) => names.includes((t.planTitle || '').trim().toLowerCase()));
       if (linked.length === 0) continue;
 
       items[block.id] = linked
